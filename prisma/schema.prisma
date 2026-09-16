@@ -1,0 +1,505 @@
+// Prisma schema for Straten Agency CRM
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+// Pipeline stages enum
+enum PipelineStage {
+  NEW_LEAD
+  RESEARCHING
+  CONTACTED
+  FOLLOW_UP
+  INTERESTED
+  PROPOSAL
+  WON
+  LOST
+}
+
+// Lead source enum
+enum LeadSource {
+  REFERRAL
+  COLD_OUTREACH
+  SOCIAL_MEDIA
+  WEBSITE_FORM
+  EVENT
+  OTHER
+}
+
+// Real estate business type enum
+enum BusinessType {
+  RESIDENTIAL_AGENT
+  COMMERCIAL_AGENT
+  PROPERTY_MANAGER
+  INVESTOR
+  DEVELOPER
+  APPRAISER
+  INSPECTOR
+  OTHER
+}
+
+// Outreach status enum
+enum CalendarEventType {
+  MEETING
+  CALL
+  FOLLOW_UP
+  PROPERTY_VIEWING
+  OTHER
+}
+
+enum OutreachStatus {
+  PENDING
+  SENT
+  OPENED
+  CLICKED
+  REPLIED
+  BOUNCED
+}
+
+model Lead {
+  id                 String      @id @default(uuid())
+  companyName        String?
+  contactName        String
+  jobTitle           String?
+  email              String
+  phone              String?
+  website            String?
+  location           String?
+  businessType       BusinessType?
+  instagram          String?
+  linkedin           String?
+  facebook           String?
+  leadSource         LeadSource
+  pipelineStage      PipelineStage @default(NEW_LEAD)
+  outreachStatus     OutreachStatus @default(PENDING)
+  dealValue          Float?
+  dateAdded          DateTime    @default(now())
+  lastContact        DateTime?
+  nextFollowUp       DateTime?
+  notes              String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  // Relations
+  outreachLogs       OutreachLog[]
+  tasks              Task[]
+  proposals          Proposal[]
+  activityEvents     ActivityEvent[]
+  calendarEvents     CalendarEvent[]
+  customerSuccess   CustomerSuccessRecord?
+  assignedToId       String?
+  assignedTo         User?       @relation("LeadAssignee", fields: [assignedToId], references: [id])
+  organizationId     String?
+  organization       Organization? @relation(fields: [organizationId], references: [id])
+
+  @@index([assignedToId])
+  @@index([organizationId])
+  @@unique([organizationId, email])
+}
+
+model OutreachLog {
+  id         String   @id @default(uuid())
+  leadId     String
+  lead       Lead     @relation(fields: [leadId], references: [id])
+  type       String   // email, call, sms, linkedin, etc.
+  subject    String?
+  content    String?
+  status     OutreachStatus
+  sentAt     DateTime @default(now())
+  openedAt   DateTime?
+  clickedAt  DateTime?
+  repliedAt  DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([leadId])
+}
+
+model CalendarEvent {
+  id            String            @id @default(uuid())
+  leadId        String?
+  lead          Lead?             @relation(fields: [leadId], references: [id])
+  title         String
+  description   String?
+  type          CalendarEventType @default(MEETING)
+  startAt       DateTime
+  endAt         DateTime?
+  location      String?
+  completed     Boolean           @default(false)
+  reminderAt    DateTime?
+  assignedToId  String?
+  assignedTo    User?             @relation("CalendarEventAssignee", fields: [assignedToId], references: [id])
+  organizationId String?
+  organization   Organization?    @relation(fields: [organizationId], references: [id])
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([leadId])
+  @@index([assignedToId])
+  @@index([startAt])
+  @@index([organizationId])
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  leadId      String?
+  lead        Lead?    @relation(fields: [leadId], references: [id])
+  title       String
+  description String?
+  dueDate     DateTime?
+  completed   Boolean  @default(false)
+  priority    String   // low, medium, high
+  assignedToId String?
+  assignedTo   User?    @relation("TaskAssignee", fields: [assignedToId], references: [id])
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([leadId])
+  @@index([assignedToId])
+  @@index([organizationId])
+}
+
+model Proposal {
+  id          String   @id @default(uuid())
+  leadId      String
+  lead        Lead     @relation(fields: [leadId], references: [id])
+  title       String
+  description String?
+  value       Float?
+  status      String   // draft, sent, accepted, rejected
+  sentAt      DateTime?
+  respondedAt DateTime?
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([leadId])
+  @@index([organizationId])
+}
+
+
+model EmailTemplate {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  subject   String
+  body      String
+  category  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AutomationWorkflow {
+  id            String   @id @default(uuid())
+  organizationId String?
+  organization  Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  triggerType   String
+  triggerConfig Json?
+  actionType    String
+  actionConfig  Json?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  executions    AutomationExecution[]
+  @@unique([organizationId, name])
+  @@index([organizationId, isActive, triggerType])
+}
+
+model AutomationExecution {
+  id           String             @id @default(uuid())
+  organizationId String?
+  organization  Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  workflowId   String
+  workflow     AutomationWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  leadId       String?
+  triggerType  String
+  status       String
+  message      String?
+  metadata     Json?
+  executionKey String? @unique
+  executedAt   DateTime           @default(now())
+  @@index([organizationId, executedAt])
+  @@index([workflowId, executedAt])
+  @@index([leadId, executedAt])
+}
+
+model ActivityEvent {
+  id        String   @id @default(uuid())
+  leadId    String?
+  lead      Lead?    @relation(fields: [leadId], references: [id])
+  type      String   // login, page_view, etc.
+  action    String
+  metadata  Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  @@index([leadId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([sessionToken])
+  @@index([userId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  title     String
+  message   String
+  href      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+  @@index([createdAt])
+}
+
+model NotificationPreference {
+  id                     String  @id @default(uuid())
+  userId                 String  @unique
+  user                   User    @relation(fields: [userId], references: [id])
+  taskNotifications      Boolean @default(true)
+  leadNotifications      Boolean @default(true)
+  followUpNotifications  Boolean @default(true)
+  proposalNotifications  Boolean @default(true)
+  calendarNotifications  Boolean @default(true)
+  emailNotifications     Boolean @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String?
+  email         String   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String   // hashed password
+  role          String   @default("AGENT") // ADMIN, MANAGER, AGENT
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Multi-Tenancy Organization
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  // Relations
+  sessions      Session[]
+  assignedLeads Lead[] @relation("LeadAssignee")
+  assignedTasks Task[] @relation("TaskAssignee")
+  assignedCalendarEvents CalendarEvent[] @relation("CalendarEventAssignee")
+  customerSuccessRecords CustomerSuccessRecord[] @relation("CustomerSuccessOwner")
+  notifications Notification[]
+  notificationPreference NotificationPreference?
+  supportTickets SupportTicket[] @relation("SupportRequester")
+  supportMessages SupportMessage[] @relation("SupportMessageAuthor")
+
+  @@index([organizationId])
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  plan        String   @default("GROWTH_PRO") // STARTER, GROWTH_PRO, ENTERPRISE
+  planStatus  String   @default("trialing") // trialing, active, past_due, canceled, incomplete
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId String?  @unique
+  subscriptionPriceId  String?
+  billingInterval      String?  // month, year
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean  @default(false)
+  suspendedAt     DateTime?
+  suspensionReason String?
+  leadLimit   Int      @default(500)
+  seatLimit   Int      @default(10)
+  automationRunLimit Int @default(1000)
+  currency    String   @default("KES")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users          User[]
+  leads          Lead[]
+  tasks          Task[]
+  calendarEvents CalendarEvent[]
+  proposals      Proposal[]
+  supportTickets SupportTicket[]
+  platformAuditLogs PlatformAuditLog[]
+  automationWorkflows AutomationWorkflow[]
+  automationExecutions AutomationExecution[]
+  apiKeys       ApiKey[]
+  webhookEndpoints WebhookEndpoint[]
+  webhookDeliveries WebhookDelivery[]
+  customerSuccessRecords CustomerSuccessRecord[]
+
+  @@index([slug])
+  @@index([suspendedAt])
+}
+
+model SupportTicket {
+  id             String   @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  requesterId    String
+  requester      User     @relation("SupportRequester", fields: [requesterId], references: [id])
+  subject        String
+  description    String
+  status         String   @default("OPEN") // OPEN, IN_PROGRESS, WAITING_ON_CUSTOMER, RESOLVED, CLOSED
+  priority       String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  category       String   @default("GENERAL") // GENERAL, BILLING, BUG, ACCOUNT, FEATURE, SECURITY
+  lastResponseAt DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  messages       SupportMessage[]
+
+  @@index([organizationId, status, updatedAt])
+  @@index([requesterId, createdAt])
+}
+
+model SupportMessage {
+  id            String   @id @default(uuid())
+  ticketId      String
+  ticket        SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorUserId  String?
+  authorUser    User?    @relation("SupportMessageAuthor", fields: [authorUserId], references: [id])
+  authorEmail   String
+  body          String
+  isInternal    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@index([ticketId, createdAt])
+}
+
+model PlatformAuditLog {
+  id             String   @id @default(uuid())
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  actorUserId    String?
+  actorEmail     String
+  action         String
+  metadata      Json?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([actorEmail, createdAt])
+}
+model ProcessedWebhookEvent {
+  id        String   @id @default(uuid())
+  provider  String
+  eventId   String   @unique
+  eventType String
+  processedAt DateTime @default(now())
+
+  @@index([provider, processedAt])
+}
+
+
+model ApiKey {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  keyPrefix      String
+  keyHash        String       @unique
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  @@index([organizationId, revokedAt])
+}
+
+model WebhookEndpoint {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  url            String
+  secret         String
+  events         Json
+  isActive       Boolean      @default(true)
+  lastDeliveredAt DateTime?
+  failureCount   Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deliveries     WebhookDelivery[]
+  @@index([organizationId, isActive])
+}
+
+model WebhookDelivery {
+  id          String          @id @default(uuid())
+  organizationId String
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  endpointId  String
+  endpoint    WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+  event       String
+  payload     Json
+  statusCode  Int?
+  response    String?
+  success     Boolean         @default(false)
+  attempt     Int             @default(1)
+  deliveredAt DateTime?
+  createdAt   DateTime        @default(now())
+  @@index([organizationId, createdAt])
+  @@index([endpointId, createdAt])
+}
+
+model CustomerSuccessRecord {
+  id               String       @id @default(uuid())
+  organizationId   String
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leadId           String       @unique
+  lead             Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  lifecycleStage   String       @default("ONBOARDING") // ONBOARDING, ADOPTING, ACTIVE, AT_RISK, RENEWAL, CHURNED
+  healthScore      Int          @default(50)
+  healthStatus     String       @default("HEALTHY") // HEALTHY, WATCH, AT_RISK
+  renewalDate      DateTime?
+  renewalValue     Float?
+  renewalStatus    String       @default("NOT_SET") // NOT_SET, UPCOMING, RENEWED, AT_RISK, CHURNED
+  successOwnerId   String?
+  successOwner     User?        @relation("CustomerSuccessOwner", fields: [successOwnerId], references: [id])
+  lastReviewAt     DateTime?
+  nextReviewAt     DateTime?
+  notes            String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  milestones       CustomerMilestone[]
+
+  @@index([organizationId, lifecycleStage])
+  @@index([organizationId, healthStatus])
+  @@index([organizationId, renewalDate])
+}
+
+model CustomerMilestone {
+  id          String               @id @default(uuid())
+  customerId  String
+  customer    CustomerSuccessRecord @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  @@index([customerId, dueDate])
+}

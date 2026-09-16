@@ -1,0 +1,16 @@
+node_modules/
+.next/
+.env
+.env.local
+.env.production
+*.log
+prisma/*.db
+prisma/*.db-journal
+.DS_Store
+coverage/
+# Added by Antigravity
+.env.*
+dist/
+build/
+.vscode/
+.idea/
