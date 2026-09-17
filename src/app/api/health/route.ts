@@ -25,6 +25,7 @@ export async function GET() {
       databaseError: dbError,
       timestamp: new Date().toISOString(),
       environment: configuration.production ? 'production' : 'development',
+      hasPrismaDatabasePostgresUrl: Boolean(process.env.PRISMA_DATABASE_POSTGRES_URL),
       issues: configuration.issues,
     },
     { status: ready ? 200 : 503, headers: { 'Cache-Control': 'no-store' } }
