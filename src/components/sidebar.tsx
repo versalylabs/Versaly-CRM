@@ -448,20 +448,6 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
                   </p>
                 </div>
               </div>
-
-              {/* Quick Action Sign Out Icon Button */}
-              <button
-                type="button"
-                onClick={async () => {
-                  if (isMobile) onCloseMobile?.();
-                  await signOut({ callbackUrl: '/' });
-                }}
-                title="Sign out of account"
-                aria-label="Sign out"
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-transparent text-gray-400 hover:text-red-400 hover:bg-red-500/15 hover:border-red-500/30 transition-all duration-200 active:scale-95"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-              </button>
             </div>
 
             {/* Prominent Full-Width Sign Out Button */}
