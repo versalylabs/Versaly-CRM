@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { LogOut } from 'lucide-react';
 
 // Clean, monochrome SVG outline icons (stroke="currentColor", fill="none")
 const Icons = {
@@ -427,23 +428,54 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
         </Link>
       </div>
 
-      {/* User Profile Footer */}
-      <div className="pt-2 border-t border-white/10">
+      {/* User Profile Footer & Sign Out */}
+      <div className="pt-2.5 border-t border-white/10">
         {status === 'loading' ? (
           <div className="text-xs text-gray-400 animate-pulse">Loading account...</div>
         ) : session?.user ? (
-          <div className="flex items-center space-x-2.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-cyan-500/20 text-xs font-bold text-cyan-300 border border-cyan-400/30">
-              {session.user.name?.[0]?.toUpperCase() || 'U'}
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-white">
-                {session.user.name || 'User'}
-              </p>
-              <p className="truncate text-[10px] text-gray-400">
-                {session.user.email}
-              </p>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2 rounded-xl bg-white/[0.03] p-1.5 border border-white/5">
+              <div className="flex items-center space-x-2.5 min-w-0 flex-1">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-sky-500/30 to-cyan-400/20 text-xs font-black text-cyan-300 border border-cyan-400/40 shadow-inner">
+                  {session.user.name?.[0]?.toUpperCase() || 'U'}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-bold text-white leading-tight">
+                    {session.user.name || 'User'}
+                  </p>
+                  <p className="truncate text-[10px] text-gray-400 leading-tight">
+                    {session.user.email}
+                  </p>
+                </div>
+              </div>
+
+              {/* Quick Action Sign Out Icon Button */}
+              <button
+                type="button"
+                onClick={async () => {
+                  if (isMobile) onCloseMobile?.();
+                  await signOut({ callbackUrl: '/' });
+                }}
+                title="Sign out of account"
+                aria-label="Sign out"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-transparent text-gray-400 hover:text-red-400 hover:bg-red-500/15 hover:border-red-500/30 transition-all duration-200 active:scale-95"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+              </button>
             </div>
+
+            {/* Prominent Full-Width Sign Out Button */}
+            <button
+              type="button"
+              onClick={async () => {
+                if (isMobile) onCloseMobile?.();
+                await signOut({ callbackUrl: '/' });
+              }}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 hover:bg-red-500/15 hover:border-red-400/40 py-2 text-center text-xs font-bold text-gray-300 hover:text-white transition-all duration-200 shadow-sm active:scale-[0.98] group"
+            >
+              <LogOut className="h-3.5 w-3.5 text-gray-400 group-hover:text-red-400 transition-colors" />
+              <span>Sign Out</span>
+            </button>
           </div>
         ) : (
           <Link
