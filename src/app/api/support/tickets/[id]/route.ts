@@ -30,7 +30,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     await prisma.supportTicket.update({ where: { id: ticket.id }, data: { status: 'OPEN', lastResponseAt: new Date() } });
     logSupport('customer_reply', { ticketId: ticket.id, organizationId: session.user.organizationId, userId: session.user.id });
     const adminEmails = (process.env.PLATFORM_ADMIN_EMAILS || '').split(',').map(x => x.trim()).filter(Boolean);
-    for (const email of adminEmails) await notifySupportEmail({ to: email, subject: `[Straten Support] Reply: ${ticket.subject}`, body: `${ticket.organization.name} replied to ticket ${ticket.subject}.\n\n${message}` });
+    for (const email of adminEmails) await notifySupportEmail({ to: email, subject: `[Versaly Support] Reply: ${ticket.subject}`, body: `${ticket.organization.name} replied to ticket ${ticket.subject}.\n\n${message}` });
     return NextResponse.json(created, { status: 201 });
   } catch (error) { console.error('Failed to reply to support ticket', error); return NextResponse.json({ error: 'Could not send reply.' }, { status: 500 }); }
 }

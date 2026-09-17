@@ -7,7 +7,7 @@ import AppShell from '@/components/AppShell';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Straten CRM — Modern Subscription Platform',
+  title: 'Versaly CRM — Modern Subscription Platform',
   description: 'High-velocity cloud CRM with visual pipeline, automated outreach, and multi-tenant workspaces.',
 };
 

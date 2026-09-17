@@ -96,16 +96,16 @@ function AcceptInviteForm() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50/50 px-4 py-12 dark:bg-[#061826]">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 dark:bg-[#053048]">
       <div className="w-full max-w-md space-y-6">
         
         {/* Top Logo & Branding */}
         <div className="text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 text-xl font-black text-white shadow-lg shadow-sky-500/25">
-            S
+            V
           </div>
           <h1 className="mt-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white">
-            Straten CRM
+            Versaly CRM
           </h1>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Cloud Workspace Member Invitation

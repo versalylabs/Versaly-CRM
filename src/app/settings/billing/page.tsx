@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { ShieldCheck, Clock, Sparkles, CheckCircle2 } from 'lucide-react';
 
 type BillingData = {
   organization: {
@@ -199,7 +200,9 @@ export default function BillingPage() {
       {/* Subscription Health Banner */}
       <div
         className={`relative overflow-hidden rounded-2xl border p-5 shadow-sm ${
-          org.isTrialing
+          session?.user?.isPlatformAdmin
+            ? 'border-emerald-200/80 bg-gradient-to-r from-emerald-50/80 via-[#073652] to-emerald-950/20 dark:border-emerald-900/40 dark:from-emerald-950/30 dark:via-gray-900 dark:to-emerald-950/20'
+            : org.isTrialing
             ? 'border-amber-200/80 bg-gradient-to-r from-amber-50 via-white to-amber-50/40 dark:border-amber-900/40 dark:from-amber-950/20 dark:via-gray-900 dark:to-amber-950/20'
             : 'border-emerald-200/80 bg-gradient-to-r from-emerald-50 via-white to-emerald-50/40 dark:border-emerald-900/40 dark:from-emerald-950/20 dark:via-gray-900 dark:to-emerald-950/20'
         }`}
@@ -207,43 +210,72 @@ export default function BillingPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-3.5">
             <div
-              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-xl shadow-md ${
-                org.isTrialing
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-md ${
+                session?.user?.isPlatformAdmin
+                  ? 'bg-emerald-600 text-white shadow-emerald-600/30'
+                  : org.isTrialing
                   ? 'bg-amber-500 text-white shadow-amber-500/20'
                   : 'bg-emerald-500 text-white shadow-emerald-500/20'
               }`}
             >
-              {org.isTrialing ? '⏰' : '⭐'}
+              {session?.user?.isPlatformAdmin ? (
+                <ShieldCheck className="h-6 w-6 text-white" />
+              ) : org.isTrialing ? (
+                <Clock className="h-6 w-6 text-white" />
+              ) : (
+                <Sparkles className="h-6 w-6 text-white" />
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-base font-bold text-gray-900 dark:text-white">
-                  {org.isTrialing ? '14-Day Free Trial' : 'Active Monthly Subscription'}
+                  {session?.user?.isPlatformAdmin
+                    ? 'Platform Master Access'
+                    : org.isTrialing
+                    ? '14-Day Free Trial'
+                    : 'Active Monthly Subscription'}
                 </span>
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-                    org.isTrialing
+                    session?.user?.isPlatformAdmin
+                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                      : org.isTrialing
                       ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
                       : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                   }`}
                 >
-                  {org.isTrialing ? `${org.trialDaysRemaining} Days Remaining` : 'Active'}
+                  {session?.user?.isPlatformAdmin
+                    ? 'Lifetime Unlimited'
+                    : org.isTrialing
+                    ? `${org.trialDaysRemaining} Days Remaining`
+                    : 'Active'}
                 </span>
               </div>
               <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-                {org.isTrialing
+                {session?.user?.isPlatformAdmin
+                  ? 'System Owner account with trial exemption, unlimited platform resources, and full administrative rights.'
+                  : org.isTrialing
                   ? `Your trial gives full access to all ${data.currentPlan.name} features. Choose a plan below to keep uninterrupted access.`
                   : `Subscribed to ${data.currentPlan.name} ($${data.currentPlan.priceMonthly}/mo). Renews automatically next billing cycle.`}
               </p>
             </div>
           </div>
 
-          <a
-            href="#pricing-tiers"
-            className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
-          >
-            {org.isTrialing ? 'Select Paid Plan ↓' : 'Change Tier ↓'}
-          </a>
+          {session?.user?.isPlatformAdmin ? (
+            <Link
+              href="/platform"
+              className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-emerald-500"
+            >
+              Platform Console →
+            </Link>
+          ) : (
+            <a
+              href="#pricing-tiers"
+              className="inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
+            >
+              {org.isTrialing ? 'Select Paid Plan ↓' : 'Change Tier ↓'}
+            </a>
+          )}
         </div>
       </div>
 
@@ -281,13 +313,13 @@ export default function BillingPage() {
             <span className="text-2xl font-black text-gray-900 dark:text-white">
               {org.seatUsed} <span className="text-sm font-semibold text-gray-400">/ {org.seatLimit} seats</span>
             </span>
-            <span className="text-xs font-bold text-purple-600 dark:text-purple-400">
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
               {org.seatPercentage}% used
             </span>
           </div>
           <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-sky-500 to-purple-500 transition-all duration-500"
+              className="h-full rounded-full bg-gradient-to-r from-sky-500 to-emerald-500 transition-all duration-500"
               style={{ width: `${Math.max(5, org.seatPercentage)}%` }}
             />
           </div>

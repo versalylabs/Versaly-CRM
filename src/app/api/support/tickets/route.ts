@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     });
     logSupport('ticket_created', { ticketId: ticket.id, organizationId: org.id, requesterId: user.id });
     const adminEmails = (process.env.PLATFORM_ADMIN_EMAILS || '').split(',').map(x => x.trim()).filter(Boolean);
-    for (const email of adminEmails) await notifySupportEmail({ to: email, subject: `[Straten Support] ${org.name}: ${subject}`, body: `${org.name} opened a support ticket.\n\nPriority: ${priority}\nCategory: ${category}\nRequester: ${user.name || user.email}\n\n${description}` });
+    for (const email of adminEmails) await notifySupportEmail({ to: email, subject: `[Versaly Support] ${org.name}: ${subject}`, body: `${org.name} opened a support ticket.\n\nPriority: ${priority}\nCategory: ${category}\nRequester: ${user.name || user.email}\n\n${description}` });
     return NextResponse.json(ticket, { status: 201 });
   } catch (error) {
     console.error('Failed to create support ticket', error);

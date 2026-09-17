@@ -27,7 +27,7 @@ export async function emitWebhookEvent(organizationId: string, event: string, pa
     const signature = crypto.createHmac('sha256', endpoint.secret).update(body).digest('hex');
     let statusCode: number | undefined; let response = ''; let success = false;
     try {
-      const res = await fetch(endpoint.url, { method: 'POST', headers: { 'content-type': 'application/json', 'x-straten-event': event, 'x-straten-signature': `sha256=${signature}` }, body, signal: AbortSignal.timeout(10000) });
+      const res = await fetch(endpoint.url, { method: 'POST', headers: { 'content-type': 'application/json', 'x-versaly-event': event, 'x-versaly-signature': `sha256=${signature}` }, body, signal: AbortSignal.timeout(10000) });
       statusCode = res.status; response = (await res.text()).slice(0, 2000); success = res.ok;
     } catch (e: any) { response = String(e?.message || e).slice(0, 2000); }
     await prisma.webhookDelivery.create({ data: { organizationId, endpointId: endpoint.id, event, payload: JSON.parse(body), statusCode: statusCode ?? null, response, success, deliveredAt: success ? new Date() : null } });

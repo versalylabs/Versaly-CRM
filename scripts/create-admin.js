@@ -15,7 +15,7 @@ function parseArgs() {
     const arg = args[i]
     if (arg === '--help' || arg === '-h') {
       console.log(`
-Straten CRM - Create first administrator
+Versaly CRM - Create first administrator
 
 Usage:
   npm run admin:create
@@ -102,7 +102,7 @@ async function askHidden(question) {
 async function main() {
   const args = parseArgs()
 
-  console.log('\nStraten CRM - First Administrator Setup')
+  console.log('\nVersaly CRM - First Administrator Setup')
   console.log('---------------------------------------')
   console.log('This command creates an ADMIN account or promotes an existing account.\n')
 

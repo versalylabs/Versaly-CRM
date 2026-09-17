@@ -1,9 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Clean, monochrome SVG outline icons (stroke="currentColor", fill="none")
 const Icons = {
@@ -94,6 +95,16 @@ const Icons = {
       <path strokeLinecap="round" strokeLinejoin="round" d="M18 10a6 6 0 10-12 0v1a2 2 0 002 2h1v-3H8a4 4 0 118 0h-1v3h1a2 2 0 002-2v-1zM9 18h6" />
     </svg>
   ),
+  copilot: (
+    <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+    </svg>
+  ),
+  inbox: (
+    <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+    </svg>
+  ),
   users: (
     <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
       <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -101,157 +112,385 @@ const Icons = {
   ),
 };
 
-const navItems = [
-  { href: '/', label: 'Dashboard', icon: Icons.dashboard },
-  { href: '/leads', label: 'Leads', icon: Icons.leads },
-  { href: '/pipeline', label: 'Pipeline', icon: Icons.pipeline },
-  { href: '/outreach', label: 'Outreach', icon: Icons.outreach },
-  { href: '/email', label: 'Email', icon: Icons.email },
-  { href: '/whatsapp', label: 'WhatsApp', icon: Icons.whatsapp },
-  { href: '/calendar', label: 'Calendar', icon: Icons.calendar },
-  { href: '/integrations', label: 'Integrations', icon: Icons.integrations },
-  { href: '/proposals', label: 'Proposals', icon: Icons.proposals },
-  { href: '/tasks', label: 'Tasks', icon: Icons.tasks },
-  { href: '/activity', label: 'Activity', icon: Icons.activity },
-  { href: '/reports', label: 'Reports', icon: Icons.reports },
-  { href: '/customer-success', label: 'Customer Success', icon: Icons.customerSuccess },
-  { href: '/notifications', label: 'Notifications', icon: Icons.notifications },
-  { href: '/automation', label: 'Automation', icon: Icons.automation },
-  { href: '/support', label: 'Support', icon: Icons.support },
-  { href: '/settings', label: 'Settings', icon: Icons.settings },
-];
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+};
 
-export default function Sidebar() {
+type NavGroup = {
+  id: string;
+  label: string;
+  collapsible?: boolean;
+  items: NavItem[];
+};
+
+interface SidebarProps {
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
+}
+
+export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarProps = {}) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
 
-  // Do not show the CRM navigation on authentication pages.
-  if (pathname.startsWith('/auth/')) {
-    return null;
-  }
+  // Define categorized navigation groups
+  const navGroups: NavGroup[] = [
+    {
+      id: 'overview',
+      label: 'Overview',
+      collapsible: false,
+      items: [
+        { href: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
+      ],
+    },
+    {
+      id: 'sales',
+      label: 'Sales & Pipeline',
+      collapsible: true,
+      items: [
+        { href: '/leads', label: 'Leads', icon: Icons.leads },
+        { href: '/pipeline', label: 'Deals Pipeline', icon: Icons.pipeline },
+        { href: '/copilot', label: 'AI Deal Copilot', icon: Icons.copilot },
+        { href: '/proposals', label: 'Proposals', icon: Icons.proposals },
+      ],
+    },
+    {
+      id: 'communications',
+      label: 'Communications',
+      collapsible: true,
+      items: [
+        { href: '/inbox', label: 'Unified Inbox', icon: Icons.inbox },
+        { href: '/outreach', label: 'Outreach', icon: Icons.outreach },
+        { href: '/email', label: 'Email', icon: Icons.email },
+        { href: '/whatsapp', label: 'WhatsApp', icon: Icons.whatsapp },
+        { href: '/calendar', label: 'Calendar', icon: Icons.calendar },
+      ],
+    },
+    {
+      id: 'operations',
+      label: 'Operations & Growth',
+      collapsible: true,
+      items: [
+        { href: '/tasks', label: 'Tasks', icon: Icons.tasks },
+        { href: '/activity', label: 'Activity Feed', icon: Icons.activity },
+        { href: '/customer-success', label: 'Customer Success', icon: Icons.customerSuccess },
+        { href: '/automation', label: 'Automation', icon: Icons.automation },
+        { href: '/reports', label: 'Reports', icon: Icons.reports },
+      ],
+    },
+    {
+      id: 'workspace',
+      label: 'Workspace & Config',
+      collapsible: true,
+      items: [
+        { href: '/integrations', label: 'Integrations', icon: Icons.integrations },
+        { href: '/notifications', label: 'Notifications', icon: Icons.notifications },
+        { href: '/settings', label: 'Settings', icon: Icons.settings },
+        ...(session?.user?.role === 'ADMIN'
+          ? [{ href: '/admin/users', label: 'Users & Roles', icon: Icons.users }]
+          : []),
+        { href: '/support', label: 'Support Desk', icon: Icons.support },
+      ],
+    },
+  ];
+
+  // Accordion state: track which categories are open
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    overview: true,
+    sales: true,
+    communications: true,
+    operations: false,
+    workspace: false,
+  });
 
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/';
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden h-screen w-64 border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:block">
-      <div className="flex h-full flex-col p-5">
-        {/* Workspace Brand Header */}
-        <div className="shrink-0">
-          <Link href="/" className="flex items-center space-x-3 group">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-600 text-white font-black shadow-md shadow-sky-500/20 group-hover:bg-sky-500 transition">
-              S
+  // Auto-expand category when user navigates to a nested page
+  useEffect(() => {
+    navGroups.forEach((group) => {
+      const hasActive = group.items.some((item) => isActive(item.href));
+      if (hasActive && !openGroups[group.id]) {
+        setOpenGroups((prev) => ({ ...prev, [group.id]: true }));
+      }
+    });
+  }, [pathname]);
+
+  const toggleGroup = (groupId: string) => {
+    setOpenGroups((prev) => ({ ...prev, [groupId]: !prev[groupId] }));
+  };
+
+  // Do not show the CRM navigation on authentication or public landing pages.
+  if (pathname.startsWith('/auth/') || pathname === '/' || pathname === '/landing') {
+    return null;
+  }
+
+  const renderContent = (isMobile = false) => (
+    <div className="flex h-full flex-col p-4">
+      {/* Workspace Brand Header */}
+      <div className="shrink-0 pb-3 border-b border-white/10 flex items-center justify-between">
+        <Link
+          href="/dashboard"
+          onClick={() => { if (isMobile) onCloseMobile?.(); }}
+          className="flex items-center space-x-3 group min-w-0"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 text-white font-black shadow-md shadow-sky-500/25 group-hover:scale-105 transition-transform">
+            V
+          </span>
+          <div className="min-w-0">
+            <span className="block truncate text-sm font-bold text-white leading-tight">
+              {session?.user?.organizationName || 'Versaly CRM'}
             </span>
-            <div className="min-w-0">
-              <span className="block truncate text-base font-bold text-gray-900 dark:text-white leading-tight">
-                {session?.user?.organizationName || 'Straten CRM'}
-              </span>
-              <span className="block text-[11px] font-semibold text-sky-600 dark:text-sky-400">
-                Cloud CRM Platform
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        {/* Navigation Items with Outline Icons */}
-        <nav className="mt-7 flex-1 space-y-1 overflow-y-auto pr-1">
-          {navItems.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`group flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
-                  active
-                    ? 'bg-sky-50 text-sky-700 shadow-sm dark:bg-sky-950/60 dark:text-sky-300'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/60 dark:hover:text-white'
-                }`}
-              >
-                <span
-                  className={`transition-colors ${
-                    active
-                      ? 'text-sky-600 dark:text-sky-400'
-                      : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'
-                  }`}
-                >
-                  {item.icon}
-                </span>
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-
-          {session?.user?.role === 'ADMIN' && (
-            <Link
-              href="/admin/users"
-              className={`group flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
-                isActive('/admin/users')
-                  ? 'bg-sky-50 text-sky-700 shadow-sm dark:bg-sky-950/60 dark:text-sky-300'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/60 dark:hover:text-white'
-              }`}
-            >
-              <span
-                className={`transition-colors ${
-                  isActive('/admin/users')
-                    ? 'text-sky-600 dark:text-sky-400'
-                    : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-300'
-                }`}
-              >
-                {Icons.users}
-              </span>
-              <span>Users & Roles</span>
-            </Link>
-          )}
-        </nav>
-
-        {/* SaaS Subscription Plan Callout */}
-        <div className="my-2 rounded-xl bg-gradient-to-br from-sky-600 via-sky-700 to-sky-900 p-3.5 text-white shadow-md">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-sky-200">
-              {session?.user?.plan ? session.user.plan.replace('_', ' ') : 'Growth Pro'}
-            </span>
-            <span className="rounded-full bg-emerald-400/20 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-300">
-              Active
+            <span className="block text-[10px] font-semibold text-cyan-400">
+              Cloud CRM Platform
             </span>
           </div>
-          <p className="mt-1 text-[11px] text-sky-100 leading-snug">
-            Monthly SaaS Subscription · Multi-user Workspace
-          </p>
-          <Link
-            href="/settings/billing"
-            className="mt-2.5 block w-full rounded-lg bg-white/95 py-1.5 text-center text-xs font-bold text-sky-950 shadow-sm hover:bg-white transition"
-          >
-            Manage Subscription
-          </Link>
-        </div>
+        </Link>
 
-        {/* User Profile */}
-        <div className="mt-2 border-t border-gray-100 pt-3 dark:border-gray-800">
-          {status === 'loading' ? (
-            <div className="text-xs text-gray-400 animate-pulse">Loading account...</div>
-          ) : session?.user ? (
-            <div className="flex items-center space-x-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-100 text-xs font-bold text-sky-700 dark:bg-sky-950 dark:text-sky-300">
-                {session.user.name?.[0]?.toUpperCase() || 'U'}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold text-gray-900 dark:text-white">
-                  {session.user.name || 'User'}
-                </p>
-                <p className="truncate text-[10px] text-gray-500 dark:text-gray-400">
-                  {session.user.email}
-                </p>
-              </div>
-            </div>
-          ) : (
-            <Link href="/auth/signin" className="text-xs font-semibold text-sky-600 hover:underline">
-              Sign in
-            </Link>
-          )}
-        </div>
+        {isMobile && (
+          <button
+            onClick={onCloseMobile}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-white/10 hover:text-white"
+            aria-label="Close Navigation Menu"
+          >
+            ✕
+          </button>
+        )}
       </div>
-    </aside>
+
+      {/* Categorized Dropdown Navigation */}
+      <nav className="mt-3 flex-1 space-y-2.5 overflow-y-auto pr-1">
+        {navGroups.map((group) => {
+          const isOpen = openGroups[group.id] ?? true;
+          const hasActiveChild = group.items.some((item) => isActive(item.href));
+
+          if (!group.collapsible) {
+            return (
+              <div key={group.id} className="space-y-1">
+                {group.items.map((item) => {
+                  const active = isActive(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => { if (isMobile) onCloseMobile?.(); }}
+                      className={`group flex items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
+                        active
+                          ? 'bg-sky-500/20 text-sky-200 border border-sky-400/30 shadow-sm backdrop-blur-sm'
+                          : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      <span className={`transition-colors ${active ? 'text-cyan-400' : 'text-gray-400 group-hover:text-gray-200'}`}>
+                        {item.icon}
+                      </span>
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            );
+          }
+
+          return (
+            <div key={group.id} className="space-y-1">
+              {/* Category Dropdown Toggle Header */}
+              <button
+                type="button"
+                onClick={() => toggleGroup(group.id)}
+                className={`w-full flex items-center justify-between rounded-lg px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                  hasActiveChild
+                    ? 'text-cyan-300 bg-white/5'
+                    : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  {hasActiveChild && <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />}
+                  <span>{group.label}</span>
+                </span>
+                <motion.svg
+                  animate={{ rotate: isOpen ? 90 : 0 }}
+                  transition={{ duration: 0.18 }}
+                  className="h-3.5 w-3.5 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </motion.svg>
+              </button>
+
+              {/* Sub-items with Framer Motion Collapse */}
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                    className="overflow-hidden space-y-0.5 pl-1"
+                  >
+                    {group.items.map((item) => {
+                      const active = isActive(item.href);
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => { if (isMobile) onCloseMobile?.(); }}
+                          className={`group flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition-all ${
+                            active
+                              ? 'bg-sky-500/20 text-sky-200 border border-sky-400/30 shadow-sm backdrop-blur-sm'
+                              : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                          }`}
+                        >
+                          <span className={`transition-colors ${active ? 'text-cyan-400' : 'text-gray-400 group-hover:text-gray-200'}`}>
+                            {item.icon}
+                          </span>
+                          <span className="truncate">{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
+
+        {/* Platform Owner Section (Restricted strictly to isPlatformAdmin) */}
+        {Boolean(session?.user?.isPlatformAdmin) && (
+          <div className="pt-2 mt-2 border-t border-white/10 space-y-1">
+            <span className="block px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+              Platform Admin
+            </span>
+            <Link
+              href="/platform"
+              onClick={() => { if (isMobile) onCloseMobile?.(); }}
+              className={`group flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition-all ${
+                isActive('/platform')
+                  ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-400/30 shadow-sm'
+                  : 'text-gray-300 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span className="text-emerald-400">
+                <svg className="h-4.5 w-4.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+              </span>
+              <span>Platform Console</span>
+            </Link>
+            <Link
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => { if (isMobile) onCloseMobile?.(); }}
+              className="group flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/10 hover:text-emerald-200 transition-all"
+            >
+              <span className="text-emerald-400">
+                <svg className="h-4.5 w-4.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </span>
+              <span>View Live Site ↗</span>
+            </Link>
+          </div>
+        )}
+      </nav>
+
+      {/* Liquid Glass SaaS Subscription Plan Callout */}
+      <div className="my-2 rounded-xl bg-gradient-to-br from-sky-600/30 via-[#073652]/80 to-sky-950/50 p-3 text-white border border-white/10 backdrop-blur-md shadow-sm">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300">
+            {session?.user?.isPlatformAdmin
+              ? 'Platform Master'
+              : session?.user?.plan
+              ? session.user.plan.replace('_', ' ')
+              : 'Growth Pro'}
+          </span>
+          <span className="rounded-full bg-emerald-400/20 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-300">
+            {session?.user?.isPlatformAdmin ? 'Lifetime' : 'Active'}
+          </span>
+        </div>
+        <p className="mt-1 text-[10px] text-gray-300 leading-snug">
+          {session?.user?.isPlatformAdmin
+            ? 'System Owner Account · Full Platform Rights'
+            : 'Multi-user SaaS Subscription'}
+        </p>
+        <Link
+          href={session?.user?.isPlatformAdmin ? '/platform' : '/settings/billing'}
+          onClick={() => { if (isMobile) onCloseMobile?.(); }}
+          className="mt-2 block w-full rounded-lg bg-white/10 hover:bg-white/20 py-1 text-center text-[11px] font-bold text-white border border-white/15 transition backdrop-blur-xs"
+        >
+          {session?.user?.isPlatformAdmin ? 'Platform Controls' : 'Manage Subscription'}
+        </Link>
+      </div>
+
+      {/* User Profile Footer */}
+      <div className="pt-2 border-t border-white/10">
+        {status === 'loading' ? (
+          <div className="text-xs text-gray-400 animate-pulse">Loading account...</div>
+        ) : session?.user ? (
+          <div className="flex items-center space-x-2.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-cyan-500/20 text-xs font-bold text-cyan-300 border border-cyan-400/30">
+              {session.user.name?.[0]?.toUpperCase() || 'U'}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-semibold text-white">
+                {session.user.name || 'User'}
+              </p>
+              <p className="truncate text-[10px] text-gray-400">
+                {session.user.email}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <Link
+            href="/auth/signin"
+            onClick={() => { if (isMobile) onCloseMobile?.(); }}
+            className="text-xs font-semibold text-cyan-400 hover:underline"
+          >
+            Sign in
+          </Link>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Persistent Sidebar (>= lg screens) */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden h-screen w-64 border-r border-white/10 bg-[#073652]/90 backdrop-blur-xl shadow-[4px_0_24px_rgba(0,0,0,0.28)] lg:block">
+        {renderContent(false)}
+      </aside>
+
+      {/* Mobile & Tablet Slide-out Drawer (< lg screens) */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onCloseMobile}
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm"
+            />
+
+            {/* Slide-out Panel */}
+            <motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 26, stiffness: 260 }}
+              className="relative z-10 flex h-full w-72 max-w-[85vw] flex-col border-r border-white/10 bg-[#073652] shadow-2xl"
+            >
+              {renderContent(true)}
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

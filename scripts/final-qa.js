@@ -42,6 +42,8 @@ const requiredPages = [
   'src/app/automation/page.tsx',
   'src/app/reports/page.tsx',
   'src/app/settings/page.tsx',
+  'src/app/copilot/page.tsx',
+  'src/app/inbox/page.tsx',
 ];
 
 const requiredApiRoutes = [
@@ -60,6 +62,9 @@ const requiredApiRoutes = [
   'src/app/api/automation/cron/route.ts',
   'src/app/api/notifications/route.ts',
   'src/app/api/reports/route.ts',
+  'src/app/api/copilot/overview/route.ts',
+  'src/app/api/inbox/conversations/route.ts',
+  'src/app/api/inbox/channels/route.ts',
 ];
 
 requiredPages.forEach((item) => exists(item, `page ${item}`));
@@ -71,7 +76,7 @@ const pkg = JSON.parse(read('package.json'));
 });
 
 const schema = read('prisma/schema.prisma');
-['model Lead', 'model Task', 'model CalendarEvent', 'model Proposal', 'model EmailTemplate', 'model AutomationWorkflow', 'model AutomationExecution', 'model Notification', 'model User'].forEach((token) => {
+['model Lead', 'model Task', 'model CalendarEvent', 'model Proposal', 'model EmailTemplate', 'model AutomationWorkflow', 'model AutomationExecution', 'model Notification', 'model User', 'model AiDealInsight', 'model AiMeetingSummary', 'model Conversation', 'model ConversationMessage', 'model ConnectedChannelAccount'].forEach((token) => {
   check(schema.includes(token), `Prisma schema contains ${token}`);
 });
 
@@ -111,7 +116,7 @@ for (const full of walk(file('src'))) {
   }
 }
 
-console.log('\nStraten CRM Final QA Check\n');
+console.log('\nVersaly CRM Final QA Check\n');
 console.log(`Passed checks: ${passes.length}`);
 console.log(`Warnings: ${warnings.length}`);
 console.log(`Failures: ${failures.length}\n`);

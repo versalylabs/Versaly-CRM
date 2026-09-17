@@ -3,6 +3,7 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import prisma from './prisma'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
+import { getPlatformAdminEmails } from './platformAdmin'
 
 // Extend the default Session/JWT types to include role & organization
 declare module 'next-auth' {
@@ -11,6 +12,7 @@ declare module 'next-auth' {
     organizationId?: string | null
     organizationName?: string | null
     plan?: string | null
+    isPlatformAdmin?: boolean
   }
 
   interface Session {
@@ -23,6 +25,7 @@ declare module 'next-auth' {
       organizationId?: string | null
       organizationName?: string | null
       plan?: string | null
+      isPlatformAdmin?: boolean
     }
   }
 }
@@ -34,6 +37,7 @@ declare module 'next-auth/jwt' {
     organizationId?: string | null
     organizationName?: string | null
     plan?: string | null
+    isPlatformAdmin?: boolean
   }
 }
 
@@ -99,6 +103,7 @@ export const authOptions: NextAuthOptions = {
         token.organizationId = user.organizationId
         token.organizationName = user.organizationName
         token.plan = user.plan
+        token.isPlatformAdmin = getPlatformAdminEmails().includes((user.email || '').toLowerCase())
       }
 
       if (trigger === 'update' && session) {
@@ -115,6 +120,10 @@ export const authOptions: NextAuthOptions = {
         session.user.organizationId = token.organizationId
         session.user.organizationName = token.organizationName
         session.user.plan = token.plan
+        session.user.isPlatformAdmin = Boolean(
+          token.isPlatformAdmin ||
+          (session.user.email && getPlatformAdminEmails().includes(session.user.email.toLowerCase()))
+        )
         if (token.name !== undefined) session.user.name = token.name
         if (token.email !== undefined) session.user.email = token.email
       }

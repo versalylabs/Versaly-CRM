@@ -57,7 +57,7 @@ function SignUpForm() {
       }
 
       // 3. Smooth landing on dashboard
-      router.push('/');
+      router.push('/dashboard');
       router.refresh();
     } catch (err: any) {
       setError(err.message || 'Unable to register right now. Please try again.');
@@ -72,7 +72,7 @@ function SignUpForm() {
         {/* Header Branding */}
         <div className="text-center space-y-2">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 text-white font-black text-xl shadow-lg shadow-sky-500/20">
-            S
+            V
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
             Start your 14-day free trial

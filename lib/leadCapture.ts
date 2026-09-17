@@ -41,8 +41,8 @@ async function sendWelcomeEmail(lead: any) {
     secure,
     auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD },
   });
-  const subject = process.env.AUTO_WELCOME_SUBJECT || 'Thanks for getting in touch with Straten Agency';
-  const text = (process.env.AUTO_WELCOME_MESSAGE || 'Hi {{contactName}},\n\nThanks for reaching out to Straten Agency. A member of our team will be in touch shortly.\n\nBest regards,\nStraten Agency')
+  const subject = process.env.AUTO_WELCOME_SUBJECT || 'Thanks for getting in touch with Versaly';
+  const text = (process.env.AUTO_WELCOME_MESSAGE || 'Hi {{contactName}},\n\nThanks for reaching out to Versaly. A member of our team will be in touch shortly.\n\nBest regards,\nVersaly')
     .replace(/{{contactName}}/g, lead.contactName || '')
     .replace(/{{companyName}}/g, lead.companyName || '');
   await transporter.sendMail({ from: process.env.SMTP_FROM, to: lead.email, subject, text });
@@ -95,7 +95,7 @@ export async function captureLead(input: CaptureInput, options: { defaultSource?
   try { welcomeEmailSent = await sendWelcomeEmail(result.lead); } catch (error) { console.error('Automatic welcome email failed', error); }
   if (welcomeEmailSent) {
     await prisma.$transaction(async (tx) => {
-      await tx.outreachLog.create({ data: { leadId: result.lead.id, type: 'EMAIL', subject: process.env.AUTO_WELCOME_SUBJECT || 'Thanks for getting in touch with Straten Agency', content: 'Automatic welcome email sent from external lead workflow.', status: 'SENT' } });
+      await tx.outreachLog.create({ data: { leadId: result.lead.id, type: 'EMAIL', subject: process.env.AUTO_WELCOME_SUBJECT || 'Thanks for getting in touch with Versaly', content: 'Automatic welcome email sent from external lead workflow.', status: 'SENT' } });
       await tx.lead.update({ where: { id: result.lead.id }, data: { lastContact: new Date(), outreachStatus: 'SENT' } });
       await logLeadActivity(tx, result.lead.id, 'EMAIL', 'Automatic welcome email sent', { channel: options.channel });
     });

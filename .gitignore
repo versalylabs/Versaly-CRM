@@ -8,9 +8,10 @@ prisma/*.db
 prisma/*.db-journal
 .DS_Store
 coverage/
-# Added by Antigravity
 .env.*
+!.env.example
 dist/
 build/
 .vscode/
 .idea/
+*.tsbuildinfo

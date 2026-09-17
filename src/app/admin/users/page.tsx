@@ -4,6 +4,22 @@ import { useEffect, useState, useMemo } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import {
+  Users,
+  UserPlus,
+  Mail,
+  Zap,
+  AlertTriangle,
+  Check,
+  Search,
+  Target,
+  ClipboardList,
+  Key,
+  Trash2,
+  Plus,
+  Copy,
+} from 'lucide-react';
 
 type Role = 'ADMIN' | 'MANAGER' | 'AGENT';
 type User = {
@@ -32,7 +48,7 @@ const roles: { value: Role; label: string; description: string; badge: string }[
     value: 'ADMIN',
     label: 'Workspace Admin',
     description: 'Full CRM operations, billing, and team permissions',
-    badge: 'bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+    badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300 border-cyan-200 dark:border-cyan-800',
   },
   {
     value: 'MANAGER',
@@ -279,7 +295,12 @@ export default function UserManagementPage() {
   const isAtSeatLimit = seatUsed >= seatLimit;
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-[#061826]">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="min-h-screen bg-gray-50 dark:bg-[#053048]"
+    >
       <div className="container-custom py-8">
         
         {/* Header with Organization & Actions */}
@@ -307,26 +328,28 @@ export default function UserManagementPage() {
                 setGeneratedInvite(null);
               }}
               disabled={isAtSeatLimit}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-xs font-bold text-sky-700 shadow-xs hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950/60 dark:text-sky-300 dark:hover:bg-sky-900/60 transition disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-xs font-bold text-sky-700 shadow-xs hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950/60 dark:text-sky-300 dark:hover:bg-sky-900/60 transition disabled:opacity-40"
             >
-              <span>✉️ Send Invite Link</span>
+              <Mail className="h-4 w-4" />
+              <span>Send Invite Link</span>
             </button>
             <button
               onClick={() => setActiveModal('create')}
               disabled={isAtSeatLimit}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:from-sky-500 hover:to-sky-600 transition disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 px-4 py-2.5 text-xs font-bold text-white shadow-md hover:from-sky-500 hover:to-sky-600 transition disabled:opacity-40"
             >
-              <span>+ Add Member Direct</span>
+              <Plus className="h-4 w-4" />
+              <span>Add Member Direct</span>
             </button>
           </div>
         </div>
 
         {/* Seat Quota Callout Banner */}
-        <div className="mb-6 rounded-2xl border border-gray-200/80 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-gray-900/60">
+        <div className="mb-6 rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-xl font-bold text-sky-700 dark:bg-sky-950 dark:text-sky-300">
-                👥
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                <Users className="h-5 w-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -367,9 +390,10 @@ export default function UserManagementPage() {
 
               <Link
                 href="/settings/billing"
-                className="whitespace-nowrap rounded-xl bg-gray-100 px-3.5 py-1.5 text-xs font-semibold text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 transition"
+                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl bg-gray-100 px-3.5 py-1.5 text-xs font-semibold text-gray-800 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 transition"
               >
-                ⚡ Upgrade Seats
+                <Zap className="h-3.5 w-3.5" />
+                <span>Upgrade Seats</span>
               </Link>
             </div>
           </div>
@@ -377,22 +401,28 @@ export default function UserManagementPage() {
 
         {/* Notifications */}
         {error && (
-          <div className="mb-5 flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-700 dark:border-rose-900/50 dark:bg-rose-950/20 dark:text-rose-300">
-            <span>⚠️ {error}</span>
+          <div className="mb-5 flex items-center justify-between rounded-xl border border-rose-200/80 bg-rose-50/80 p-4 text-xs font-medium text-rose-700 backdrop-blur-md dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-rose-500" />
+              <span>{error}</span>
+            </div>
             <button onClick={() => setError('')} className="font-bold">✕</button>
           </div>
         )}
         {success && (
-          <div className="mb-5 flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-medium text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-300">
-            <span>✓ {success}</span>
+          <div className="mb-5 flex items-center justify-between rounded-xl border border-emerald-200/80 bg-emerald-50/80 p-4 text-xs font-medium text-emerald-800 backdrop-blur-md dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300">
+            <div className="flex items-center gap-2">
+              <Check className="h-4 w-4 shrink-0 text-emerald-500" />
+              <span>{success}</span>
+            </div>
             <button onClick={() => setSuccess('')} className="font-bold">✕</button>
           </div>
         )}
 
         {/* Filters Bar */}
-        <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-sm dark:border-gray-800 dark:bg-gray-900/60">
+        <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-gray-200/80 bg-white/80 p-3.5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/80">
           <div className="flex flex-1 items-center gap-2.5">
-            <span className="text-gray-400">🔍</span>
+            <Search className="h-4 w-4 text-gray-400 shrink-0" />
             <input
               type="text"
               value={search}
@@ -503,8 +533,14 @@ export default function UserManagementPage() {
                         {/* Workload */}
                         <td className="px-3 py-4 text-[11px] text-gray-600 dark:text-gray-300">
                           <div className="flex items-center gap-3">
-                            <span>🎯 {user._count?.assignedLeads || 0} leads</span>
-                            <span>📋 {user._count?.assignedTasks || 0} tasks</span>
+                            <span className="inline-flex items-center gap-1">
+                              <Target className="h-3.5 w-3.5 text-sky-500" />
+                              <span>{user._count?.assignedLeads || 0} leads</span>
+                            </span>
+                            <span className="inline-flex items-center gap-1">
+                              <ClipboardList className="h-3.5 w-3.5 text-sky-500" />
+                              <span>{user._count?.assignedTasks || 0} tasks</span>
+                            </span>
                           </div>
                         </td>
 
@@ -541,20 +577,20 @@ export default function UserManagementPage() {
                                 setPasswordTargetUser(user);
                                 setActiveModal('password');
                               }}
-                              className="rounded-lg p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-800 dark:text-gray-400 dark:hover:text-white transition"
+                              className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-800 dark:text-gray-400 dark:hover:text-white transition"
                               title="Reset Password"
                             >
-                              🔑
+                              <Key className="h-4 w-4" />
                             </button>
 
                             {!isSelf && (
                               <button
                                 onClick={() => handleDeleteUser(user)}
                                 disabled={savingId === user.id}
-                                className="rounded-lg p-1 text-rose-500 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/40 transition"
+                                className="rounded-lg p-1.5 text-rose-500 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/40 transition"
                                 title="Remove User & Free Seat"
                               >
-                                🗑️
+                                <Trash2 className="h-4 w-4" />
                               </button>
                             )}
                           </div>
@@ -574,7 +610,9 @@ export default function UserManagementPage() {
             <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in fade-in zoom-in-95">
               <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xl">✉️</span>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
+                    <Mail className="h-4.5 w-4.5" />
+                  </div>
                   <div>
                     <h3 className="text-base font-bold text-gray-900 dark:text-white">
                       Invite Team Member
@@ -645,8 +683,9 @@ export default function UserManagementPage() {
               ) : (
                 <div className="mt-4 space-y-4">
                   <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                      ✓ Invitation Link Ready
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                      <Check className="h-3 w-3" />
+                      <span>Invitation Link Ready</span>
                     </span>
                     <p className="mt-1 text-xs text-emerald-900 dark:text-emerald-200 font-semibold">
                       Invite for {generatedInvite.email} ({generatedInvite.role})
@@ -669,9 +708,10 @@ export default function UserManagementPage() {
                       />
                       <button
                         onClick={copyInviteUrl}
-                        className="shrink-0 rounded-xl bg-sky-600 px-3.5 py-2 text-xs font-bold text-white shadow hover:bg-sky-500 transition"
+                        className="inline-flex items-center gap-1.5 shrink-0 rounded-xl bg-sky-600 px-3.5 py-2 text-xs font-bold text-white shadow hover:bg-sky-500 transition"
                       >
-                        {copied ? 'Copied! ✓' : 'Copy Link'}
+                        <Copy className="h-3.5 w-3.5" />
+                        <span>{copied ? 'Copied!' : 'Copy Link'}</span>
                       </button>
                     </div>
                   </div>
@@ -699,7 +739,9 @@ export default function UserManagementPage() {
             <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in fade-in zoom-in-95">
               <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xl">➕</span>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
+                    <UserPlus className="h-4.5 w-4.5" />
+                  </div>
                   <div>
                     <h3 className="text-base font-bold text-gray-900 dark:text-white">
                       Create Team Member Direct
@@ -804,9 +846,14 @@ export default function UserManagementPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
             <div className="w-full max-w-sm rounded-3xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-800 dark:bg-gray-900 animate-in fade-in zoom-in-95">
               <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
-                <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                  Reset Password
-                </h3>
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
+                    <Key className="h-4 w-4" />
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900 dark:text-white">
+                    Reset Password
+                  </h3>
+                </div>
                 <button
                   onClick={() => setActiveModal(null)}
                   className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -854,6 +901,6 @@ export default function UserManagementPage() {
         )}
 
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url = env("DATABASE_URL")
 }
 
@@ -73,6 +73,8 @@ model Lead {
   instagram          String?
   linkedin           String?
   facebook           String?
+  tiktok             String?
+  xHandle            String?
   leadSource         LeadSource
   pipelineStage      PipelineStage @default(NEW_LEAD)
   outreachStatus     OutreachStatus @default(PENDING)
@@ -91,6 +93,9 @@ model Lead {
   activityEvents     ActivityEvent[]
   calendarEvents     CalendarEvent[]
   customerSuccess   CustomerSuccessRecord?
+  aiInsight         AiDealInsight?
+  meetingSummaries  AiMeetingSummary[]
+  conversations     Conversation[]
   assignedToId       String?
   assignedTo         User?       @relation("LeadAssignee", fields: [assignedToId], references: [id])
   organizationId     String?
@@ -313,6 +318,7 @@ model User {
   notificationPreference NotificationPreference?
   supportTickets SupportTicket[] @relation("SupportRequester")
   supportMessages SupportMessage[] @relation("SupportMessageAuthor")
+  assignedConversations Conversation[] @relation("ConversationAssignee")
 
   @@index([organizationId])
 }
@@ -351,6 +357,10 @@ model Organization {
   webhookEndpoints WebhookEndpoint[]
   webhookDeliveries WebhookDelivery[]
   customerSuccessRecords CustomerSuccessRecord[]
+  aiDealInsights        AiDealInsight[]
+  meetingSummaries      AiMeetingSummary[]
+  conversations         Conversation[]
+  connectedChannels     ConnectedChannelAccount[]
 
   @@index([slug])
   @@index([suspendedAt])
@@ -503,3 +513,114 @@ model CustomerMilestone {
 
   @@index([customerId, dueDate])
 }
+
+model AiDealInsight {
+  id              String       @id @default(uuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leadId          String       @unique
+  lead            Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  sentimentScore  Int          @default(50)
+  sentimentLabel  String       @default("NEUTRAL") // POSITIVE, NEUTRAL, CONCERN
+  winProbability  Int          @default(50)
+  churnRisk       String       @default("MEDIUM") // LOW, MEDIUM, HIGH
+  buyingSignals   Json?
+  objections      Json?
+  suggestedActions Json?
+  summaryNotes    String?
+  analyzedAt      DateTime     @default(now())
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([organizationId, sentimentLabel])
+  @@index([organizationId, churnRisk])
+  @@index([organizationId, winProbability])
+}
+
+model AiMeetingSummary {
+  id              String       @id @default(uuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leadId          String
+  lead            Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  calendarEventId String?
+  title           String
+  rawTranscript   String
+  summary         String
+  actionItems     Json?
+  objections      Json?
+  keyDecisions    Json?
+  sentiment       String       @default("NEUTRAL")
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([organizationId, createdAt])
+  @@index([leadId, createdAt])
+}
+
+model Conversation {
+  id                  String               @id @default(uuid())
+  organizationId      String
+  organization        Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leadId              String
+  lead                Lead                 @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  channel             String               @default("EMAIL") // EMAIL, WHATSAPP, SMS, MULTI
+  status              String               @default("OPEN")  // OPEN, WAITING_ON_CUSTOMER, WAITING_ON_US, CLOSED, SNOOZED
+  subject             String?
+  lastMessageAt       DateTime             @default(now())
+  lastMessageSnippet  String?
+  unreadCount         Int                  @default(0)
+  assignedToId        String?
+  assignedTo          User?                @relation("ConversationAssignee", fields: [assignedToId], references: [id])
+  messages            ConversationMessage[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([organizationId, status])
+  @@index([organizationId, lastMessageAt])
+  @@index([leadId])
+  @@index([assignedToId])
+}
+
+model ConversationMessage {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderType     String       // AGENT, LEAD, SYSTEM, AI_COPILOT
+  senderId       String?
+  senderName     String?
+  channel        String       // EMAIL, WHATSAPP, SMS, INSTAGRAM, FACEBOOK, TIKTOK, X, INTERNAL_NOTE
+  content        String
+  metadata       Json?
+  isInternal     Boolean      @default(false)
+  status         String       @default("SENT") // SENT, DELIVERED, READ, FAILED, PENDING
+  sentAt         DateTime     @default(now())
+
+  @@index([conversationId, sentAt])
+}
+
+model ConnectedChannelAccount {
+  id                String       @id @default(uuid())
+  organizationId    String
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  channel           String       // INSTAGRAM, FACEBOOK, TIKTOK, X, WHATSAPP, EMAIL
+  accountName       String       // e.g. "Straten CRM IG", "Straten FB Page", "Straten Agency X"
+  accountHandle     String       // e.g. "@straten_agency", "straten_official", "@straten_crm"
+  externalAccountId String?      // e.g. Meta Page ID, Instagram Business Account ID, TikTok Open ID, X User ID
+  accessToken       String?      // API Token / OAuth User or Page Access Token
+  refreshToken      String?      // Refresh token if applicable
+  appId             String?      // App ID / Client Key
+  appSecret         String?      // App Secret / Client Secret
+  webhookSecret     String?      // Webhook verification token
+  status            String       @default("CONNECTED") // CONNECTED, DISCONNECTED, ERROR
+  avatarUrl         String?
+  metadata          Json?        // Channel specific metadata (scopes, permissions, followers)
+  connectedAt       DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@unique([organizationId, channel, accountHandle])
+  @@index([organizationId, channel])
+  @@index([status])
+}
+
+

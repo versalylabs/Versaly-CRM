@@ -3,6 +3,18 @@
 import { formatCurrency } from '@/lib/currency';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import {
+  Users,
+  User,
+  Target,
+  DollarSign,
+  Zap,
+  Download,
+  Printer,
+  AlertTriangle,
+  TrendingUp,
+} from 'lucide-react';
 import { Sparkline, RadialGaugeChart } from '@/components/dashboard/DashboardCharts';
 
 type ReportsData = {
@@ -138,9 +150,9 @@ export default function ReportsPage() {
 
   if (error || !data) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50/80 p-8 text-center dark:border-red-900/50 dark:bg-red-950/20">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-xl dark:bg-red-900/50">
-          ⚠️
+      <div className="rounded-2xl border border-red-200/80 bg-red-50/80 p-8 text-center backdrop-blur-xl dark:border-red-900/50 dark:bg-red-950/20">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300">
+          <AlertTriangle className="h-6 w-6" />
         </div>
         <h1 className="mt-3 text-lg font-bold text-red-900 dark:text-red-200">Reports Unavailable</h1>
         <p className="mt-1 text-sm text-red-700 dark:text-red-300">{error || 'No report data was returned.'}</p>
@@ -204,7 +216,12 @@ export default function ReportsPage() {
   const hoveredLeadPt = hoveredTrendIdx !== null ? leadPts[hoveredTrendIdx] : null;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-7 pb-12">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="mx-auto max-w-7xl space-y-7 pb-12"
+    >
       {/* =========================================
           1. Header & Controls
          ========================================= */}
@@ -212,7 +229,7 @@ export default function ReportsPage() {
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Straten Intelligence Platform</span>
+            <span>Versaly Intelligence Platform</span>
             <span className="text-gray-300 dark:text-gray-700">·</span>
             <span className="font-medium text-gray-500 dark:text-gray-400">{data.filters.label}</span>
           </div>
@@ -227,26 +244,28 @@ export default function ReportsPage() {
 
         <div className="flex flex-wrap items-center gap-2.5">
           {data.viewer.canViewTeam && (
-            <div className="inline-flex rounded-xl border border-gray-200 bg-white p-1 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+            <div className="inline-flex rounded-xl border border-gray-200/80 bg-white/80 p-1 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-[#073652]/80">
               <button
                 onClick={() => setScope('team')}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                   scope === 'team'
                     ? 'bg-sky-600 text-white shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
                 }`}
               >
-                👥 Team Performance
+                <Users className="h-3.5 w-3.5" />
+                <span>Team Performance</span>
               </button>
               <button
                 onClick={() => setScope('mine')}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
                   scope === 'mine'
                     ? 'bg-sky-600 text-white shadow-sm'
                     : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
                 }`}
               >
-                👤 My Metrics
+                <User className="h-3.5 w-3.5" />
+                <span>My Metrics</span>
               </button>
             </div>
           )}
@@ -254,7 +273,7 @@ export default function ReportsPage() {
           <select
             value={range}
             onChange={(e) => setRange(e.target.value)}
-            className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm outline-none transition focus:border-sky-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200"
+            className="rounded-xl border border-gray-200/80 bg-white/80 px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm outline-none transition focus:border-sky-500 dark:border-white/10 dark:bg-[#073652]/80 dark:text-gray-200"
           >
             {rangeOptions.map((item) => (
               <option key={item.value} value={item.value}>
@@ -262,11 +281,13 @@ export default function ReportsPage() {
               </option>
             ))}
           </select>
-          <button onClick={exportCsv} className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-sky-300 hover:text-sky-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200 dark:hover:border-sky-700">
-            ↓ Export CSV
+          <button onClick={exportCsv} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200/80 bg-white/80 px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-sky-300 hover:text-sky-700 dark:border-white/10 dark:bg-[#073652]/80 dark:text-gray-200 dark:hover:border-sky-700">
+            <Download className="h-3.5 w-3.5" />
+            <span>Export CSV</span>
           </button>
-          <button onClick={printReport} className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-sky-300 hover:text-sky-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-200 dark:hover:border-sky-700">
-            Print / PDF
+          <button onClick={printReport} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200/80 bg-white/80 px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-sky-300 hover:text-sky-700 dark:border-white/10 dark:bg-[#073652]/80 dark:text-gray-200 dark:hover:border-sky-700">
+            <Printer className="h-3.5 w-3.5" />
+            <span>Print / PDF</span>
           </button>
         </div>
       </div>
@@ -276,7 +297,7 @@ export default function ReportsPage() {
          ========================================= */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {/* Total Leads */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:shadow-md dark:border-white/10 dark:bg-[#073652]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Total Inbound & Sourced</p>
@@ -284,13 +305,13 @@ export default function ReportsPage() {
                 {s.totalLeads}
               </h3>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-lg text-sky-600 dark:bg-sky-950/60 dark:text-sky-400">
-              👥
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400">
+              <Users className="h-5 w-5" />
             </div>
           </div>
           <div className="mt-4 flex items-end justify-between">
             <div>
-              <span className="inline-flex items-center rounded-md bg-sky-50 px-1.5 py-0.5 text-[11px] font-semibold text-sky-700 dark:bg-sky-950/50 dark:text-sky-300">
+              <span className="inline-flex items-center rounded-md bg-sky-500/10 px-1.5 py-0.5 text-[11px] font-semibold text-sky-700 dark:text-sky-300">
                 {data.filters.label}
               </span>
               <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">New prospects acquired</p>
@@ -300,7 +321,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Conversion Rate */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:shadow-md dark:border-white/10 dark:bg-[#073652]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Conversion Velocity</p>
@@ -308,13 +329,13 @@ export default function ReportsPage() {
                 {percent(s.conversionRate)}
               </h3>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-lg text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
-              🎯
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <Target className="h-5 w-5" />
             </div>
           </div>
           <div className="mt-4 flex items-end justify-between">
             <div>
-              <span className="inline-flex items-center rounded-md bg-emerald-50 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+              <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
                 {s.won} Closed Won
               </span>
               <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">{s.lost} deals archived lost</p>
@@ -324,31 +345,31 @@ export default function ReportsPage() {
         </div>
 
         {/* Active Pipeline Value */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:shadow-md dark:border-white/10 dark:bg-[#073652]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Active Pipeline Value</p>
-              <h3 className="mt-2 text-3xl font-extrabold tracking-tight text-purple-600 dark:text-purple-400">
+              <h3 className="mt-2 text-3xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400">
                 {money(s.activeValue)}
               </h3>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-lg text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
-              💎
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <DollarSign className="h-5 w-5" />
             </div>
           </div>
           <div className="mt-4 flex items-end justify-between">
             <div>
-              <span className="inline-flex items-center rounded-md bg-purple-50 px-1.5 py-0.5 text-[11px] font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
+              <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
                 Weighted Potential
               </span>
               <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">Active opportunities in play</p>
             </div>
-            <Sparkline data={[12, 15, 14, 20, 18, 25]} color="purple" />
+            <Sparkline data={[12, 15, 14, 20, 18, 25]} color="emerald" />
           </div>
         </div>
 
         {/* Outreach Reply Rate */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:shadow-md dark:border-white/10 dark:bg-[#073652]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Outreach Engagement</p>
@@ -356,13 +377,13 @@ export default function ReportsPage() {
                 {percent(s.replyRate)}
               </h3>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-lg text-amber-600 dark:bg-amber-950/60 dark:text-amber-400">
-              ⚡
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <Zap className="h-5 w-5" />
             </div>
           </div>
           <div className="mt-4 flex items-end justify-between">
             <div>
-              <span className="inline-flex items-center rounded-md bg-amber-50 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+              <span className="inline-flex items-center rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300">
                 {data.outreach.replied} Responses
               </span>
               <p className="mt-0.5 text-[11px] text-gray-500 dark:text-gray-400">across {data.outreach.total} touchpoints</p>
@@ -395,7 +416,7 @@ export default function ReportsPage() {
                 <span className="text-gray-600 dark:text-gray-300 font-medium">Outreach</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-purple-500" />
+                <span className="h-2 w-2 rounded-full bg-cyan-500" />
                 <span className="text-gray-600 dark:text-gray-300 font-medium">Proposals</span>
               </div>
             </div>
@@ -420,12 +441,11 @@ export default function ReportsPage() {
                         y2={y}
                         stroke="currentColor"
                         className="text-gray-200 dark:text-gray-800"
-                        strokeDasharray="4 4"
-                        strokeWidth="1"
+                        strokeDasharray="2 4"
                       />
                       <text
-                        x={padLeft - 8}
-                        y={y + 3.5}
+                        x={padLeft - 6}
+                        y={y + 3}
                         textAnchor="end"
                         className="fill-gray-400 text-[10px] font-medium dark:fill-gray-500"
                       >
@@ -438,7 +458,7 @@ export default function ReportsPage() {
                 {/* Spline Paths */}
                 <path d={leadPath} fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" />
                 <path d={outreachPath} fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" />
-                <path d={proposalPath} fill="none" stroke="#8b5cf6" strokeWidth="2.5" strokeLinecap="round" />
+                <path d={proposalPath} fill="none" stroke="#06b6d4" strokeWidth="2.5" strokeLinecap="round" />
 
                 {/* Labels */}
                 {trendPoints.map((t, i) => {
@@ -508,7 +528,7 @@ export default function ReportsPage() {
                     <div className="flex justify-between gap-3 text-emerald-600 font-medium">
                       <span>Outreach:</span> <span className="font-bold">{hoveredItem.outreach}</span>
                     </div>
-                    <div className="flex justify-between gap-3 text-purple-600 font-medium">
+                    <div className="flex justify-between gap-3 text-cyan-600 font-medium">
                       <span>Proposals:</span> <span className="font-bold">{hoveredItem.proposals}</span>
                     </div>
                   </div>
@@ -586,13 +606,13 @@ export default function ReportsPage() {
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <div className="rounded-xl bg-gray-50 p-4 dark:bg-gray-800/60"><p className="text-[11px] font-semibold text-gray-500">Active pipeline</p><p className="mt-1 text-xl font-extrabold text-gray-900 dark:text-white">{money(s.activeValue)}</p></div>
             <div className="rounded-xl bg-emerald-50 p-4 dark:bg-emerald-950/30"><p className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">Won value</p><p className="mt-1 text-xl font-extrabold text-emerald-700 dark:text-emerald-300">{money(s.wonValue)}</p></div>
-            <div className="rounded-xl bg-purple-50 p-4 dark:bg-purple-950/30"><p className="text-[11px] font-semibold text-purple-700 dark:text-purple-300">Avg. won deal</p><p className="mt-1 text-xl font-extrabold text-purple-700 dark:text-purple-300">{money(s.averageDealSize)}</p></div>
+            <div className="rounded-xl bg-cyan-50 p-4 dark:bg-cyan-950/30"><p className="text-[11px] font-semibold text-cyan-700 dark:text-cyan-300">Avg. won deal</p><p className="mt-1 text-xl font-extrabold text-cyan-700 dark:text-cyan-300">{money(s.averageDealSize)}</p></div>
           </div>
           <div className="mt-5 space-y-3">
             {data.pipeline.filter((item) => !['WON','LOST'].includes(item.stage)).map((item) => {
               const probabilities: Record<string, number> = { NEW_LEAD: .10, RESEARCHING: .15, CONTACTED: .25, FOLLOW_UP: .35, INTERESTED: .50, PROPOSAL: .70 };
               const probability = probabilities[item.stage] || 0;
-              return <div key={item.stage}><div className="mb-1.5 flex justify-between text-xs"><span className="font-semibold text-gray-700 dark:text-gray-300">{label(item.stage)}</span><span className="text-gray-500">{Math.round(probability*100)}% · {money(item.value * probability)}</span></div><div className="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800"><div className="h-full rounded-full bg-gradient-to-r from-sky-500 to-indigo-500" style={{width:`${Math.max(2, probability*100)}%`}} /></div></div>;
+              return <div key={item.stage}><div className="mb-1.5 flex justify-between text-xs"><span className="font-semibold text-gray-700 dark:text-gray-300">{label(item.stage)}</span><span className="text-gray-500">{Math.round(probability*100)}% · {money(item.value * probability)}</span></div><div className="h-2 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800"><div className="h-full rounded-full bg-gradient-to-r from-sky-500 to-emerald-500" style={{width:`${Math.max(2, probability*100)}%`}} /></div></div>;
             })}
           </div>
         </div>
@@ -771,6 +791,6 @@ export default function ReportsPage() {
           </div>
         </section>
       )}
-    </div>
+    </motion.div>
   );
 }

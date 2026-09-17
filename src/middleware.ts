@@ -38,7 +38,14 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  if (pathname.startsWith('/auth/') || pathname.startsWith('/api/') || pathname.startsWith('/_next/') || pathname.startsWith('/favicon.ico')) {
+  if (
+    pathname === '/' ||
+    pathname.startsWith('/landing') ||
+    pathname.startsWith('/auth/') ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next/') ||
+    pathname.startsWith('/favicon.ico')
+  ) {
     return withRequestHeaders(NextResponse.next(), requestId)
   }
 

@@ -233,7 +233,7 @@ export async function GET(req: NextRequest) {
         ['Average sales cycle days', averageSalesCycleDays],
       ];
       const csv = rows.map((row) => row.map(csvEscape).join(',')).join('\n');
-      return new NextResponse(csv, { status: 200, headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="straten-report-${range}.csv"`, 'Cache-Control': 'no-store' } });
+      return new NextResponse(csv, { status: 200, headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': `attachment; filename="versaly-report-${range}.csv"`, 'Cache-Control': 'no-store' } });
     }
 
     return NextResponse.json({

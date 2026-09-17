@@ -56,9 +56,9 @@ const STAGE_COLORS: Record<string, string> = {
   NEW_LEAD: 'bg-gray-100 text-gray-700',
   RESEARCHING: 'bg-blue-50 text-blue-700',
   CONTACTED: 'bg-cyan-50 text-cyan-700',
-  FOLLOW_UP: 'bg-amber-50 text-amber-700',
-  INTERESTED: 'bg-purple-50 text-purple-700',
-  PROPOSAL: 'bg-indigo-50 text-indigo-700',
+  FOLLOW_UP: 'bg-sky-50 text-sky-700',
+  INTERESTED: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300',
+  PROPOSAL: 'bg-cyan-50 text-cyan-700 dark:bg-cyan-950/50 dark:text-cyan-300',
   WON: 'bg-green-50 text-green-700',
   LOST: 'bg-red-50 text-red-700',
 };
@@ -387,7 +387,7 @@ export default function LeadsPage() {
                 </thead>
                 <tbody>
                   {paginatedLeads.map((lead) => (
-                    <tr key={lead.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/80">
+                    <tr key={lead.id} className="border-b border-gray-100 last:border-0 hover:bg-[#0f4965] transition-colors">
                       <td className="py-4 pr-4">
                         <Link href={`/leads/${lead.id}`} className="font-semibold text-gray-800 hover:text-accent-600">
                           {lead.contactName}

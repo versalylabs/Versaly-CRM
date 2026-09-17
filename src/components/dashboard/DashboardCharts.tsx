@@ -50,8 +50,8 @@ export function Sparkline({ data, color = 'blue', height = 36, width = 110 }: Sp
   const colorMap = {
     blue: { stroke: '#0284c7', stopStart: '#38bdf8', stopEnd: '#0284c7' },
     emerald: { stroke: '#10b981', stopStart: '#34d399', stopEnd: '#10b981' },
-    purple: { stroke: '#8b5cf6', stopStart: '#a78bfa', stopEnd: '#8b5cf6' },
-    amber: { stroke: '#f59e0b', stopStart: '#fbbf24', stopEnd: '#f59e0b' },
+    purple: { stroke: '#10b981', stopStart: '#34d399', stopEnd: '#10b981' },
+    amber: { stroke: '#10b981', stopStart: '#34d399', stopEnd: '#10b981' },
   };
 
   const scheme = colorMap[color];
@@ -643,7 +643,7 @@ export function SubscriptionQuotaCard({ subscription }: SubscriptionCardProps) {
               </div>
               <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-sky-500 to-purple-500 transition-all duration-500"
+                  className="h-full rounded-full bg-gradient-to-r from-sky-500 to-emerald-500 transition-all duration-500"
                   style={{ width: `${Math.max(8, subscription.seatPercentage)}%` }}
                 />
               </div>
@@ -704,10 +704,10 @@ export function SubscriptionQuotaCard({ subscription }: SubscriptionCardProps) {
                 </ul>
               </div>
 
-              <div className="rounded-xl border border-purple-200 bg-purple-50/30 p-4 dark:border-purple-800/40 dark:bg-purple-950/20">
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 dark:border-emerald-800/40 dark:bg-emerald-950/20">
                 <div className="flex justify-between items-center">
                   <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-purple-700 dark:text-purple-300">
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
                       Scale Tier Upgrade
                     </span>
                     <h4 className="text-base font-bold text-gray-900 dark:text-white">
@@ -719,7 +719,7 @@ export function SubscriptionQuotaCard({ subscription }: SubscriptionCardProps) {
                       alert('Upgrade requested! Support team will assist your account migration.');
                       setModalOpen(false);
                     }}
-                    className="rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-purple-700"
+                    className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-500"
                   >
                     Upgrade
                   </button>

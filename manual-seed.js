@@ -23,8 +23,8 @@ async function main() {
   // Create default tenant Organization
   const organization = await prisma.organization.create({
     data: {
-      name: 'Straten Agency Inc.',
-      slug: 'straten-agency',
+      name: 'Versaly Technologies Inc.',
+      slug: 'versaly-hq',
       plan: 'GROWTH_PRO',
       planStatus: 'active',
       leadLimit: 500,
@@ -39,7 +39,7 @@ async function main() {
   const user = await prisma.user.create({
     data: {
       name: 'Demo User',
-      email: 'demo@stratenagency.com',
+      email: 'demo@versaly.com',
       password: hashedPassword,
       role: 'ADMIN',
       organizationId: organization.id,

@@ -34,13 +34,13 @@ const TYPE_OPTIONS: { value: string; label: string }[] = [
 ];
 
 const TYPE_STYLE: Record<string, { dot: string; label: string }> = {
-  lead_created: { dot: 'bg-blue-500', label: 'Lead' },
-  outreach: { dot: 'bg-purple-500', label: 'Outreach' },
+  lead_created: { dot: 'bg-sky-500', label: 'Lead' },
+  outreach: { dot: 'bg-emerald-500', label: 'Outreach' },
   task_created: { dot: 'bg-amber-500', label: 'Task' },
   task_completed: { dot: 'bg-emerald-500', label: 'Task done' },
   proposal_created: { dot: 'bg-gray-400', label: 'Proposal' },
-  proposal_sent: { dot: 'bg-indigo-500', label: 'Proposal sent' },
-  proposal_responded: { dot: 'bg-pink-500', label: 'Proposal response' },
+  proposal_sent: { dot: 'bg-cyan-500', label: 'Proposal sent' },
+  proposal_responded: { dot: 'bg-emerald-500', label: 'Proposal response' },
 };
 
 function dayLabel(dateStr: string) {

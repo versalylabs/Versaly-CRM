@@ -3,6 +3,22 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Target,
+  DollarSign,
+  Zap,
+  Trophy,
+  Search,
+  Flame,
+  AlertTriangle,
+  MapPin,
+  Mail,
+  Calendar,
+  Plus,
+  ArrowRight,
+  TrendingUp,
+} from 'lucide-react';
 import { formatCurrency } from '../../../lib/currency';
 
 type Lead = {
@@ -77,19 +93,19 @@ const STAGES: Stage[] = [
     id: 'INTERESTED',
     label: 'Interested',
     probability: 65,
-    badgeColor: 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300',
-    dotColor: 'bg-purple-500',
-    accentBorder: 'border-t-purple-500',
-    columnBg: 'bg-purple-50/40 dark:bg-purple-950/20',
+    badgeColor: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300',
+    dotColor: 'bg-emerald-500',
+    accentBorder: 'border-t-emerald-500',
+    columnBg: 'bg-emerald-50/40 dark:bg-emerald-950/20',
   },
   {
     id: 'PROPOSAL',
     label: 'Proposal',
     probability: 80,
-    badgeColor: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300',
-    dotColor: 'bg-indigo-500',
-    accentBorder: 'border-t-indigo-500',
-    columnBg: 'bg-indigo-50/40 dark:bg-indigo-950/20',
+    badgeColor: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300',
+    dotColor: 'bg-cyan-500',
+    accentBorder: 'border-t-cyan-500',
+    columnBg: 'bg-cyan-50/40 dark:bg-cyan-950/20',
   },
   {
     id: 'WON',
@@ -285,7 +301,12 @@ export default function PipelinePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-[#061826]">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="min-h-screen bg-gray-50 dark:bg-[#053048]"
+    >
       <div className="container-custom py-8 !max-w-none">
         
         {/* Header Bar */}
@@ -309,36 +330,37 @@ export default function PipelinePage() {
               href="/leads"
               className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 px-4 py-2.5 text-xs font-semibold text-white shadow-md hover:from-sky-500 hover:to-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 transition"
             >
-              <span>+ Add New Lead</span>
+              <Plus className="h-4 w-4" />
+              <span>Add New Lead</span>
             </Link>
           </div>
         </div>
 
         {/* Executive KPI Summary Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-gray-200/80 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900/60">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#073652]/80 backdrop-blur-xl transition hover:border-sky-500/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Active Deals
               </span>
-              <span className="rounded-full bg-sky-100 p-1.5 text-sky-600 dark:bg-sky-950 dark:text-sky-400">
-                🎯
+              <span className="rounded-lg border border-sky-500/20 bg-sky-500/10 p-2 text-sky-600 dark:text-sky-400">
+                <Target className="h-4 w-4" />
               </span>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-2xl font-black text-gray-900 dark:text-white">{totals.active}</span>
-              <span className="text-xs text-gray-500">/ {totals.total} total</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">/ {totals.total} total</span>
             </div>
             <p className="mt-1 text-[11px] text-gray-400">Open active opportunities in funnel</p>
           </div>
 
-          <div className="rounded-2xl border border-gray-200/80 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900/60">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#073652]/80 backdrop-blur-xl transition hover:border-emerald-500/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Active Pipeline Value
               </span>
-              <span className="rounded-full bg-emerald-100 p-1.5 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
-                💰
+              <span className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-2 text-emerald-600 dark:text-emerald-400">
+                <DollarSign className="h-4 w-4" />
               </span>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
@@ -349,37 +371,37 @@ export default function PipelinePage() {
             <p className="mt-1 text-[11px] text-gray-400">Total unweighted potential revenue</p>
           </div>
 
-          <div className="rounded-2xl border border-gray-200/80 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900/60">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#073652]/80 backdrop-blur-xl transition hover:border-teal-500/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Weighted Forecast
               </span>
-              <span className="rounded-full bg-purple-100 p-1.5 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
-                ⚡
+              <span className="rounded-lg border border-teal-500/20 bg-teal-500/10 p-2 text-teal-600 dark:text-teal-400">
+                <Zap className="h-4 w-4" />
               </span>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-2xl font-black text-purple-600 dark:text-purple-400">
+              <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
                 {formatCurrency(totals.weightedValue)}
               </span>
             </div>
             <p className="mt-1 text-[11px] text-gray-400">Calculated by stage probabilities</p>
           </div>
 
-          <div className="rounded-2xl border border-gray-200/80 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900/60">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#073652]/80 backdrop-blur-xl transition hover:border-amber-500/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Won Rate
               </span>
-              <span className="rounded-full bg-amber-100 p-1.5 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
-                🏆
+              <span className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-2 text-amber-600 dark:text-amber-400">
+                <Trophy className="h-4 w-4" />
               </span>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
               <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
                 {totals.winRate}%
               </span>
-              <span className="text-xs text-gray-500">({totals.won} won)</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">({totals.won} won)</span>
             </div>
             <p className="mt-1 text-[11px] text-gray-400">
               Won revenue: {formatCurrency(totals.wonValue)}
@@ -388,9 +410,9 @@ export default function PipelinePage() {
         </div>
 
         {/* Filter & Search Bar */}
-        <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-gray-200/80 bg-white p-3.5 shadow-sm dark:border-gray-800 dark:bg-gray-900/60">
+        <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-gray-200/80 bg-white/80 p-3.5 shadow-sm dark:border-white/10 dark:bg-[#073652]/80 backdrop-blur-xl">
           <div className="flex flex-1 items-center gap-2.5">
-            <span className="text-gray-400">🔍</span>
+            <Search className="h-4 w-4 text-gray-400 shrink-0" />
             <input
               type="text"
               value={search}
@@ -408,15 +430,15 @@ export default function PipelinePage() {
             )}
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 border-t sm:border-t-0 sm:border-l border-gray-100 sm:pl-3 pt-2 sm:pt-0 dark:border-gray-800">
+          <div className="flex flex-wrap items-center gap-2 border-t sm:border-t-0 sm:border-l border-gray-200/60 sm:pl-3 pt-2 sm:pt-0 dark:border-white/10">
             {/* Quick Scope Filter */}
-            <div className="flex rounded-xl bg-gray-100 p-1 dark:bg-gray-800">
+            <div className="flex rounded-xl bg-gray-100/80 p-1 dark:bg-[#052b41]/80">
               <button
                 onClick={() => setActiveFilter('all')}
                 className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
                   activeFilter === 'all'
-                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white'
-                    : 'text-gray-500 hover:text-gray-900 dark:text-gray-400'
+                    ? 'bg-white text-gray-900 shadow-sm dark:bg-sky-600 dark:text-white'
+                    : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                 }`}
               >
                 All
@@ -425,21 +447,22 @@ export default function PipelinePage() {
                 onClick={() => setActiveFilter('active')}
                 className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
                   activeFilter === 'active'
-                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white'
-                    : 'text-gray-500 hover:text-gray-900 dark:text-gray-400'
+                    ? 'bg-white text-gray-900 shadow-sm dark:bg-sky-600 dark:text-white'
+                    : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                 }`}
               >
                 Active Only
               </button>
               <button
                 onClick={() => setActiveFilter('high_value')}
-                className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
+                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
                   activeFilter === 'high_value'
-                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-white'
-                    : 'text-gray-500 hover:text-gray-900 dark:text-gray-400'
+                    ? 'bg-white text-amber-600 shadow-sm dark:bg-amber-500/20 dark:text-amber-300'
+                    : 'text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
                 }`}
               >
-                🔥 High Value
+                <Flame className="h-3 w-3 text-amber-500" />
+                <span>High Value</span>
               </button>
             </div>
 
@@ -447,7 +470,7 @@ export default function PipelinePage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="rounded-xl border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] font-medium text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 outline-none"
+              className="rounded-xl border border-gray-200/80 bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-gray-700 dark:border-white/10 dark:bg-[#052b41] dark:text-gray-200 outline-none"
             >
               <option value="value_desc">Value: High to Low</option>
               <option value="value_asc">Value: Low to High</option>
@@ -457,8 +480,11 @@ export default function PipelinePage() {
         </div>
 
         {error && (
-          <div className="mb-5 flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-medium text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/20 dark:text-rose-300">
-            <span>⚠️ {error}</span>
+          <div className="mb-5 flex items-center justify-between rounded-xl border border-rose-200/80 bg-rose-50/80 p-4 text-xs font-medium text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-300 backdrop-blur-md">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-rose-500" />
+              <span>{error}</span>
+            </div>
             <button onClick={fetchLeads} className="font-bold underline underline-offset-2">
               Reload
             </button>
@@ -467,29 +493,32 @@ export default function PipelinePage() {
 
         {/* Kanban Board Container */}
         {loading ? (
-          <div className="flex h-72 items-center justify-center rounded-2xl border border-gray-200 bg-white p-12 text-center dark:border-gray-800 dark:bg-gray-900/40">
+          <div className="flex h-72 items-center justify-center rounded-2xl border border-gray-200/80 bg-white/80 p-12 text-center dark:border-white/10 dark:bg-[#073652]/60 backdrop-blur-xl">
             <div className="space-y-3">
               <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
               <p className="text-xs text-gray-500 dark:text-gray-400">Loading pipeline deals...</p>
             </div>
           </div>
         ) : leads.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center dark:border-gray-800 dark:bg-gray-900/40">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-2xl dark:bg-sky-950/60">
-              📊
+          <div className="rounded-2xl border border-dashed border-gray-300 bg-white/60 p-12 text-center dark:border-white/15 dark:bg-[#073652]/40 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.2)]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-sky-500/20 bg-sky-500/10 text-sky-400">
+              <TrendingUp className="h-7 w-7" />
             </div>
             <h2 className="mt-4 text-lg font-bold text-gray-900 dark:text-white">
               No Leads in Your Pipeline Yet
             </h2>
-            <p className="mx-auto mt-1 max-w-sm text-xs text-gray-500 dark:text-gray-400">
-              Start adding prospects to track opportunities from discovery to closed revenue.
+            <p className="mx-auto mt-1.5 max-w-md text-xs text-gray-500 dark:text-gray-400">
+              Your pipeline starts clean. Add new prospective deals to track conversion velocity from discovery to closed revenue.
             </p>
-            <Link
-              href="/leads"
-              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-xs font-semibold text-white shadow hover:bg-sky-500 transition"
-            >
-              + Create Your First Lead
-            </Link>
+            <div className="mt-6 flex justify-center">
+              <Link
+                href="/leads"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 px-5 py-2.5 text-xs font-semibold text-white shadow-md hover:from-sky-500 hover:to-sky-600 transition"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Create Your First Lead</span>
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="overflow-x-auto pb-6 custom-scrollbar">
@@ -510,14 +539,14 @@ export default function PipelinePage() {
                       if (e.currentTarget === e.target) setActiveDropStage(null);
                     }}
                     onDrop={() => handleDrop(stage.id)}
-                    className={`flex flex-col rounded-2xl border-t-4 border border-gray-200/80 p-3.5 transition-all duration-150 ${stage.accentBorder} ${stage.columnBg} dark:border-gray-800/80 ${
+                    className={`flex flex-col rounded-2xl border-t-4 border border-gray-200/80 p-3.5 backdrop-blur-xl transition-all duration-150 ${stage.accentBorder} ${stage.columnBg} dark:border-white/10 dark:bg-[#073652]/60 ${
                       isDropTarget
-                        ? 'ring-2 ring-sky-500 bg-sky-50/80 dark:bg-sky-950/40 border-sky-400 dark:border-sky-600 scale-[1.01]'
+                        ? 'ring-2 ring-sky-500 bg-sky-50/80 dark:bg-sky-950/60 border-sky-400 dark:border-sky-500 scale-[1.01]'
                         : ''
                     }`}
                   >
                     {/* Stage Header */}
-                    <div className="mb-3.5 pb-3 border-b border-gray-200/60 dark:border-gray-800">
+                    <div className="mb-3.5 pb-3 border-b border-gray-200/60 dark:border-white/10">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
                           <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${stage.dotColor}`} />
@@ -525,7 +554,7 @@ export default function PipelinePage() {
                             {stage.label}
                           </h3>
                         </div>
-                        <span className="rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold text-gray-700 shadow-2xs dark:bg-gray-800 dark:text-gray-300">
+                        <span className="rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold text-gray-700 shadow-2xs dark:bg-[#052b41] dark:text-gray-200 dark:border dark:border-white/10">
                           {stageLeads.length}
                         </span>
                       </div>
@@ -558,7 +587,7 @@ export default function PipelinePage() {
                               setDraggedId(null);
                               setActiveDropStage(null);
                             }}
-                            className={`group relative rounded-xl border border-gray-200 bg-white p-3.5 shadow-xs transition hover:border-sky-300 hover:shadow-md dark:border-gray-800 dark:bg-gray-900/90 dark:hover:border-sky-600/50 ${
+                            className={`group relative rounded-xl border border-gray-200/80 bg-white/90 p-3.5 shadow-xs backdrop-blur-md transition hover:border-sky-400 hover:shadow-md dark:border-white/10 dark:bg-[#052b41]/90 dark:hover:border-sky-500/50 ${
                               isDragging
                                 ? 'opacity-40 scale-[0.98] border-dashed border-sky-400 rotate-1'
                                 : ''
@@ -570,7 +599,7 @@ export default function PipelinePage() {
                           >
                             {/* Card Top: Deal Value & Recency */}
                             <div className="flex items-center justify-between gap-2">
-                              <span className="inline-flex items-center rounded-lg bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
+                              <span className="inline-flex items-center rounded-lg bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border dark:border-emerald-500/20">
                                 {lead.dealValue ? formatCurrency(lead.dealValue) : 'No Value'}
                               </span>
                               <span className="text-[10px] font-medium text-gray-400">
@@ -592,30 +621,30 @@ export default function PipelinePage() {
                             </div>
 
                             {/* Contact Details Snippets */}
-                            <div className="mt-3 space-y-1 text-[11px] text-gray-500 dark:text-gray-400">
+                            <div className="mt-3 space-y-1.5 text-[11px] text-gray-500 dark:text-gray-400">
                               {lead.location && (
                                 <div className="flex items-center gap-1.5 truncate">
-                                  <span className="shrink-0 text-gray-400">📍</span>
+                                  <MapPin className="h-3 w-3 shrink-0 text-sky-400" />
                                   <span className="truncate">{lead.location}</span>
                                 </div>
                               )}
                               <div className="flex items-center gap-1.5 truncate">
-                                <span className="shrink-0 text-gray-400">✉️</span>
+                                <Mail className="h-3 w-3 shrink-0 text-sky-400" />
                                 <span className="truncate">{lead.email}</span>
                               </div>
                             </div>
 
                             {/* Footer: Source, Owner, and Stage Select */}
-                            <div className="mt-3 pt-2.5 border-t border-gray-100 dark:border-gray-800/80">
+                            <div className="mt-3 pt-2.5 border-t border-gray-100 dark:border-white/10">
                               <div className="flex items-center justify-between gap-2">
-                                <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                                <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-[#073652] dark:text-gray-300 dark:border dark:border-white/10">
                                   {formatSource(lead.leadSource)}
                                 </span>
 
                                 {lead.assignedTo && (
                                   <div
                                     title={`Assigned to ${lead.assignedTo.name || lead.assignedTo.email}`}
-                                    className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-100 text-[10px] font-bold text-sky-700 dark:bg-sky-950 dark:text-sky-300"
+                                    className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-100 text-[10px] font-bold text-sky-700 dark:bg-sky-950 dark:text-sky-300 border border-sky-500/20"
                                   >
                                     {lead.assignedTo.name?.[0]?.toUpperCase() || 'U'}
                                   </div>
@@ -629,7 +658,7 @@ export default function PipelinePage() {
                                   disabled={isUpdating}
                                   onChange={(e) => moveLead(lead.id, e.target.value)}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="w-full rounded-lg border border-gray-200 bg-gray-50/70 px-2 py-1 text-[10px] font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-800/70 dark:text-gray-300 outline-none"
+                                  className="w-full rounded-lg border border-gray-200 bg-gray-50/70 px-2 py-1 text-[10px] font-medium text-gray-600 dark:border-white/10 dark:bg-[#073652] dark:text-gray-300 outline-none"
                                 >
                                   {STAGES.map((s) => (
                                     <option key={s.id} value={s.id}>
@@ -659,7 +688,7 @@ export default function PipelinePage() {
                       )}
 
                       {stageLeads.length === 0 && !isDropTarget && (
-                        <div className="rounded-xl border border-dashed border-gray-200/80 bg-white/30 py-8 text-center text-xs text-gray-400 dark:border-gray-800 dark:bg-gray-900/20">
+                        <div className="rounded-xl border border-dashed border-gray-200/80 bg-white/30 py-8 text-center text-xs text-gray-400 dark:border-white/10 dark:bg-white/5">
                           No deals in this stage
                         </div>
                       )}
@@ -671,7 +700,7 @@ export default function PipelinePage() {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 

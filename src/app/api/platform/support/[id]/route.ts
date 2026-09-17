@@ -21,7 +21,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     await prisma.supportTicket.update({ where: { id: ticket.id }, data: { lastResponseAt: new Date(), status: isInternal ? ticket.status : 'WAITING_ON_CUSTOMER' } });
     await audit(session.user.email, session.user.id, ticket.organizationId, isInternal ? 'support.internal_note_added' : 'support.agent_reply_sent', { ticketId: ticket.id });
     logSupport('agent_reply', { ticketId: ticket.id, organizationId: ticket.organizationId, isInternal });
-    if (!isInternal) await notifySupportEmail({ to: ticket.requester.email, subject: `[Straten Support] Re: ${ticket.subject}`, body: `Support replied to your ticket for ${ticket.organization.name}.\n\n${message}` });
+    if (!isInternal) await notifySupportEmail({ to: ticket.requester.email, subject: `[Versaly Support] Re: ${ticket.subject}`, body: `Support replied to your ticket for ${ticket.organization.name}.\n\n${message}` });
     return NextResponse.json(created, { status: 201 });
   } catch (error) { console.error('Platform support reply failed', error); return NextResponse.json({ error: 'Could not send support reply.' }, { status: 500 }); }
 }

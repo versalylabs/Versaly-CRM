@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const SECRET = process.env.NEXTAUTH_SECRET || 'straten-crm-secret-salt-for-tokens-2026';
+const SECRET = process.env.NEXTAUTH_SECRET || 'versaly-crm-secret-salt-for-tokens-2026';
 
 export type InvitePayload = {
   organizationId: string;

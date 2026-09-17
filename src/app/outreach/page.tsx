@@ -35,12 +35,12 @@ const TYPES = [
 const STATUSES = ['PENDING', 'SENT', 'OPENED', 'CLICKED', 'REPLIED', 'BOUNCED'];
 
 const STATUS_STYLES: Record<string, string> = {
-  PENDING: 'bg-gray-100 text-gray-700',
-  SENT: 'bg-blue-50 text-blue-700',
-  OPENED: 'bg-cyan-50 text-cyan-700',
-  CLICKED: 'bg-purple-50 text-purple-700',
-  REPLIED: 'bg-green-50 text-green-700',
-  BOUNCED: 'bg-red-50 text-red-700',
+  PENDING: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+  SENT: 'bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300',
+  OPENED: 'bg-cyan-50 text-cyan-700 dark:bg-cyan-950/50 dark:text-cyan-300',
+  CLICKED: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300',
+  REPLIED: 'bg-green-50 text-green-700 dark:bg-green-950/50 dark:text-green-300',
+  BOUNCED: 'bg-red-50 text-red-700 dark:bg-red-950/50 dark:text-red-300',
 };
 
 function label(value: string) {

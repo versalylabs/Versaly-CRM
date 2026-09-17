@@ -32,7 +32,7 @@ function SignInForm() {
         return;
       }
 
-      router.replace('/');
+      router.replace('/dashboard');
       router.refresh();
     } catch {
       setError('Unable to sign in right now. Please try again.');
@@ -47,10 +47,10 @@ function SignInForm() {
         {/* Branding Header */}
         <div className="text-center space-y-2">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 text-white font-black text-xl shadow-lg shadow-sky-500/20">
-            S
+            V
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-            Sign in to Straten CRM
+            Sign in to Versaly CRM
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
             Access your cloud workspace & client pipeline

@@ -110,7 +110,7 @@ export default function CommandPalette() {
     };
   }, [query]);
 
-  if (pathname.startsWith('/auth/')) return null;
+  if (pathname.startsWith('/auth/') || pathname === '/' || pathname === '/landing') return null;
 
   return (
     <>

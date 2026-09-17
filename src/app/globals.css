@@ -73,6 +73,11 @@
   margin: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
 html,
 body {
   max-width: 100vw;
@@ -255,8 +260,20 @@ body {
 .text-gray-500 { color: #9ca3af !important; }
 .text-gray-400 { color: #9ca3af !important; }
 .border-gray-100, .border-gray-200, .border-gray-300 { border-color: #15516b !important; }
-.hover\:bg-gray-50:hover { background-color: #0f4965 !important; }
-.hover\:bg-gray-100:hover { background-color: #0f4965 !important; }
+.hover\:bg-gray-50:hover,
+.hover\:bg-gray-50\/80:hover,
+.hover\:bg-gray-50\/70:hover,
+.hover\:bg-gray-50\/60:hover,
+.hover\:bg-gray-50\/50:hover,
+.hover\:bg-gray-50\/40:hover,
+.hover\:bg-gray-100:hover,
+.hover\:bg-gray-100\/80:hover,
+.hover\:bg-gray-100\/50:hover,
+.hover\:bg-slate-50:hover,
+.hover\:bg-slate-100:hover,
+tbody tr:hover {
+  background-color: #0f4965 !important;
+}
 .hover\:text-gray-900:hover { color: #ffffff !important; }
 input, textarea, select, .lead-input {
   background-color: #042a40 !important;

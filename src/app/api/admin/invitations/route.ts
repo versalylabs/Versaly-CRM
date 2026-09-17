@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     }
 
     // Check seat capacity
-    let orgName = session.user.organizationName || 'Straten CRM';
+    let orgName = session.user.organizationName || 'Versaly CRM';
     if (orgId) {
       const [userCount, org] = await Promise.all([
         prisma.user.count({ where: { organizationId: orgId } }),

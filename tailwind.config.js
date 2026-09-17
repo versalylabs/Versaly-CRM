@@ -47,7 +47,23 @@ module.exports = {
       boxShadow: {
         soft: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
         medium: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-      }
+      },
+      animation: {
+        spotlight: 'spotlight 2s ease .75s 1 forwards',
+        'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      keyframes: {
+        spotlight: {
+          '0%': {
+            opacity: '0',
+            transform: 'translate(-72%, -62%) scale(0.5)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translate(-50%,-40%) scale(1)',
+          },
+        },
+      },
     },
   },
   plugins: [],
