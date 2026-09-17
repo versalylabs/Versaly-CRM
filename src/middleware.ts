@@ -54,7 +54,31 @@ export async function middleware(req: NextRequest) {
     process.env.AUTH_SECRET ||
     'versaly-crm-session-production-auth-secret-key-32-chars-long-minimum';
 
-  const token = await getToken({ req, secret: authSecret })
+  const hasSecureCookie = req.cookies.has('__Secure-next-auth.session-token');
+
+  let token = await getToken({
+    req,
+    secret: authSecret,
+    cookieName: hasSecureCookie ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
+    secureCookie: hasSecureCookie,
+  });
+
+  if (!token && hasSecureCookie) {
+    token = await getToken({
+      req,
+      secret: authSecret,
+      cookieName: 'next-auth.session-token',
+      secureCookie: false,
+    });
+  } else if (!token && !hasSecureCookie) {
+    token = await getToken({
+      req,
+      secret: authSecret,
+      cookieName: '__Secure-next-auth.session-token',
+      secureCookie: true,
+    });
+  }
+
   if (!token) {
     const url = req.nextUrl.clone()
     url.pathname = '/auth/signin'
