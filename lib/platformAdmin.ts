@@ -2,10 +2,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 
 export function getPlatformAdminEmails() {
-  return (process.env.PLATFORM_ADMIN_EMAILS || '')
+  const configured = (process.env.PLATFORM_ADMIN_EMAILS || '')
     .split(',')
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
+  const defaults = ['versalylabs@gmail.com', 'demo@versaly.com'];
+  return Array.from(new Set([...defaults, ...configured]));
 }
 
 export async function requirePlatformAdmin() {

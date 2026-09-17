@@ -134,6 +134,10 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/signin',
     error: '/auth/error',
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret:
+    process.env.NEXTAUTH_SECRET ||
+    process.env.AUTH_SECRET ||
+    'versaly-crm-session-production-auth-secret-key-32-chars-long-minimum',
   debug: process.env.NODE_ENV === 'development',
 }
+
