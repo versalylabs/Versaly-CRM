@@ -62,13 +62,12 @@ function SignUpForm() {
 
       if (!loginResult || loginResult.error) {
         // Fallback: If auto-login didn't succeed, redirect to signin with banner
-        router.push('/auth/signin?registered=true');
+        window.location.href = '/auth/signin?registered=true';
         return;
       }
 
       // 3. Smooth landing on dashboard
-      router.push('/dashboard');
-      router.refresh();
+      window.location.href = '/dashboard';
     } catch (err: any) {
       setError(err.message || 'Unable to register right now. Please try again.');
     } finally {

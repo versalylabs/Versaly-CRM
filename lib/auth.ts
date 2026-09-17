@@ -41,6 +41,27 @@ declare module 'next-auth/jwt' {
   }
 }
 
+const rawNextAuthUrl = process.env.NEXTAUTH_URL;
+if (
+  !rawNextAuthUrl ||
+  rawNextAuthUrl.includes('your-app-name') ||
+  rawNextAuthUrl.includes('your-domain') ||
+  rawNextAuthUrl.includes('example.com')
+) {
+  process.env.NEXTAUTH_URL = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : 'https://versaly-crm.vercel.app';
+}
+
+const authSecret =
+  process.env.NEXTAUTH_SECRET ||
+  process.env.AUTH_SECRET ||
+  'versaly-crm-session-production-auth-secret-key-32-chars-long-minimum';
+
+if (!process.env.NEXTAUTH_SECRET) {
+  process.env.NEXTAUTH_SECRET = authSecret;
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [

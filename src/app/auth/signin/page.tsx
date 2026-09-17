@@ -32,8 +32,7 @@ function SignInForm() {
         return;
       }
 
-      router.replace('/dashboard');
-      router.refresh();
+      window.location.href = '/dashboard';
     } catch {
       setError('Unable to sign in right now. Please try again.');
     } finally {

@@ -130,6 +130,8 @@ export default function Dashboard() {
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
       load();
+    } else if (status === 'unauthenticated') {
+      window.location.href = '/auth/signin';
     }
   }, [load, status, session]);
 

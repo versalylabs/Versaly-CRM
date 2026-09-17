@@ -55,11 +55,12 @@ async function ensureDefaultAdmins(activeUrl) {
       console.log('Created default organization: Versaly Labs (versaly-hq)');
     }
 
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    const versalyHashedPassword = await bcrypt.hash('labversaly-16', 10);
+    const demoHashedPassword = await bcrypt.hash('password123', 10);
 
     const adminsToEnsure = [
-      { email: 'demo@versaly.com', name: 'Demo Admin' },
-      { email: 'versalylabs@gmail.com', name: 'Versaly Admin' },
+      { email: 'demo@versaly.com', name: 'Demo Admin', password: demoHashedPassword },
+      { email: 'versalylabs@gmail.com', name: 'Versaly Admin', password: versalyHashedPassword },
     ];
 
     for (const admin of adminsToEnsure) {
@@ -72,13 +73,24 @@ async function ensureDefaultAdmins(activeUrl) {
           data: {
             name: admin.name,
             email: admin.email,
-            password: hashedPassword,
+            password: admin.password,
             role: 'ADMIN',
             isActive: true,
             organizationId: org.id,
           },
         });
         console.log(`Created admin account: ${admin.email}`);
+      } else {
+        await prisma.user.update({
+          where: { email: admin.email },
+          data: {
+            password: admin.password,
+            isActive: true,
+            role: 'ADMIN',
+            organizationId: existing.organizationId || org.id,
+          },
+        });
+        console.log(`Updated credentials for admin account: ${admin.email}`);
       }
     }
   } catch (err) {

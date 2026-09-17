@@ -49,7 +49,12 @@ export async function middleware(req: NextRequest) {
     return withRequestHeaders(NextResponse.next(), requestId)
   }
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
+  const authSecret =
+    process.env.NEXTAUTH_SECRET ||
+    process.env.AUTH_SECRET ||
+    'versaly-crm-session-production-auth-secret-key-32-chars-long-minimum';
+
+  const token = await getToken({ req, secret: authSecret })
   if (!token) {
     const url = req.nextUrl.clone()
     url.pathname = '/auth/signin'
