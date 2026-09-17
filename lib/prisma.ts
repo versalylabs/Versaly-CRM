@@ -1,17 +1,39 @@
 import { PrismaClient } from '@prisma/client'
 
-const dbUrl =
-  process.env.DATABASE_URL ||
-  process.env.PRISMA_DATABASE_URL ||
-  process.env.POSTGRES_PRISMA_URL ||
-  process.env.POSTGRES_URL;
+function resolveDatabaseUrl(): string | undefined {
+  const candidates = [
+    process.env.DATABASE_URL,
+    process.env.PRISMA_DATABASE_URL,
+    process.env.POSTGRES_PRISMA_URL,
+    process.env.POSTGRES_URL,
+    process.env.POSTGRES_URL_NON_POOLING,
+  ];
 
-if (dbUrl && !process.env.DATABASE_URL) {
-  process.env.DATABASE_URL = dbUrl;
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string') {
+      const trimmed = candidate.trim();
+      if (
+        trimmed.length > 5 &&
+        !trimmed.includes('username:password@hostname') &&
+        (trimmed.startsWith('postgresql://') ||
+          trimmed.startsWith('postgres://') ||
+          trimmed.startsWith('prisma+postgres://') ||
+          trimmed.startsWith('file:'))
+      ) {
+        return trimmed;
+      }
+    }
+  }
+  return undefined;
 }
 
-const clientOptions = dbUrl && !dbUrl.includes('username:password@hostname')
-  ? { datasources: { db: { url: dbUrl } } }
+const activeDbUrl = resolveDatabaseUrl();
+if (activeDbUrl) {
+  process.env.DATABASE_URL = activeDbUrl;
+}
+
+const clientOptions = activeDbUrl
+  ? { datasources: { db: { url: activeDbUrl } } }
   : {};
 
 let prisma: PrismaClient

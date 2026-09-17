@@ -8,15 +8,25 @@ import Link from 'next/link';
 function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialPlan = searchParams.get('plan') || 'GROWTH_PRO';
-  const [plan, setPlan] = useState(initialPlan);
+  const initialPlan = (searchParams.get('plan') as 'STARTER' | 'GROWTH_PRO' | 'ENTERPRISE') || 'GROWTH_PRO';
+  const [plan, setPlan] = useState<'STARTER' | 'GROWTH_PRO' | 'ENTERPRISE'>(
+    initialPlan === 'STARTER' || initialPlan === 'ENTERPRISE' ? initialPlan : 'GROWTH_PRO'
+  );
   const [name, setName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [currency, setCurrency] = useState('USD');
+  const [currency, setCurrency] = useState('KES');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const planDetails = {
+    STARTER: { name: 'Starter', leads: '1,000 Leads', seats: '3 Seats', trial: '14 Days Free' },
+    GROWTH_PRO: { name: 'Growth Pro', leads: '5,000 Leads', seats: '10 Seats', trial: '14 Days Free' },
+    ENTERPRISE: { name: 'Enterprise', leads: '100,000 Leads', seats: '50 Seats', trial: '14 Days Free' },
+  };
+
+  const currentPlan = planDetails[plan] || planDetails.GROWTH_PRO;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -71,9 +81,9 @@ function SignUpForm() {
       <div className="w-full max-w-lg space-y-6">
         {/* Header Branding */}
         <div className="text-center space-y-2">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 text-white font-black text-xl shadow-lg shadow-sky-500/20">
+          <Link href="/" className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 text-white font-black text-xl shadow-lg shadow-sky-500/20 hover:scale-105 transition-transform">
             V
-          </div>
+          </Link>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
             Start your 14-day free trial
           </h1>
@@ -82,18 +92,36 @@ function SignUpForm() {
           </p>
         </div>
 
+        {/* Plan Selector Buttons */}
+        <div className="flex rounded-xl bg-gray-200/70 p-1 dark:bg-gray-800">
+          {(['STARTER', 'GROWTH_PRO', 'ENTERPRISE'] as const).map((key) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setPlan(key)}
+              className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition-all ${
+                plan === key
+                  ? 'bg-white text-sky-600 shadow-sm dark:bg-gray-700 dark:text-white'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+              }`}
+            >
+              {key === 'GROWTH_PRO' ? 'Growth Pro (Popular)' : key === 'STARTER' ? 'Starter' : 'Enterprise'}
+            </button>
+          ))}
+        </div>
+
         {/* Feature Highlights Pill Banner */}
         <div className="grid grid-cols-3 gap-2 rounded-2xl border border-sky-100 bg-sky-50/70 p-3 text-center text-xs dark:border-sky-900/40 dark:bg-sky-950/20">
           <div>
-            <span className="block font-bold text-sky-900 dark:text-sky-200">Growth Pro</span>
-            <span className="text-[10px] text-sky-700 dark:text-sky-400">14 Days Free</span>
+            <span className="block font-bold text-sky-900 dark:text-sky-200">{currentPlan.name}</span>
+            <span className="text-[10px] text-sky-700 dark:text-sky-400">{currentPlan.trial}</span>
           </div>
           <div className="border-x border-sky-200/60 dark:border-sky-800/60">
-            <span className="block font-bold text-sky-900 dark:text-sky-200">500 Leads</span>
-            <span className="text-[10px] text-sky-700 dark:text-sky-400">Included Quota</span>
+            <span className="block font-bold text-sky-900 dark:text-sky-200">{currentPlan.leads}</span>
+            <span className="text-[10px] text-sky-700 dark:text-sky-400">Active Contacts</span>
           </div>
           <div>
-            <span className="block font-bold text-sky-900 dark:text-sky-200">10 Seats</span>
+            <span className="block font-bold text-sky-900 dark:text-sky-200">{currentPlan.seats}</span>
             <span className="text-[10px] text-sky-700 dark:text-sky-400">Team Workload</span>
           </div>
         </div>

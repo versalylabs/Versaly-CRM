@@ -138,9 +138,21 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
-    console.error('Registration error:', error);    return NextResponse.json(
-      { error: 'An unexpected error occurred while creating your workspace. Please try again.' },
+  } catch (error: any) {
+    console.error('Registration error:', error);
+    const rawMessage = error?.message || '';
+    let userMessage = 'An unexpected error occurred while creating your workspace. Please try again.';
+
+    if (rawMessage.includes('Can\'t reach database') || rawMessage.includes('connect to database') || rawMessage.includes('connection refused')) {
+      userMessage = 'Database connection failed. Please verify that your DATABASE_URL or PRISMA_DATABASE_URL is active in Vercel settings.';
+    } else if (rawMessage.includes('does not exist') || rawMessage.includes('relation') || rawMessage.includes('Table')) {
+      userMessage = 'Database schema has not been synchronized yet. Running schema push...';
+    } else if (rawMessage) {
+      userMessage = `Workspace setup error: ${rawMessage.slice(0, 160)}`;
+    }
+
+    return NextResponse.json(
+      { error: userMessage, details: rawMessage || undefined },
       { status: 500 }
     );
   }

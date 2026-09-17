@@ -1,12 +1,34 @@
 const { execSync } = require('child_process');
 
-const dbUrl =
-  process.env.DATABASE_URL ||
-  process.env.PRISMA_DATABASE_URL ||
-  process.env.POSTGRES_PRISMA_URL ||
-  process.env.POSTGRES_URL;
+function resolveDatabaseUrl() {
+  const candidates = [
+    process.env.DATABASE_URL,
+    process.env.PRISMA_DATABASE_URL,
+    process.env.POSTGRES_PRISMA_URL,
+    process.env.POSTGRES_URL,
+    process.env.POSTGRES_URL_NON_POOLING,
+  ];
 
-if (dbUrl && !dbUrl.includes('username:password@hostname') && !dbUrl.startsWith('file:')) {
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string') {
+      const trimmed = candidate.trim();
+      if (
+        trimmed.length > 5 &&
+        !trimmed.includes('username:password@hostname') &&
+        (trimmed.startsWith('postgresql://') ||
+          trimmed.startsWith('postgres://') ||
+          trimmed.startsWith('prisma+postgres://'))
+      ) {
+        return trimmed;
+      }
+    }
+  }
+  return null;
+}
+
+const dbUrl = resolveDatabaseUrl();
+
+if (dbUrl) {
   process.env.DATABASE_URL = dbUrl;
   try {
     console.log('Synchronizing database schema to live database...');
@@ -21,3 +43,4 @@ if (dbUrl && !dbUrl.includes('username:password@hostname') && !dbUrl.startsWith(
 } else {
   console.log('No valid live database URL found at build time. Skipping auto-sync.');
 }
+
