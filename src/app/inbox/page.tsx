@@ -163,6 +163,26 @@ const ChannelIcon = ({ channel, className = 'h-4 w-4' }: { channel: string; clas
   );
 };
 
+const FOLDERS = [
+  { id: 'all', label: 'All', fullLabel: 'All Conversations', icon: '📬' },
+  { id: 'unread', label: 'Unread', fullLabel: 'Unread', icon: '🔵' },
+  { id: 'assigned_to_me', label: 'Assigned', fullLabel: 'Assigned to Me', icon: '👤' },
+  { id: 'unassigned', label: 'Unassigned', fullLabel: 'Unassigned', icon: '👥' },
+  { id: 'starred', label: 'Starred', fullLabel: 'Starred', icon: '⭐' },
+  { id: 'archived', label: 'Archived', fullLabel: 'Archived', icon: '📦' },
+  { id: 'closed', label: 'Closed', fullLabel: 'Closed', icon: '✅' },
+] as const;
+
+const CHANNELS = [
+  { id: 'all', label: 'All Channels', shortLabel: 'All', icon: '🌐' },
+  { id: 'EMAIL', label: 'Email', shortLabel: 'Email', icon: 'EMAIL' },
+  { id: 'WHATSAPP', label: 'WhatsApp', shortLabel: 'WhatsApp', icon: 'WHATSAPP' },
+  { id: 'INSTAGRAM', label: 'Instagram', shortLabel: 'Instagram', icon: 'INSTAGRAM' },
+  { id: 'FACEBOOK', label: 'Facebook', shortLabel: 'Facebook', icon: 'FACEBOOK' },
+  { id: 'X', label: 'X (Twitter)', shortLabel: 'X', icon: 'X' },
+  { id: 'TIKTOK', label: 'TikTok', shortLabel: 'TikTok', icon: 'TIKTOK' },
+] as const;
+
 export default function UnifiedInboxPage() {
   const { data: session } = useSession();
 
@@ -207,7 +227,17 @@ export default function UnifiedInboxPage() {
   const [showNewModal, setShowNewModal] = useState(false);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showConvertModal, setShowConvertModal] = useState(false);
+  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
   const [mobileView, setMobileView] = useState<'LIST' | 'CHAT' | 'INTEL'>('LIST');
+
+  // New Conversation Modal State
+  const [newContactName, setNewContactName] = useState('');
+  const [newContactEmail, setNewContactEmail] = useState('');
+  const [newContactPhone, setNewContactPhone] = useState('');
+  const [newChannel, setNewChannel] = useState('EMAIL');
+  const [newSubject, setNewSubject] = useState('');
+  const [newInitialMessage, setNewInitialMessage] = useState('');
+  const [creatingConv, setCreatingConv] = useState(false);
 
   // Task follow-up form state
   const [taskTitle, setTaskTitle] = useState('');
@@ -542,6 +572,91 @@ export default function UnifiedInboxPage() {
     }
   };
 
+  // Filter helper functions
+  const isFiltered =
+    activeFolder !== 'all' ||
+    activeChannel !== 'all' ||
+    activeStatus !== 'all' ||
+    Boolean(searchQuery.trim());
+
+  const resetAllFilters = () => {
+    setActiveFolder('all');
+    setActiveChannel('all');
+    setActiveStatus('all');
+    setSearchQuery('');
+  };
+
+  const getFolderCount = (folderId: string) => {
+    switch (folderId) {
+      case 'all':
+        return counts.all;
+      case 'unread':
+        return counts.unread;
+      case 'assigned_to_me':
+        return counts.assignedToMe;
+      case 'unassigned':
+        return counts.unassigned;
+      case 'starred':
+        return counts.starred;
+      case 'archived':
+        return counts.archived;
+      case 'closed':
+        return counts.closed;
+      default:
+        return 0;
+    }
+  };
+
+  const handleCreateConversation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newContactName.trim() && !newContactEmail.trim() && !newContactPhone.trim()) return;
+
+    setCreatingConv(true);
+    try {
+      const res = await fetch('/api/inbox/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channel: newChannel,
+          contactName: newContactName.trim() || undefined,
+          contactEmail: newContactEmail.trim() || undefined,
+          contactPhone: newContactPhone.trim() || undefined,
+          subject: newSubject.trim() || undefined,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const conv = data.conversation;
+        if (conv?.id && newInitialMessage.trim()) {
+          await fetch(`/api/inbox/conversations/${conv.id}/messages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              channel: newChannel,
+              content: newInitialMessage.trim(),
+            }),
+          });
+        }
+        setShowNewModal(false);
+        setNewContactName('');
+        setNewContactEmail('');
+        setNewContactPhone('');
+        setNewSubject('');
+        setNewInitialMessage('');
+        await loadConversations(false);
+        if (conv?.id) {
+          setSelectedId(conv.id);
+          setMobileView('CHAT');
+        }
+      }
+    } catch (err) {
+      console.error('Failed to create conversation:', err);
+    } finally {
+      setCreatingConv(false);
+    }
+  };
+
   return (
     <div className="flex h-[calc(100vh-4rem)] w-full overflow-hidden bg-[#053048] text-slate-100 font-sans">
       {/* ========================================================================= */}
@@ -575,22 +690,25 @@ export default function UnifiedInboxPage() {
           </button>
         </div>
 
+        {/* New Conversation Action */}
+        <button
+          type="button"
+          onClick={() => setShowNewModal(true)}
+          className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 text-xs font-bold text-white shadow-md shadow-sky-500/20 transition flex items-center justify-center gap-1.5"
+        >
+          <span className="text-sm font-black leading-none">+</span>
+          <span>New Conversation</span>
+        </button>
+
         {/* Folders Navigation */}
         <div className="space-y-1">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-2 pb-1">
             Views
           </p>
 
-          {[
-            { id: 'all', label: 'All Conversations', count: counts.all, icon: '📬' },
-            { id: 'unread', label: 'Unread', count: counts.unread, icon: '🔵' },
-            { id: 'assigned_to_me', label: 'Assigned to Me', count: counts.assignedToMe, icon: '👤' },
-            { id: 'unassigned', label: 'Unassigned', count: counts.unassigned, icon: '👥' },
-            { id: 'starred', label: 'Starred', count: counts.starred, icon: '⭐' },
-            { id: 'archived', label: 'Archived', count: counts.archived, icon: '📦' },
-            { id: 'closed', label: 'Closed', count: counts.closed, icon: '✅' },
-          ].map((f) => {
+          {FOLDERS.map((f) => {
             const isActive = activeFolder === f.id;
+            const count = getFolderCount(f.id);
             return (
               <button
                 key={f.id}
@@ -604,15 +722,15 @@ export default function UnifiedInboxPage() {
               >
                 <span className="flex items-center gap-2">
                   <span className="text-xs">{f.icon}</span>
-                  <span>{f.label}</span>
+                  <span>{f.fullLabel}</span>
                 </span>
-                {f.count > 0 && (
+                {count > 0 && (
                   <span
                     className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
                       isActive ? 'bg-sky-500 text-white' : 'bg-white/10 text-slate-300'
                     }`}
                   >
-                    {f.count}
+                    {count}
                   </span>
                 )}
               </button>
@@ -634,15 +752,7 @@ export default function UnifiedInboxPage() {
             </Link>
           </div>
 
-          {[
-            { id: 'all', label: 'All Channels', icon: '🌐' },
-            { id: 'EMAIL', label: 'Email', icon: 'EMAIL' },
-            { id: 'WHATSAPP', label: 'WhatsApp', icon: 'WHATSAPP' },
-            { id: 'INSTAGRAM', label: 'Instagram', icon: 'INSTAGRAM' },
-            { id: 'FACEBOOK', label: 'Facebook', icon: 'FACEBOOK' },
-            { id: 'X', label: 'X (Twitter)', icon: 'X' },
-            { id: 'TIKTOK', label: 'TikTok', icon: 'TIKTOK' },
-          ].map((ch) => {
+          {CHANNELS.map((ch) => {
             const isActive = activeChannel === ch.id;
             const isConn = ch.id === 'all' || channelStatuses[ch.id]?.connected;
             return (
@@ -704,8 +814,62 @@ export default function UnifiedInboxPage() {
           mobileView !== 'LIST' ? 'hidden md:flex' : 'flex'
         }`}
       >
-        {/* Search and Filters Header */}
-        <div className="p-3.5 border-b border-white/10 space-y-2.5">
+        {/* Mobile Header Bar (Only visible on screens < lg) */}
+        <div className="p-3 border-b border-white/10 lg:hidden space-y-2 bg-[#053048]/80 backdrop-blur-md">
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={() => setShowMobileSidebar(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-slate-200 hover:bg-white/10 hover:text-white transition"
+              title="Open Views & Channels Drawer"
+            >
+              <svg className="h-4 w-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+              </svg>
+              <span>Views</span>
+              {isFiltered && (
+                <span className="h-2 w-2 rounded-full bg-sky-400 animate-pulse" />
+              )}
+            </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowNewModal(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 text-white text-xs font-bold shadow hover:from-sky-500 hover:to-cyan-400 transition flex items-center gap-1"
+              >
+                <span>+</span>
+                <span>New</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => loadConversations(false)}
+                className="p-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white transition"
+                title="Refresh Inbox"
+              >
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+
+              <Link
+                href="/settings/integrations"
+                className="text-[11px] font-medium text-sky-400 hover:text-sky-300 px-2 py-1.5 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center gap-1"
+                title="Manage Integrations"
+              >
+                <span>⚙️</span>
+                <span className="text-[10px] text-slate-300">
+                  {Object.values(channelStatuses).filter((s) => s.connected).length}/6
+                </span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Search, Pills & Filters Header */}
+        <div className="p-3 border-b border-white/10 space-y-2 bg-[#073b58]/40">
+          {/* Search Bar */}
           <div className="relative">
             <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
               <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -717,28 +881,159 @@ export default function UnifiedInboxPage() {
               placeholder="Search conversations, contacts, messages..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#042a40] border border-white/10 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+              className="w-full pl-9 pr-8 py-2 rounded-xl bg-[#042a40] border border-white/10 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-2.5 flex items-center text-slate-400 hover:text-white text-xs"
+              >
+                ✕
+              </button>
+            )}
           </div>
 
-          <div className="flex items-center justify-between text-[11px] text-slate-400">
-            <div className="flex items-center gap-1.5">
-              <span>Status:</span>
-              <select
-                value={activeStatus}
-                onChange={(e) => setActiveStatus(e.target.value)}
-                className="bg-[#042a40] border border-white/10 rounded-lg px-2 py-0.5 text-xs text-white focus:outline-none"
-              >
-                <option value="all">All</option>
-                <option value="OPEN">Open</option>
-                <option value="WAITING_ON_US">Waiting on Us</option>
-                <option value="WAITING_ON_CUSTOMER">Waiting on Client</option>
-                <option value="CLOSED">Closed</option>
-              </select>
+          {/* Quick Folder Pills (Horizontal Scrollable) */}
+          <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex items-center gap-1.5 py-0.5 -mx-1 px-1">
+            {FOLDERS.map((f) => {
+              const isActive = activeFolder === f.id;
+              const count = getFolderCount(f.id);
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setActiveFolder(f.id)}
+                  className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-medium transition border ${
+                    isActive
+                      ? 'bg-sky-600/30 text-sky-200 border-sky-400/50 shadow-sm font-semibold'
+                      : 'bg-[#042a40]/70 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  <span className="text-[11px]">{f.icon}</span>
+                  <span>{f.label}</span>
+                  {count > 0 && (
+                    <span
+                      className={`px-1.5 py-0.2 rounded-full text-[9px] font-bold ${
+                        isActive ? 'bg-sky-500 text-white' : 'bg-white/10 text-slate-300'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Quick Channel Pills (Horizontal Scrollable) */}
+          <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex items-center gap-1.5 py-0.5 -mx-1 px-1">
+            {CHANNELS.map((ch) => {
+              const isActive = activeChannel === ch.id;
+              const isConn = ch.id === 'all' || channelStatuses[ch.id]?.connected;
+              return (
+                <button
+                  key={ch.id}
+                  type="button"
+                  onClick={() => setActiveChannel(ch.id)}
+                  className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-medium transition border ${
+                    isActive
+                      ? 'bg-cyan-600/30 text-cyan-200 border-cyan-400/50 shadow-sm font-semibold'
+                      : 'bg-[#042a40]/70 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {ch.id === 'all' ? (
+                    <span className="text-[11px]">🌐</span>
+                  ) : (
+                    <ChannelIcon channel={ch.id} className="h-3 w-3" />
+                  )}
+                  <span>{ch.shortLabel}</span>
+                  {ch.id !== 'all' && (
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        isConn ? 'bg-emerald-400 shadow-[0_0_4px_rgba(52,211,153,0.8)]' : 'bg-slate-600'
+                      }`}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Status & Channel Dropdowns */}
+          <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <span>Status:</span>
+                <select
+                  value={activeStatus}
+                  onChange={(e) => setActiveStatus(e.target.value)}
+                  className="bg-[#042a40] border border-white/10 rounded-lg px-2 py-0.5 text-xs text-white focus:outline-none"
+                >
+                  <option value="all">All</option>
+                  <option value="OPEN">Open</option>
+                  <option value="WAITING_ON_US">Waiting on Us</option>
+                  <option value="WAITING_ON_CUSTOMER">Waiting on Client</option>
+                  <option value="CLOSED">Closed</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <span>Channel:</span>
+                <select
+                  value={activeChannel}
+                  onChange={(e) => setActiveChannel(e.target.value)}
+                  className="bg-[#042a40] border border-white/10 rounded-lg px-2 py-0.5 text-xs text-white focus:outline-none"
+                >
+                  <option value="all">All Channels</option>
+                  <option value="EMAIL">Email</option>
+                  <option value="WHATSAPP">WhatsApp</option>
+                  <option value="INSTAGRAM">Instagram</option>
+                  <option value="FACEBOOK">Facebook</option>
+                  <option value="X">X (Twitter)</option>
+                  <option value="TIKTOK">TikTok</option>
+                </select>
+              </div>
             </div>
 
             <span className="text-[10px]">Updated {formatRelativeTime(lastUpdated.toISOString())}</span>
           </div>
+
+          {/* Active Filter Clear Bar (Shown only if filtered) */}
+          {isFiltered && (
+            <div className="flex items-center justify-between gap-1.5 pt-1 text-[11px] bg-sky-500/10 border border-sky-500/20 rounded-xl px-2.5 py-1">
+              <div className="flex items-center gap-1.5 truncate">
+                <span className="text-sky-300 font-semibold">Active:</span>
+                {activeFolder !== 'all' && (
+                  <span className="text-slate-200 bg-white/10 px-1.5 py-0.5 rounded text-[10px]">
+                    {FOLDERS.find((f) => f.id === activeFolder)?.label || activeFolder}
+                  </span>
+                )}
+                {activeChannel !== 'all' && (
+                  <span className="text-slate-200 bg-white/10 px-1.5 py-0.5 rounded text-[10px]">
+                    {activeChannel}
+                  </span>
+                )}
+                {activeStatus !== 'all' && (
+                  <span className="text-slate-200 bg-white/10 px-1.5 py-0.5 rounded text-[10px]">
+                    {activeStatus}
+                  </span>
+                )}
+                {searchQuery && (
+                  <span className="text-slate-200 bg-white/10 px-1.5 py-0.5 rounded text-[10px] truncate max-w-[80px]">
+                    &quot;{searchQuery}&quot;
+                  </span>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={resetAllFilters}
+                className="text-sky-300 hover:text-white font-medium text-[10px] shrink-0 underline"
+              >
+                Clear All
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Conversation Rows */}
@@ -746,12 +1041,54 @@ export default function UnifiedInboxPage() {
           {loading ? (
             <div className="p-8 text-center text-xs text-slate-400">Loading inbox...</div>
           ) : conversations.length === 0 ? (
-            <div className="p-8 text-center space-y-2">
-              <div className="text-3xl">📭</div>
-              <p className="text-xs font-bold text-white">No conversations found</p>
-              <p className="text-[11px] text-slate-400 max-w-[200px] mx-auto">
-                Connect your communication channels or adjust your filters.
+            <div className="p-8 text-center space-y-3">
+              <div className="text-4xl">📭</div>
+              <p className="text-sm font-bold text-white">No conversations found</p>
+              <p className="text-xs text-slate-400 max-w-[260px] mx-auto leading-relaxed">
+                {isFiltered
+                  ? 'No conversations match your current filters. Try resetting filters or switching folders/channels.'
+                  : 'No conversations found in your unified inbox. Connect communication channels or start a new conversation.'}
               </p>
+
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2">
+                {isFiltered && (
+                  <button
+                    type="button"
+                    onClick={resetAllFilters}
+                    className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-semibold hover:bg-sky-500/30 transition shadow"
+                  >
+                    Reset All Filters
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setShowNewModal(true)}
+                  className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 text-white text-xs font-bold shadow transition flex items-center justify-center gap-1.5"
+                >
+                  <span>+</span>
+                  <span>New Conversation</span>
+                </button>
+
+                <Link
+                  href="/settings/integrations"
+                  className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 text-xs font-semibold transition flex items-center justify-center gap-1.5"
+                >
+                  <svg className="h-3.5 w-3.5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Connect Channels</span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => loadConversations(false)}
+                  className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 text-xs font-semibold transition"
+                >
+                  Refresh
+                </button>
+              </div>
             </div>
           ) : (
             conversations.map((conv) => {
@@ -1651,6 +1988,309 @@ export default function UnifiedInboxPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: START NEW CONVERSATION */}
+      {/* ========================================================================= */}
+      {showNewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-white/15 bg-[#073b58] p-6 shadow-2xl space-y-4 text-slate-100">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">💬</span>
+                <h3 className="text-base font-bold text-white">Start New Conversation</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowNewModal(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateConversation} className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Channel
+                </label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {[
+                    { id: 'EMAIL', label: 'Email' },
+                    { id: 'WHATSAPP', label: 'WhatsApp' },
+                    { id: 'INSTAGRAM', label: 'Instagram' },
+                    { id: 'FACEBOOK', label: 'Facebook' },
+                    { id: 'X', label: 'X (Twitter)' },
+                    { id: 'TIKTOK', label: 'TikTok' },
+                  ].map((ch) => (
+                    <button
+                      key={ch.id}
+                      type="button"
+                      onClick={() => setNewChannel(ch.id)}
+                      className={`flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl text-xs font-semibold border transition ${
+                        newChannel === ch.id
+                          ? 'bg-sky-500/25 border-sky-400 text-sky-200 shadow-sm'
+                          : 'bg-[#042a40] border-white/10 text-slate-300 hover:bg-white/5'
+                      }`}
+                    >
+                      <ChannelIcon channel={ch.id} className="h-3.5 w-3.5" />
+                      <span className="truncate">{ch.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Contact Name / Organization
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Sarah Jenkins or Acme Corp"
+                  value={newContactName}
+                  onChange={(e) => setNewContactName(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Email (Optional)
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="client@example.com"
+                    value={newContactEmail}
+                    onChange={(e) => setNewContactEmail(e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Phone / Handle
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="+1 555 0199 or @username"
+                    value={newContactPhone}
+                    onChange={(e) => setNewContactPhone(e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Subject / Topic (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Project Consultation Inquiry"
+                  value={newSubject}
+                  onChange={(e) => setNewSubject(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Initial Message (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Type an opening message..."
+                  value={newInitialMessage}
+                  onChange={(e) => setNewInitialMessage(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-[#042a40] p-3 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none resize-none"
+                />
+              </div>
+
+              <div className="pt-2 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowNewModal(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingConv}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 text-xs font-bold text-white shadow transition disabled:opacity-60"
+                >
+                  {creatingConv ? 'Creating...' : 'Start Conversation'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MOBILE DRAWER: FOLDERS & CHANNELS */}
+      {/* ========================================================================= */}
+      {showMobileSidebar && (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowMobileSidebar(false)}
+          />
+
+          {/* Drawer Sidebar */}
+          <div className="relative w-72 max-w-[85vw] bg-[#042a40] border-r border-white/10 p-4 flex flex-col h-full shadow-2xl z-10 overflow-y-auto space-y-5 animate-in slide-in-from-left duration-200">
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 text-white font-black shadow-md shadow-sky-500/25">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  </svg>
+                </span>
+                <div>
+                  <h2 className="text-sm font-bold text-white tracking-wide">Unified Inbox</h2>
+                  <p className="text-[11px] text-slate-400">Omnichannel Hub</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowMobileSidebar(false)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Quick New Conversation Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowMobileSidebar(false);
+                setShowNewModal(true);
+              }}
+              className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 text-xs font-bold text-white shadow transition flex items-center justify-center gap-1.5"
+            >
+              <span className="text-sm font-black leading-none">+</span>
+              <span>New Conversation</span>
+            </button>
+
+            {/* Folders Navigation */}
+            <div className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-2 pb-1">
+                Views
+              </p>
+
+              {FOLDERS.map((f) => {
+                const isActive = activeFolder === f.id;
+                const count = getFolderCount(f.id);
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveFolder(f.id);
+                      setShowMobileSidebar(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${
+                      isActive
+                        ? 'bg-sky-600/20 text-sky-400 border border-sky-500/30 font-semibold'
+                        : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="text-xs">{f.icon}</span>
+                      <span>{f.fullLabel}</span>
+                    </span>
+                    {count > 0 && (
+                      <span
+                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          isActive ? 'bg-sky-500 text-white' : 'bg-white/10 text-slate-300'
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Communication Channels Filter */}
+            <div className="space-y-1 pt-2 border-t border-white/10">
+              <div className="flex items-center justify-between px-2 pb-1">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  Channels
+                </p>
+                <Link
+                  href="/settings/integrations"
+                  onClick={() => setShowMobileSidebar(false)}
+                  className="text-[10px] text-sky-400 hover:text-sky-300 font-medium"
+                >
+                  Manage
+                </Link>
+              </div>
+
+              {CHANNELS.map((ch) => {
+                const isActive = activeChannel === ch.id;
+                const isConn = ch.id === 'all' || channelStatuses[ch.id]?.connected;
+                return (
+                  <button
+                    key={ch.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveChannel(ch.id);
+                      setShowMobileSidebar(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${
+                      isActive
+                        ? 'bg-sky-600/20 text-sky-400 border border-sky-500/30 font-semibold'
+                        : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2.5">
+                      {ch.id === 'all' ? (
+                        <span>🌐</span>
+                      ) : (
+                        <ChannelIcon channel={ch.id} className="h-4 w-4" />
+                      )}
+                      <span>{ch.label}</span>
+                    </span>
+                    {ch.id !== 'all' && (
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          isConn ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]' : 'bg-slate-600'
+                        }`}
+                        title={isConn ? 'Channel Connected' : 'Not Connected'}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Channel Health Footer */}
+            <div className="mt-auto pt-4 border-t border-white/10">
+              <Link
+                href="/settings/integrations"
+                onClick={() => setShowMobileSidebar(false)}
+                className="rounded-xl bg-white/5 p-3 flex items-center justify-between border border-white/5 hover:border-sky-500/30 transition group"
+              >
+                <div>
+                  <p className="text-[11px] font-bold text-white group-hover:text-sky-400 transition">
+                    Channel Integrations
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    {Object.values(channelStatuses).filter((s) => s.connected).length} of 6 Connected
+                  </p>
+                </div>
+                <span className="text-slate-400 group-hover:text-white text-xs">→</span>
+              </Link>
+            </div>
           </div>
         </div>
       )}
