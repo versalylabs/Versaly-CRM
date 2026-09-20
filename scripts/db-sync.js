@@ -1,31 +1,5 @@
 const { execSync } = require('child_process');
-
-function resolveDatabaseUrl() {
-  const candidates = [
-    process.env.PRISMA_DATABASE_POSTGRES_URL,
-    process.env.DATABASE_URL,
-    process.env.POSTGRES_PRISMA_URL,
-    process.env.POSTGRES_URL,
-    process.env.PRISMA_DATABASE_URL,
-    process.env.POSTGRES_URL_NON_POOLING,
-  ];
-
-  for (const candidate of candidates) {
-    if (typeof candidate === 'string') {
-      const trimmed = candidate.trim();
-      if (
-        trimmed.length > 5 &&
-        !trimmed.includes('username:password@hostname') &&
-        (trimmed.startsWith('postgresql://') ||
-          trimmed.startsWith('postgres://') ||
-          trimmed.startsWith('prisma+postgres://'))
-      ) {
-        return trimmed;
-      }
-    }
-  }
-  return null;
-}
+const { resolveDatabaseUrl, prepareSchema } = require('./db-prepare');
 
 async function ensureDefaultAdmins(activeUrl) {
   const { PrismaClient } = require('@prisma/client');
@@ -100,13 +74,13 @@ async function ensureDefaultAdmins(activeUrl) {
   }
 }
 
-const dbUrl = resolveDatabaseUrl();
-
 async function run() {
+  const { dbUrl } = prepareSchema();
+
   if (dbUrl) {
     process.env.DATABASE_URL = dbUrl;
     try {
-      console.log('Synchronizing database schema to live database...');
+      console.log('Synchronizing database schema to database...');
       execSync('npx prisma db push --accept-data-loss', {
         stdio: 'inherit',
         env: { ...process.env, DATABASE_URL: dbUrl },
@@ -119,10 +93,8 @@ async function run() {
       console.warn('Notice: prisma db push or admin seed failed or was skipped:', err.message);
     }
   } else {
-    console.log('No valid live database URL found at build time. Skipping auto-sync.');
+    console.log('No valid database URL found. Skipping auto-sync.');
   }
 }
 
 run();
-
-

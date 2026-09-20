@@ -7,13 +7,16 @@ type Lead = { id: string; contactName: string; companyName: string | null; email
 type Template = { id: string; name: string; subject: string; body: string; category: string | null; isActive: boolean };
 type Config = { configured: boolean; from: string | null };
 
-const input = 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-100';
+const glassInput =
+  'w-full rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
 
 function mergeTemplate(value: string, lead?: Lead | null) {
   if (!lead) return value;
   return value
     .replaceAll('{{contactName}}', lead.contactName || '')
+    .replaceAll('{{contact_name}}', lead.contactName || '')
     .replaceAll('{{companyName}}', lead.companyName || '')
+    .replaceAll('{{company}}', lead.companyName || '')
     .replaceAll('{{email}}', lead.email || '');
 }
 
@@ -35,15 +38,21 @@ export default function EmailPage() {
   const selectedLead = useMemo(() => leads.find((lead) => lead.id === form.leadId) || null, [leads, form.leadId]);
 
   const load = useCallback(async () => {
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
       const [leadRes, templateRes, configRes] = await Promise.all([
         fetch('/api/leads', { cache: 'no-store' }),
         fetch('/api/email/templates', { cache: 'no-store' }),
         fetch('/api/email/send', { cache: 'no-store' }),
       ]);
-      const [leadData, templateData, configData] = await Promise.all([leadRes.json(), templateRes.json(), configRes.json()]);
-      if (!leadRes.ok || !templateRes.ok || !configRes.ok) throw new Error(templateData.error || configData.error || 'Could not load email workspace.');
+      const [leadData, templateData, configData] = await Promise.all([
+        leadRes.json(),
+        templateRes.json(),
+        configRes.json(),
+      ]);
+      if (!leadRes.ok || !templateRes.ok || !configRes.ok)
+        throw new Error(templateData.error || configData.error || 'Could not load email workspace.');
       const nextLeads = Array.isArray(leadData) ? leadData : [];
       setLeads(nextLeads);
       setTemplates(Array.isArray(templateData) ? templateData : []);
@@ -55,10 +64,14 @@ export default function EmailPage() {
       }
     } catch (err: any) {
       setError(err.message || 'Could not load email workspace.');
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   function chooseLead(id: string) {
     const lead = leads.find((item) => item.id === id);
@@ -80,19 +93,29 @@ export default function EmailPage() {
 
   async function sendEmail(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.leadId) { setError('Please choose a lead.'); return; }
-    setSending(true); setError(''); setSuccess('');
+    if (!form.leadId) {
+      setError('Please choose a lead.');
+      return;
+    }
+    setSending(true);
+    setError('');
+    setSuccess('');
     try {
       const res = await fetch('/api/email/send', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not send email.');
       setSuccess(`Email sent to ${form.to || selectedLead?.email || 'the lead'} and logged automatically in outreach history.`);
       setForm((current) => ({ ...current, subject: '', content: '' }));
       setSelectedTemplateId('');
-    } catch (err: any) { setError(err.message || 'Could not send email.'); }
-    finally { setSending(false); }
+    } catch (err: any) {
+      setError(err.message || 'Could not send email.');
+    } finally {
+      setSending(false);
+    }
   }
 
   function openNewTemplate() {
@@ -103,22 +126,37 @@ export default function EmailPage() {
 
   function openEditTemplate(template: Template) {
     setEditingTemplate(template);
-    setTemplateForm({ name: template.name, subject: template.subject, body: template.body, category: template.category || '' });
+    setTemplateForm({
+      name: template.name,
+      subject: template.subject,
+      body: template.body,
+      category: template.category || '',
+    });
     setShowTemplateForm(true);
   }
 
   async function saveTemplate(e: React.FormEvent) {
     e.preventDefault();
-    setSavingTemplate(true); setError('');
+    setSavingTemplate(true);
+    setError('');
     try {
       const url = editingTemplate ? `/api/email/templates/${editingTemplate.id}` : '/api/email/templates';
       const method = editingTemplate ? 'PATCH' : 'POST';
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(templateForm) });
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(templateForm),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not save template.');
-      setShowTemplateForm(false); setEditingTemplate(null); await load();
-    } catch (err: any) { setError(err.message || 'Could not save template.'); }
-    finally { setSavingTemplate(false); }
+      setShowTemplateForm(false);
+      setEditingTemplate(null);
+      await load();
+    } catch (err: any) {
+      setError(err.message || 'Could not save template.');
+    } finally {
+      setSavingTemplate(false);
+    }
   }
 
   async function deleteTemplate(template: Template) {
@@ -129,33 +167,344 @@ export default function EmailPage() {
       if (!res.ok) throw new Error(data.error || 'Could not delete template.');
       if (selectedTemplateId === template.id) setSelectedTemplateId('');
       await load();
-    } catch (err: any) { setError(err.message || 'Could not delete template.'); }
+    } catch (err: any) {
+      setError(err.message || 'Could not delete template.');
+    }
   }
 
-  return <div className="min-h-screen bg-gray-50"><div className="container-custom py-8 !max-w-none">
-    <div className="mb-7 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between"><div><h1 className="text-2xl font-bold text-gray-800">Email Workspace</h1><p className="mt-1 text-sm text-gray-500">Send CRM emails, reuse templates, and automatically keep every sent message in the lead timeline.</p></div><Link href="/outreach" className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">View Unified History</Link></div>
+  return (
+    <div className="min-h-screen bg-[#053048] text-slate-100">
+      <div className="container-custom py-8 space-y-8">
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">Communication Suite</span>
+            </div>
+            <h1 className="mt-1 text-3xl font-extrabold text-white tracking-tight">Email Workspace</h1>
+            <p className="text-sm text-slate-400 mt-1">
+              Compose client outreach, manage reusable email templates, and auto-sync delivery history.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/outreach"
+              className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-200 hover:text-white transition flex items-center gap-1.5"
+            >
+              <span>📜</span>
+              <span>Unified History</span>
+            </Link>
+          </div>
+        </div>
 
-    {error && <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
-    {success && <div className="mb-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{success}</div>}
-    {!config.configured && <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-5"><h2 className="font-semibold text-amber-900">Email delivery needs SMTP configuration</h2><p className="mt-1 text-sm text-amber-800">The workspace is ready, but sending is disabled until SMTP credentials are added to your environment. Configure SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_SECURE, and SMTP_FROM, then restart the server.</p></div>}
-    {config.configured && <div className="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">Email delivery is connected. Messages will be sent from <strong>{config.from}</strong>.</div>}
+        {/* Notifications & System Alerts (Liquid Glass) */}
+        {error && (
+          <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs text-rose-200">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-xs text-emerald-200">
+            {success}
+          </div>
+        )}
 
-    {loading ? <div className="rounded-xl bg-white p-10 text-center text-sm text-gray-500 shadow-soft">Loading email workspace...</div> : <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
-      <section className="rounded-xl bg-white p-6 shadow-soft"><div className="mb-6"><h2 className="text-lg font-semibold text-gray-900">Compose Email</h2><p className="mt-1 text-sm text-gray-500">Select a lead, optionally apply a template, and send.</p></div>
-        <form onSubmit={sendEmail} className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2"><div><label className="mb-1 block text-sm font-medium text-gray-700">Lead</label><select required className={input} value={form.leadId} onChange={(e) => chooseLead(e.target.value)}><option value="">Select a lead...</option>{leads.map((lead) => <option key={lead.id} value={lead.id}>{lead.contactName}{lead.companyName ? ` — ${lead.companyName}` : ''}</option>)}</select></div><div><label className="mb-1 block text-sm font-medium text-gray-700">Template</label><select className={input} value={selectedTemplateId} onChange={(e) => applyTemplate(e.target.value)}><option value="">Start from scratch</option>{templates.filter((template) => template.isActive).map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}</select></div></div>
-          <div><label className="mb-1 block text-sm font-medium text-gray-700">To</label><input required type="email" className={input} value={form.to} onChange={(e) => setForm({ ...form, to: e.target.value })} placeholder="recipient@example.com" /></div>
-          <div><label className="mb-1 block text-sm font-medium text-gray-700">Subject</label><input required className={input} value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} placeholder="Email subject" /></div>
-          <div><label className="mb-1 block text-sm font-medium text-gray-700">Message</label><textarea required rows={12} className={input} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} placeholder="Write your message..." /></div>
-          <div className="flex items-center justify-between gap-4"><p className="text-xs text-gray-400">Template variables: <code>{'{{contactName}}'}</code>, <code>{'{{companyName}}'}</code>, <code>{'{{email}}'}</code></p><button disabled={sending || !config.configured} className="btn-primary disabled:cursor-not-allowed disabled:opacity-50">{sending ? 'Sending...' : 'Send & Log Email'}</button></div>
-        </form>
-      </section>
+        {!config.configured && (
+          <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-b from-amber-500/10 to-amber-950/20 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3)] backdrop-blur-xl">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
+            <h2 className="font-bold text-amber-300 text-sm flex items-center gap-2">
+              <span>⚠️</span>
+              <span>Email Delivery Needs SMTP Configuration</span>
+            </h2>
+            <p className="mt-1 text-xs text-amber-200/80 leading-relaxed">
+              The email template engine and composer are fully active. Live delivery is simulated or staged until production SMTP credentials (SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD) are set in your environment.
+            </p>
+          </div>
+        )}
 
-      <aside className="rounded-xl bg-white p-6 shadow-soft"><div className="mb-5 flex items-center justify-between"><div><h2 className="text-lg font-semibold text-gray-900">Email Templates</h2><p className="mt-1 text-sm text-gray-500">Reusable messaging for your team.</p></div><button onClick={openNewTemplate} className="btn-primary">+ New</button></div>
-        <div className="space-y-3">{templates.length ? templates.map((template) => <div key={template.id} className="rounded-xl border border-gray-200 p-4"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="font-medium text-gray-900">{template.name}</p><p className="mt-1 truncate text-sm text-gray-500">{template.subject}</p>{template.category && <span className="mt-2 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600">{template.category}</span>}</div><div className="flex gap-2"><button onClick={() => { applyTemplate(template.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="rounded-lg border px-2 py-1 text-xs">Use</button><button onClick={() => openEditTemplate(template)} className="rounded-lg border px-2 py-1 text-xs">Edit</button><button onClick={() => deleteTemplate(template)} className="rounded-lg border border-red-100 px-2 py-1 text-xs text-red-600">Delete</button></div></div></div>) : <div className="rounded-xl border border-dashed border-gray-300 p-8 text-center text-sm text-gray-500">No templates yet. Create one for introductions, follow-ups, proposals, or nurture emails.</div>}</div>
-      </aside>
-    </div>}
+        {config.configured && (
+          <div className="relative overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-b from-emerald-500/10 to-emerald-950/20 p-4 backdrop-blur-xl text-xs text-emerald-200 flex items-center gap-2">
+            <span>✓</span>
+            <span>
+              Connected to SMTP server. Outbound messages will be sent from <strong className="text-white">{config.from}</strong>.
+            </span>
+          </div>
+        )}
 
-    {showTemplateForm && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"><div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white p-6 shadow-xl"><div className="mb-5 flex items-center justify-between"><h2 className="text-lg font-semibold text-gray-900">{editingTemplate ? 'Edit Email Template' : 'New Email Template'}</h2><button onClick={() => setShowTemplateForm(false)} className="text-2xl leading-none text-gray-400">×</button></div><form onSubmit={saveTemplate} className="space-y-4"><div className="grid gap-4 md:grid-cols-2"><div><label className="mb-1 block text-sm font-medium">Template name</label><input required className={input} value={templateForm.name} onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })} /></div><div><label className="mb-1 block text-sm font-medium">Category</label><input className={input} value={templateForm.category} onChange={(e) => setTemplateForm({ ...templateForm, category: e.target.value })} placeholder="e.g. Follow-up" /></div></div><div><label className="mb-1 block text-sm font-medium">Subject</label><input required className={input} value={templateForm.subject} onChange={(e) => setTemplateForm({ ...templateForm, subject: e.target.value })} /></div><div><label className="mb-1 block text-sm font-medium">Message</label><textarea required rows={12} className={input} value={templateForm.body} onChange={(e) => setTemplateForm({ ...templateForm, body: e.target.value })} /><p className="mt-2 text-xs text-gray-400">Use {'{{contactName}}'}, {'{{companyName}}'}, and {'{{email}}'} for personalization.</p></div><div className="flex justify-end gap-3"><button type="button" onClick={() => setShowTemplateForm(false)} className="rounded-lg border px-4 py-2 text-sm">Cancel</button><button disabled={savingTemplate} className="btn-primary disabled:opacity-50">{savingTemplate ? 'Saving...' : 'Save Template'}</button></div></form></div></div>}
-  </div></div>;
+        {/* Main Grid: Composer + Templates Library */}
+        {loading ? (
+          <div className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-[#073652]/70 p-12 text-center text-xs text-slate-400 backdrop-blur-xl">
+            <div className="text-2xl animate-pulse">✉️</div>
+            <p className="mt-2">Loading email workspace & templates...</p>
+          </div>
+        ) : (
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(340px,0.7fr)]">
+            {/* Compose Email Panel (React Bits Liquid Glass) */}
+            <section className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
+
+              <div>
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <span>✉️</span>
+                  <span>Compose Email</span>
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">Select a lead, optionally apply a template, and send.</p>
+              </div>
+
+              <form onSubmit={sendEmail} className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-300">Lead *</label>
+                    <select
+                      required
+                      className={glassInput}
+                      value={form.leadId}
+                      onChange={(e) => chooseLead(e.target.value)}
+                    >
+                      <option value="">Select a lead...</option>
+                      {leads.map((lead) => (
+                        <option key={lead.id} value={lead.id} className="bg-[#053048] text-white">
+                          {lead.contactName}
+                          {lead.companyName ? ` — ${lead.companyName}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-300">Apply Template</label>
+                    <select
+                      className={glassInput}
+                      value={selectedTemplateId}
+                      onChange={(e) => applyTemplate(e.target.value)}
+                    >
+                      <option value="">Start from scratch</option>
+                      {templates
+                        .filter((template) => template.isActive)
+                        .map((template) => (
+                          <option key={template.id} value={template.id} className="bg-[#053048] text-white">
+                            {template.name} ({template.category || 'General'})
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-slate-300">Recipient Email *</label>
+                  <input
+                    required
+                    type="email"
+                    className={glassInput}
+                    value={form.to}
+                    onChange={(e) => setForm({ ...form, to: e.target.value })}
+                    placeholder="recipient@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-slate-300">Subject Line *</label>
+                  <input
+                    required
+                    className={glassInput}
+                    value={form.subject}
+                    onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                    placeholder="e.g. Exploring strategic synergies between our companies"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-slate-300">Message Body *</label>
+                  <textarea
+                    required
+                    rows={10}
+                    className={`${glassInput} resize-none font-mono text-xs`}
+                    value={form.content}
+                    onChange={(e) => setForm({ ...form, content: e.target.value })}
+                    placeholder="Write your email here..."
+                  />
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-white/10">
+                  <p className="text-[11px] text-slate-400">
+                    Variables: <code className="text-cyan-300">{'{{contactName}}'}</code>,{' '}
+                    <code className="text-cyan-300">{'{{companyName}}'}</code>,{' '}
+                    <code className="text-cyan-300">{'{{email}}'}</code>
+                  </p>
+                  <button
+                    disabled={sending || !config.configured}
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 text-white font-bold text-xs shadow-lg shadow-sky-500/20 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {sending ? 'Sending...' : '🚀 Send & Log Email'}
+                  </button>
+                </div>
+              </form>
+            </section>
+
+            {/* Email Templates Sidebar (Liquid Glass Panel) */}
+            <aside className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-base font-bold text-white flex items-center gap-2">
+                    <span>📑</span>
+                    <span>Email Templates</span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">Reusable B2B templates ({templates.length}).</p>
+                </div>
+                <button
+                  onClick={openNewTemplate}
+                  className="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs shadow transition"
+                >
+                  + New
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {templates.length ? (
+                  templates.map((template) => (
+                    <div
+                      key={template.id}
+                      className="group relative overflow-hidden rounded-xl border border-white/[0.08] hover:border-sky-400/40 bg-[#042438]/60 hover:bg-[#042438]/90 p-4 transition-all duration-200"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-white text-xs group-hover:text-cyan-200 transition">
+                            {template.name}
+                          </p>
+                          <p className="mt-1 truncate text-[11px] text-slate-400">{template.subject}</p>
+                          {template.category && (
+                            <span className="mt-2 inline-block rounded-md border border-cyan-400/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-300">
+                              {template.category}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            onClick={() => {
+                              applyTemplate(template.id);
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 px-2.5 py-1 text-[11px] font-medium text-slate-200 hover:text-white transition"
+                          >
+                            Use
+                          </button>
+                          <button
+                            onClick={() => openEditTemplate(template)}
+                            className="rounded-lg border border-sky-400/30 bg-sky-500/15 hover:bg-sky-500/25 px-2.5 py-1 text-[11px] font-medium text-sky-200 hover:text-white transition"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => deleteTemplate(template)}
+                            className="rounded-lg border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 px-2.5 py-1 text-[11px] font-medium text-rose-300 hover:text-rose-200 transition"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-xl border border-dashed border-white/10 p-8 text-center text-xs text-slate-400">
+                    No templates found. Click + New to add your first template.
+                  </div>
+                )}
+              </div>
+            </aside>
+          </div>
+        )}
+
+        {/* Liquid Glass Modal for Creating / Editing Templates */}
+        {showTemplateForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+            <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/[0.14] bg-gradient-to-b from-[#073652] via-[#062c44] to-[#042438] p-6 shadow-[0_16px_48px_rgba(0,0,0,0.6)] backdrop-blur-2xl space-y-5">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent" />
+
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <span>{editingTemplate ? '✏️' : '✨'}</span>
+                  <span>{editingTemplate ? 'Edit Email Template' : 'New Email Template'}</span>
+                </h2>
+                <button
+                  onClick={() => setShowTemplateForm(false)}
+                  className="text-lg text-slate-400 hover:text-white transition leading-none px-2 py-1 rounded-lg"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={saveTemplate} className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-300">Template Name *</label>
+                    <input
+                      required
+                      className={glassInput}
+                      value={templateForm.name}
+                      onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
+                      placeholder="e.g. Strategic Introduction"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-slate-300">Category</label>
+                    <input
+                      className={glassInput}
+                      value={templateForm.category}
+                      onChange={(e) => setTemplateForm({ ...templateForm, category: e.target.value })}
+                      placeholder="e.g. Outreach, Follow-up, Retention"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-slate-300">Subject Line *</label>
+                  <input
+                    required
+                    className={glassInput}
+                    value={templateForm.subject}
+                    onChange={(e) => setTemplateForm({ ...templateForm, subject: e.target.value })}
+                    placeholder="e.g. Quick check-in for {{companyName}}"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-slate-300">Message Body *</label>
+                  <textarea
+                    required
+                    rows={10}
+                    className={`${glassInput} resize-none font-mono text-xs`}
+                    value={templateForm.body}
+                    onChange={(e) => setTemplateForm({ ...templateForm, body: e.target.value })}
+                  />
+                  <p className="mt-1.5 text-[11px] text-slate-400">
+                    Use <code className="text-cyan-300">{'{{contactName}}'}</code>,{' '}
+                    <code className="text-cyan-300">{'{{companyName}}'}</code>, and{' '}
+                    <code className="text-cyan-300">{'{{email}}'}</code> for auto-personalization.
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-3 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setShowTemplateForm(false)}
+                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-300 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    disabled={savingTemplate}
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 text-white font-bold text-xs shadow transition disabled:opacity-50"
+                  >
+                    {savingTemplate ? 'Saving...' : 'Save Template'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }

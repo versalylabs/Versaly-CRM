@@ -18,6 +18,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const count = await prisma.proposal.count();
+    if (count >= 4) {
+      return NextResponse.json(
+        { error: "Maximum limit of 4 proposal templates reached. You can only edit existing templates or delete one to add a new one." },
+        { status: 400 }
+      );
+    }
     const body = await request.json();
     if (!body.leadId || !body.title?.trim()) {
       return NextResponse.json({ error: "Lead and proposal title are required" }, { status: 400 });

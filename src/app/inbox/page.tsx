@@ -2,25 +2,37 @@
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrency } from '@/lib/currency';
+import { CANNED_RESPONSES, generateSmartReplySuggestions } from '@/lib/inbox-shared';
 
 interface ConversationItem {
   id: string;
-  leadId: string;
+  leadId: string | null;
+  contactName: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  contactHandle: string | null;
   channel: string;
+  primaryChannel?: string | null;
   status: string;
+  priority: string;
   subject: string | null;
   lastMessageAt: string;
   lastMessageSnippet: string | null;
   unreadCount: number;
+  isStarred: boolean;
+  isArchived: boolean;
+  isClosed: boolean;
   assignedToId: string | null;
   assignedTo?: {
     id: string;
     name: string | null;
     email: string;
+    image?: string | null;
   } | null;
-  lead: {
+  lead?: {
     id: string;
     contactName: string;
     companyName: string | null;
@@ -33,120 +45,179 @@ interface ConversationItem {
     pipelineStage: string;
     outreachStatus: string;
     dealValue: number | null;
+    lastContact?: string | null;
+    location?: string | null;
+    notes?: string | null;
     aiInsight?: {
       sentimentScore: number;
       sentimentLabel: string;
       winProbability: number;
       churnRisk: string;
     } | null;
-  };
+    customerSuccess?: {
+      lifecycleStage: string;
+      healthScore: number;
+      healthStatus: string;
+      renewalDate: string | null;
+      renewalValue: number | null;
+    } | null;
+    tasks?: Array<{
+      id: string;
+      title: string;
+      dueDate: string | null;
+      completed: boolean;
+      priority: string;
+    }>;
+    proposals?: Array<{
+      id: string;
+      title: string;
+      value: number | null;
+      status: string;
+    }>;
+    activityEvents?: Array<{
+      id: string;
+      action: string;
+      createdAt: string;
+    }>;
+  } | null;
 }
 
 interface MessageItem {
   id: string;
   conversationId: string;
-  senderType: 'AGENT' | 'LEAD' | 'SYSTEM' | 'AI_COPILOT';
+  direction?: 'INBOUND' | 'OUTBOUND';
+  senderType: string;
   senderId: string | null;
   senderName: string | null;
   channel: string;
   content: string;
+  contentType?: string;
   isInternal: boolean;
+  deliveryStatus?: string;
   status: string;
   sentAt: string;
+  metadata?: any;
 }
 
-interface SmartReplySuggestion {
-  id: string;
-  label: string;
-  text: string;
-  channel: 'EMAIL' | 'WHATSAPP' | 'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK' | 'X';
-}
-
-interface ConnectedAccount {
-  id: string;
+interface ChannelStatus {
   channel: string;
-  accountName: string;
-  accountHandle: string;
-  externalAccountId?: string | null;
-  status: string;
-  avatarUrl?: string | null;
-  hasAccessToken?: boolean;
-  hasAppSecret?: boolean;
-  webhookSecret?: string | null;
-  connectedAt: string;
+  connected: boolean;
+  status: 'CONNECTED' | 'DISCONNECTED' | 'ERROR' | 'PENDING';
+  displayName: string;
+  accountName?: string;
+  accountHandle?: string;
 }
 
-const CANNED_RESPONSES = [
-  {
-    id: 'intro',
-    title: 'Warm Discovery Introduction',
-    content: 'Hi {{name}}, thanks for reaching out! We would love to learn more about your goals at {{company}} and see how Versaly CRM can streamline your sales pipeline. When would be a good time for a brief 15-minute introductory call?',
-  },
-  {
-    id: 'pricing',
-    title: 'Standard Pricing & Tiers',
-    content: 'Hi {{name}}, here is a quick overview of our plans. Our Growth Pro plan includes unlimited pipeline tracking, automated cadences, and AI deal intelligence. Let us know if you would like a customized quote for {{company}}.',
-  },
-  {
-    id: 'calendar',
-    title: 'Calendar Booking Link',
-    content: 'Hi {{name}}, please feel free to pick a convenient slot directly on my calendar here: https://calendar.versaly.io/sync. Looking forward to our conversation!',
-  },
-  {
-    id: 'followup',
-    title: 'Gentle Value Follow-Up',
-    content: 'Hi {{name}}, following up on our previous note. We have some exciting updates that can help {{company}} accelerate conversions this quarter. Are you available for a quick touchpoint this week?',
-  },
-];
+// Brand monochrome SVG Icons
+const ChannelIcon = ({ channel, className = 'h-4 w-4' }: { channel: string; className?: string }) => {
+  const c = (channel || 'EMAIL').toUpperCase();
+  if (c === 'WHATSAPP') {
+    return (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+      </svg>
+    );
+  }
+  if (c === 'INSTAGRAM') {
+    return (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+        <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+      </svg>
+    );
+  }
+  if (c === 'FACEBOOK') {
+    return (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
+      </svg>
+    );
+  }
+  if (c === 'X') {
+    return (
+      <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+      </svg>
+    );
+  }
+  if (c === 'TIKTOK') {
+    return (
+      <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.97-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+      </svg>
+    );
+  }
+  if (c === 'INTERNAL_NOTE') {
+    return (
+      <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
+    );
+  }
+  // Default EMAIL
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
+  );
+};
 
 export default function UnifiedInboxPage() {
+  const { data: session } = useSession();
+
+  // Primary State
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
-  const [counts, setCounts] = useState({ all: 0, unread: 0, open: 0, waiting: 0, closed: 0 });
+  const [counts, setCounts] = useState({
+    all: 0,
+    unread: 0,
+    assignedToMe: 0,
+    unassigned: 0,
+    starred: 0,
+    archived: 0,
+    closed: 0,
+  });
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [selectedConversation, setSelectedConversation] = useState<any | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<ConversationItem | null>(null);
   const [messages, setMessages] = useState<MessageItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const [smartReplies, setSmartReplies] = useState<SmartReplySuggestion[]>([]);
+  const [channelStatuses, setChannelStatuses] = useState<Record<string, ChannelStatus>>({});
+  const [teamMembers, setTeamMembers] = useState<Array<{ id: string; name: string | null; email: string }>>([]);
 
-  // Folder & Channel filter
-  const [activeFolder, setActiveFolder] = useState<'all' | 'unread' | 'open' | 'waiting' | 'closed'>('all');
-  const [activeChannel, setActiveChannel] = useState<'all' | 'EMAIL' | 'WHATSAPP' | 'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK' | 'X'>('all');
+  // Filters & Search
+  const [activeFolder, setActiveFolder] = useState<string>('all');
+  const [activeChannel, setActiveChannel] = useState<string>('all');
+  const [activeStatus, setActiveStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   // Composer State
   const [composerMode, setComposerMode] = useState<'REPLY' | 'INTERNAL_NOTE'>('REPLY');
-  const [composerChannel, setComposerChannel] = useState<'EMAIL' | 'WHATSAPP' | 'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK' | 'X'>('EMAIL');
+  const [composerChannel, setComposerChannel] = useState<string>('EMAIL');
   const [composerSubject, setComposerSubject] = useState('');
   const [composerContent, setComposerContent] = useState('');
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [composerError, setComposerError] = useState<string | null>(null);
+  const [draftSaved, setDraftSaved] = useState(false);
 
-  // Connected Accounts State
-  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([]);
-  const [showConnectModal, setShowConnectModal] = useState(false);
-  const [activeConnectTab, setActiveConnectTab] = useState<'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK' | 'X'>('INSTAGRAM');
-  const [connectHandle, setConnectHandle] = useState('');
-  const [connectAccountName, setConnectAccountName] = useState('');
-  const [connectAppId, setConnectAppId] = useState('');
-  const [connectAccessToken, setConnectAccessToken] = useState('');
-  const [connectAppSecret, setConnectAppSecret] = useState('');
-  const [connectWebhookSecret, setConnectWebhookSecret] = useState('');
-  const [connecting, setConnecting] = useState(false);
-  const [connectStatusMsg, setConnectStatusMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
-
-  // New Conversation Modal State
+  // Modals & Panels
+  const [showIntelPanel, setShowIntelPanel] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
-  const [workspaceLeads, setWorkspaceLeads] = useState<any[]>([]);
-  const [newLeadId, setNewLeadId] = useState('');
-  const [newChannel, setNewChannel] = useState<'EMAIL' | 'WHATSAPP' | 'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK' | 'X'>('EMAIL');
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [showConvertModal, setShowConvertModal] = useState(false);
+  const [mobileView, setMobileView] = useState<'LIST' | 'CHAT' | 'INTEL'>('LIST');
 
-  // Simulation State
-  const [showSimulateModal, setShowSimulateModal] = useState(false);
-  const [simulateText, setSimulateText] = useState('Hi! Just reviewed your proposal and we would like to proceed with the discovery call.');
-  const [simulateChannel, setSimulateChannel] = useState<'WHATSAPP' | 'EMAIL' | 'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK' | 'X'>('WHATSAPP');
+  // Task follow-up form state
+  const [taskTitle, setTaskTitle] = useState('');
+  const [taskDueDate, setTaskDueDate] = useState('');
+  const [taskPriority, setTaskPriority] = useState('medium');
+  const [creatingTask, setCreatingTask] = useState(false);
 
-  // Mobile View state (THREADS | CHAT | CHANNELS)
-  const [mobileView, setMobileView] = useState<'THREADS' | 'CHAT' | 'CHANNELS'>('THREADS');
+  // New Lead conversion form state
+  const [convertCompanyName, setConvertCompanyName] = useState('');
+  const [convertingLead, setConvertingLead] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -154,93 +225,100 @@ export default function UnifiedInboxPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // 1. Load Connected Channel Accounts
-  const loadConnectedAccounts = useCallback(async () => {
+  // 1. Fetch Channel Statuses & Team Members
+  const loadChannelStatuses = useCallback(async () => {
     try {
       const res = await fetch('/api/inbox/channels', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
-        setConnectedAccounts(data.accounts || []);
+        const map: Record<string, ChannelStatus> = {};
+        (data.channels || []).forEach((c: ChannelStatus) => {
+          map[c.channel] = c;
+        });
+        setChannelStatuses(map);
       }
-    } catch (err) {
-      console.error('Failed to load connected channels:', err);
+    } catch (e) {
+      console.error('Failed to load channel statuses:', e);
     }
   }, []);
 
-  // 2. Load Conversations List
-  const loadConversations = useCallback(async (selectFirst = false) => {
+  const loadTeamMembers = useCallback(async () => {
     try {
-      setLoading(true);
-      const res = await fetch('/api/inbox/conversations', { cache: 'no-store' });
-      if (!res.ok) throw new Error('Failed to load conversations');
-      const data = await res.json();
-      setConversations(data.conversations || []);
-      setCounts(data.counts || { all: 0, unread: 0, open: 0, waiting: 0, closed: 0 });
-
-      if (selectFirst && data.conversations?.length > 0 && !selectedId) {
-        setSelectedId(data.conversations[0].id);
+      const res = await fetch('/api/admin/users', { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        setTeamMembers(data.users || []);
       }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+    } catch {
+      // Non-blocking
     }
-  }, [selectedId]);
+  }, []);
 
-  // 3. Load Single Conversation Details & Messages
+  // 2. Fetch Conversations
+  const loadConversations = useCallback(
+    async (selectFirst = false) => {
+      try {
+        setLoading(true);
+        const params = new URLSearchParams();
+        if (activeFolder !== 'all') params.set('folder', activeFolder);
+        if (activeChannel !== 'all') params.set('channel', activeChannel);
+        if (activeStatus !== 'all') params.set('status', activeStatus);
+        if (searchQuery.trim()) params.set('query', searchQuery.trim());
+
+        const res = await fetch(`/api/inbox/conversations?${params.toString()}`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          setConversations(data.conversations || []);
+          if (data.counts) setCounts(data.counts);
+          setLastUpdated(new Date());
+
+          if (selectFirst && data.conversations?.length > 0 && !selectedId) {
+            setSelectedId(data.conversations[0].id);
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load conversations:', e);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [activeFolder, activeChannel, activeStatus, searchQuery, selectedId]
+  );
+
+  // 3. Fetch Specific Conversation Details & Messages
   const loadConversationDetails = useCallback(async (id: string) => {
     try {
       setMessagesLoading(true);
-      const [res, repliesRes] = await Promise.all([
-        fetch(`/api/inbox/conversations/${id}`, { cache: 'no-store' }),
-        fetch(`/api/inbox/conversations/${id}/smart-replies`, { cache: 'no-store' }),
-      ]);
-
+      const res = await fetch(`/api/inbox/conversations/${id}`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setSelectedConversation(data.conversation);
-        setMessages(data.conversation?.messages || []);
+        setMessages(data.conversation.messages || []);
+        setComposerChannel(data.conversation.channel || 'EMAIL');
+        setComposerSubject(data.conversation.subject || '');
+        setComposerError(null);
 
-        const validChannels = ['EMAIL', 'WHATSAPP', 'INSTAGRAM', 'FACEBOOK', 'TIKTOK', 'X'];
-        if (validChannels.includes(data.conversation?.channel)) {
-          setComposerChannel(data.conversation.channel as any);
-        } else {
-          setComposerChannel('EMAIL');
-        }
-        setComposerSubject(data.conversation?.subject || '');
+        // Update unread count in local state
+        setConversations((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, unreadCount: 0 } : c))
+        );
       }
-
-      if (repliesRes.ok) {
-        const repliesData = await repliesRes.json();
-        setSmartReplies(repliesData.suggestions || []);
-      }
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error('Failed to load conversation details:', e);
     } finally {
       setMessagesLoading(false);
     }
   }, []);
 
-  // 4. Load Leads for New Thread Picker
-  const loadWorkspaceLeads = async () => {
-    try {
-      const res = await fetch('/api/leads', { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        setWorkspaceLeads(data.leads || []);
-        if (data.leads?.length > 0 && !newLeadId) {
-          setNewLeadId(data.leads[0].id);
-        }
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // Initial Load
+  useEffect(() => {
+    loadChannelStatuses();
+    loadTeamMembers();
+  }, [loadChannelStatuses, loadTeamMembers]);
 
   useEffect(() => {
     loadConversations(true);
-    loadConnectedAccounts();
-  }, [loadConversations, loadConnectedAccounts]);
+  }, [loadConversations]);
 
   useEffect(() => {
     if (selectedId) {
@@ -252,1502 +330,1330 @@ export default function UnifiedInboxPage() {
     scrollToBottom();
   }, [messages]);
 
-  // Real-time live polling synchronization (every 4 seconds)
-  useEffect(() => {
-    const timer = setInterval(async () => {
-      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
-        try {
-          const res = await fetch('/api/inbox/conversations', { cache: 'no-store' });
-          if (res.ok) {
-            const data = await res.json();
-            setConversations(data.conversations || []);
-            setCounts(data.counts || { all: 0, unread: 0, open: 0, waiting: 0, closed: 0 });
-          }
-
-          if (selectedId) {
-            const detailRes = await fetch(`/api/inbox/conversations/${selectedId}`, { cache: 'no-store' });
-            if (detailRes.ok) {
-              const detailData = await detailRes.json();
-              if (detailData.conversation?.messages) {
-                setMessages(detailData.conversation.messages);
-              }
-            }
-          }
-        } catch (e) {
-          // Silent catch for background polling
-        }
-      }
-    }, 4000);
-
-    return () => clearInterval(timer);
-  }, [selectedId]);
-
-  // Send Message or Internal Note
+  // Send Message / Note
   const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!selectedId || !composerContent.trim() || sending) return;
 
-    try {
-      setSending(true);
-      const isInternal = composerMode === 'INTERNAL_NOTE';
-      const channel = isInternal ? 'INTERNAL_NOTE' : composerChannel;
+    setSending(true);
+    setComposerError(null);
 
+    const isNote = composerMode === 'INTERNAL_NOTE';
+    const channelToUse = isNote ? 'INTERNAL_NOTE' : composerChannel;
+
+    try {
       const res = await fetch(`/api/inbox/conversations/${selectedId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          channel,
-          content: composerContent,
-          subject: composerSubject,
-          isInternal,
+          channel: channelToUse,
+          content: composerContent.trim(),
+          subject: composerSubject.trim() || undefined,
+          isInternal: isNote,
         }),
       });
 
-      if (!res.ok) throw new Error('Failed to send message');
       const data = await res.json();
+      if (!res.ok) {
+        setComposerError(data.error || 'Failed to dispatch message');
+        setSending(false);
+        return;
+      }
 
-      setMessages((prev) => [...prev, data.message]);
+      // Add to messages list immediately
+      if (data.message) {
+        setMessages((prev) => [...prev, data.message]);
+      }
+
       setComposerContent('');
-      await loadConversations(false);
-    } catch (err) {
-      console.error(err);
+      setComposerSubject('');
+      setDraftSaved(false);
+
+      // Refresh list snippet
+      loadConversations(false);
+    } catch (err: any) {
+      setComposerError(err.message || 'Network error sending message');
     } finally {
       setSending(false);
     }
   };
 
-  // Simulate Inbound Customer Message
-  const handleSimulateInbound = async () => {
-    if (!selectedId || !simulateText.trim()) return;
-
-    try {
-      const res = await fetch('/api/inbox/simulate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          conversationId: selectedId,
-          content: simulateText,
-          channel: simulateChannel,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setMessages((prev) => [...prev, data.message]);
-        setShowSimulateModal(false);
-        await loadConversations(false);
-        if (selectedId) {
-          loadConversationDetails(selectedId);
-        }
-      }
-    } catch (err) {
-      console.error(err);
+  // Toggle Star
+  const handleToggleStar = async (convId: string, currentStarred: boolean) => {
+    const nextStarred = !currentStarred;
+    setConversations((prev) =>
+      prev.map((c) => (c.id === convId ? { ...c, isStarred: nextStarred } : c))
+    );
+    if (selectedConversation?.id === convId) {
+      setSelectedConversation((prev) => (prev ? { ...prev, isStarred: nextStarred } : null));
     }
-  };
-
-  // Toggle Conversation Status (Open <-> Closed)
-  const handleToggleStatus = async (newStatus: string) => {
-    if (!selectedId) return;
 
     try {
-      const res = await fetch(`/api/inbox/conversations/${selectedId}`, {
+      await fetch(`/api/inbox/conversations/${convId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ isStarred: nextStarred }),
       });
-
-      if (res.ok) {
-        setSelectedConversation((prev: any) => ({ ...prev, status: newStatus }));
-        await loadConversations(false);
-      }
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error('Failed to update star state:', e);
     }
   };
 
-  // Connect Channel Account (Quick OAuth or Manual)
-  const handleConnectChannel = async (quickAuth = false) => {
+  // Change Status
+  const handleStatusChange = async (convId: string, newStatus: string) => {
     try {
-      setConnecting(true);
-      setConnectStatusMsg(null);
-
-      const fallbackHandle = quickAuth
-        ? activeConnectTab === 'INSTAGRAM'
-          ? '@versalylabs'
-          : activeConnectTab === 'FACEBOOK'
-          ? 'Versaly Agency Official'
-          : activeConnectTab === 'TIKTOK'
-          ? '@versalylabs_agency'
-          : '@versalylabs'
-        : connectHandle;
-
-      if (!fallbackHandle.trim()) {
-        setConnectStatusMsg({ text: 'Please enter an account handle or username', type: 'error' });
-        return;
+      const res = await fetch(`/api/inbox/conversations/${convId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus, isClosed: newStatus === 'CLOSED' }),
+      });
+      if (res.ok) {
+        setSelectedConversation((prev) => (prev ? { ...prev, status: newStatus } : null));
+        loadConversations(false);
       }
+    } catch (e) {
+      console.error('Failed to update conversation status:', e);
+    }
+  };
 
-      const payload = {
-        channel: activeConnectTab,
-        accountHandle: fallbackHandle,
-        accountName: connectAccountName || `${fallbackHandle} (${activeConnectTab})`,
-        appId: connectAppId || (quickAuth ? `app_${activeConnectTab.toLowerCase()}_live` : undefined),
-        accessToken: connectAccessToken || (quickAuth ? `token_live_${activeConnectTab.toLowerCase()}_${Math.random().toString(36).substring(2, 12)}` : undefined),
-        appSecret: connectAppSecret || (quickAuth ? `sec_${Math.random().toString(36).substring(2, 10)}` : undefined),
-        webhookSecret: connectWebhookSecret || undefined,
-      };
+  // Change Priority
+  const handlePriorityChange = async (convId: string, newPriority: string) => {
+    try {
+      const res = await fetch(`/api/inbox/conversations/${convId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priority: newPriority }),
+      });
+      if (res.ok) {
+        setSelectedConversation((prev) => (prev ? { ...prev, priority: newPriority } : null));
+        setConversations((prev) =>
+          prev.map((c) => (c.id === convId ? { ...c, priority: newPriority } : c))
+        );
+      }
+    } catch (e) {
+      console.error('Failed to update priority:', e);
+    }
+  };
 
-      const res = await fetch('/api/inbox/channels', {
+  // Change Assignee
+  const handleAssignChange = async (convId: string, assignedToId: string) => {
+    try {
+      const res = await fetch(`/api/inbox/conversations/${convId}/assign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setConnectStatusMsg({ text: data.error || 'Failed to connect account', type: 'error' });
-        return;
-      }
-
-      setConnectStatusMsg({
-        text: `Connected ${fallbackHandle} to ${activeConnectTab} successfully!`,
-        type: 'success',
-      });
-      setConnectHandle('');
-      setConnectAccountName('');
-      setConnectAppId('');
-      setConnectAccessToken('');
-      setConnectAppSecret('');
-      setConnectWebhookSecret('');
-      await loadConnectedAccounts();
-    } catch (err: any) {
-      setConnectStatusMsg({ text: err.message || 'Connection error occurred', type: 'error' });
-    } finally {
-      setConnecting(false);
-    }
-  };
-
-  // Disconnect Channel Account
-  const handleDisconnectChannel = async (accountId: string) => {
-    try {
-      const res = await fetch(`/api/inbox/channels?id=${accountId}`, {
-        method: 'DELETE',
+        body: JSON.stringify({ assignedToId: assignedToId || null }),
       });
       if (res.ok) {
-        setConnectStatusMsg({ text: 'Channel account disconnected', type: 'success' });
-        await loadConnectedAccounts();
+        const data = await res.json();
+        setSelectedConversation((prev) =>
+          prev ? { ...prev, assignedToId: assignedToId || null, assignedTo: data.conversation.assignedTo } : null
+        );
+        loadConversations(false);
       }
-    } catch (err) {
-      console.error('Failed to disconnect account', err);
+    } catch (e) {
+      console.error('Failed to assign conversation:', e);
     }
   };
 
-  // Create New Conversation Thread
-  const handleCreateNewThread = async (e: React.FormEvent) => {
+  // Create Follow-up Task
+  const handleCreateTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newLeadId) return;
+    if (!selectedId || !taskTitle.trim() || creatingTask) return;
 
+    setCreatingTask(true);
     try {
-      const res = await fetch('/api/inbox/conversations', {
+      const res = await fetch(`/api/inbox/conversations/${selectedId}/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          leadId: newLeadId,
-          channel: newChannel,
+          title: taskTitle.trim(),
+          dueDate: taskDueDate || null,
+          priority: taskPriority,
         }),
       });
-
       if (res.ok) {
-        const data = await res.json();
-        setShowNewModal(false);
-        await loadConversations(false);
-        setSelectedId(data.conversation.id);
+        setTaskTitle('');
+        setTaskDueDate('');
+        setShowTaskModal(false);
+        loadConversationDetails(selectedId);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error('Failed to create task:', e);
+    } finally {
+      setCreatingTask(false);
     }
   };
 
-  // Insert Canned Template
-  const applyCannedResponse = (template: typeof CANNED_RESPONSES[0]) => {
-    const lead = selectedConversation?.lead;
-    const name = lead?.contactName?.split(' ')[0] || lead?.contactName || 'there';
-    const company = lead?.companyName || 'your company';
+  // Convert Unknown Contact to Lead
+  const handleConvertLead = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedId || convertingLead) return;
 
-    const text = template.content
-      .replace(/{{name}}/g, name)
-      .replace(/{{company}}/g, company);
-
-    setComposerContent(text);
-  };
-
-  // Channel helper styling & badges
-  const getChannelMeta = (channel: string) => {
-    switch (channel?.toUpperCase()) {
-      case 'WHATSAPP':
-        return {
-          label: 'WhatsApp',
-          dot: 'bg-emerald-500',
-          badge: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300',
-          border: 'border-emerald-500/30',
-        };
-      case 'EMAIL':
-        return {
-          label: 'Email',
-          dot: 'bg-sky-500',
-          badge: 'bg-sky-500/15 text-sky-600 dark:text-cyan-300',
-          border: 'border-sky-500/30',
-        };
-      case 'INSTAGRAM':
-        return {
-          label: 'Instagram',
-          dot: 'bg-pink-500',
-          badge: 'bg-pink-500/15 text-pink-600 dark:text-pink-300',
-          border: 'border-pink-500/30',
-        };
-      case 'FACEBOOK':
-        return {
-          label: 'Facebook',
-          dot: 'bg-blue-600',
-          badge: 'bg-blue-500/15 text-blue-600 dark:text-blue-300',
-          border: 'border-blue-500/30',
-        };
-      case 'TIKTOK':
-        return {
-          label: 'TikTok',
-          dot: 'bg-teal-400',
-          badge: 'bg-teal-500/15 text-teal-600 dark:text-teal-300',
-          border: 'border-teal-500/30',
-        };
-      case 'X':
-        return {
-          label: 'X (Twitter)',
-          dot: 'bg-slate-400',
-          badge: 'bg-slate-500/15 text-slate-700 dark:text-slate-200',
-          border: 'border-slate-500/30',
-        };
-      default:
-        return {
-          label: channel,
-          dot: 'bg-gray-400',
-          badge: 'bg-gray-500/15 text-gray-600 dark:text-gray-300',
-          border: 'border-gray-500/30',
-        };
+    setConvertingLead(true);
+    try {
+      const res = await fetch(`/api/inbox/conversations/${selectedId}/convert-lead`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyName: convertCompanyName.trim() || undefined,
+        }),
+      });
+      if (res.ok) {
+        setShowConvertModal(false);
+        setConvertCompanyName('');
+        loadConversationDetails(selectedId);
+        loadConversations(false);
+      }
+    } catch (e) {
+      console.error('Failed to convert contact to lead:', e);
+    } finally {
+      setConvertingLead(false);
     }
   };
 
-  // Filter Conversations
-  const filteredConversations = useMemo(() => {
-    return conversations.filter((c) => {
-      // Folder filter
-      if (activeFolder === 'unread' && c.unreadCount === 0) return false;
-      if (activeFolder === 'open' && c.status !== 'OPEN') return false;
-      if (activeFolder === 'waiting' && c.status !== 'WAITING_ON_CUSTOMER') return false;
-      if (activeFolder === 'closed' && c.status !== 'CLOSED') return false;
+  // Smart suggestions
+  const smartSuggestions = useMemo(() => {
+    if (!selectedConversation) return [];
+    const lastMessage = messages[messages.length - 1]?.content || '';
+    return generateSmartReplySuggestions(selectedConversation.lead || selectedConversation, lastMessage);
+  }, [selectedConversation, messages]);
 
-      // Channel filter
-      if (activeChannel !== 'all' && c.channel !== activeChannel) return false;
+  // Check if active composer channel is connected
+  const isSelectedChannelConnected = useMemo(() => {
+    if (composerMode === 'INTERNAL_NOTE') return true;
+    const status = channelStatuses[composerChannel];
+    return status ? status.connected : false;
+  }, [composerMode, composerChannel, channelStatuses]);
 
-      // Search query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const contactMatch = c.lead?.contactName?.toLowerCase().includes(q);
-        const companyMatch = c.lead?.companyName?.toLowerCase().includes(q);
-        const snippetMatch = c.lastMessageSnippet?.toLowerCase().includes(q);
-        return contactMatch || companyMatch || snippetMatch;
-      }
-
-      return true;
-    });
-  }, [conversations, activeFolder, activeChannel, searchQuery]);
-
-  const activeTabAccount = connectedAccounts.find((a) => a.channel === activeConnectTab);
-  const activeComposerAccount = connectedAccounts.find((a) => a.channel === composerChannel);
+  // Relative time helper
+  const formatRelativeTime = (dateStr: string) => {
+    try {
+      const diffMs = Date.now() - new Date(dateStr).getTime();
+      const mins = Math.floor(diffMs / (1000 * 60));
+      if (mins < 1) return 'just now';
+      if (mins < 60) return `${mins}m ago`;
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return `${hrs}h ago`;
+      const days = Math.floor(hrs / 24);
+      if (days < 7) return `${days}d ago`;
+      return new Date(dateStr).toLocaleDateString();
+    } catch {
+      return '';
+    }
+  };
 
   return (
-    <div className="mx-auto max-w-[1600px] h-[calc(100vh-5rem)] flex flex-col space-y-3 pb-2">
-      {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-400">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-            <span>· Unified Omnichannel Communications</span>
-          </div>
-          <h1 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white">
-            Omnichannel Unified Inbox
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-          {/* Live Sync Active Pulse Badge */}
-          <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+    <div className="flex h-[calc(100vh-4rem)] w-full overflow-hidden bg-[#053048] text-slate-100 font-sans">
+      {/* ========================================================================= */}
+      {/* COLUMN 1: LEFT NAVIGATION & FOLDERS & CHANNEL FILTERS */}
+      {/* ========================================================================= */}
+      <aside
+        className={`w-64 shrink-0 flex-col border-r border-white/10 bg-[#042a40] p-4 space-y-6 overflow-y-auto hidden lg:flex`}
+      >
+        {/* Brand / Inbox Header */}
+        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-400 text-white font-black shadow-md shadow-sky-500/25">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+              </svg>
             </span>
-            <span>Live Sync Active</span>
+            <div>
+              <h1 className="text-sm font-bold text-white tracking-wide">Unified Inbox</h1>
+              <p className="text-[11px] text-slate-400">Omnichannel Hub</p>
+            </div>
           </div>
-
-          {/* Connect Channels Modal Button */}
           <button
-            onClick={() => {
-              setShowConnectModal(true);
-              setConnectStatusMsg(null);
-            }}
-            className="flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-3.5 py-2 text-xs font-bold text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/20 transition-all shadow-sm"
+            type="button"
+            onClick={() => loadConversations(false)}
+            title="Refresh Inbox"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span>Connect Channels</span>
-            <span className="rounded-full bg-cyan-500/20 px-1.5 py-0.2 text-[10px] font-black">
-              {connectedAccounts.length} Connected
-            </span>
-          </button>
-
-          {/* New Conversation Button */}
-          <button
-            onClick={() => {
-              loadWorkspaceLeads();
-              setShowNewModal(true);
-            }}
-            className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-sky-500/20 hover:from-sky-500 hover:to-cyan-400 transition-all"
-          >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            <span>New Conversation</span>
           </button>
         </div>
-      </div>
 
-      {/* 3-Pane Unified Inbox Container */}
-      <div className="flex-1 grid grid-cols-12 gap-3 min-h-0 overflow-hidden rounded-2xl border border-gray-200/80 bg-white/70 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/80">
-        {/* PANE 1: Folders & Channels (Cols: 2.5) */}
-        <div className={`col-span-12 md:col-span-3 lg:col-span-2 border-r border-gray-200/80 dark:border-white/10 p-3 flex-col justify-between overflow-y-auto ${mobileView === 'CHANNELS' ? 'flex' : 'hidden md:flex'}`}>
-          <div className="space-y-4">
-            {/* Mobile-only return to threads header */}
-            <div className="md:hidden flex items-center justify-between pb-2 border-b border-gray-200 dark:border-white/10">
-              <span className="text-xs font-bold text-gray-800 dark:text-white">Filter Channels</span>
+        {/* Folders Navigation */}
+        <div className="space-y-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 px-2 pb-1">
+            Views
+          </p>
+
+          {[
+            { id: 'all', label: 'All Conversations', count: counts.all, icon: '📬' },
+            { id: 'unread', label: 'Unread', count: counts.unread, icon: '🔵' },
+            { id: 'assigned_to_me', label: 'Assigned to Me', count: counts.assignedToMe, icon: '👤' },
+            { id: 'unassigned', label: 'Unassigned', count: counts.unassigned, icon: '👥' },
+            { id: 'starred', label: 'Starred', count: counts.starred, icon: '⭐' },
+            { id: 'archived', label: 'Archived', count: counts.archived, icon: '📦' },
+            { id: 'closed', label: 'Closed', count: counts.closed, icon: '✅' },
+          ].map((f) => {
+            const isActive = activeFolder === f.id;
+            return (
               <button
-                onClick={() => setMobileView('THREADS')}
-                className="rounded-lg bg-sky-500/15 text-sky-600 dark:text-cyan-300 px-2.5 py-1 text-xs font-bold"
+                key={f.id}
+                type="button"
+                onClick={() => setActiveFolder(f.id)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${
+                  isActive
+                    ? 'bg-sky-600/20 text-sky-400 border border-sky-500/30 font-semibold'
+                    : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                }`}
               >
-                Done →
-              </button>
-            </div>
-
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block px-2 mb-1.5">
-                Inboxes
-              </span>
-              <nav className="space-y-1 text-xs font-semibold">
-                <button
-                  onClick={() => setActiveFolder('all')}
-                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-2 transition-all ${
-                    activeFolder === 'all'
-                      ? 'bg-sky-500/15 text-sky-600 dark:text-cyan-300 font-bold'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
-                    <span>All Messages</span>
-                  </div>
-                  <span className="rounded-full bg-gray-200/70 px-1.5 py-0.5 text-[10px] text-gray-700 dark:bg-white/10 dark:text-gray-300">
-                    {counts.all}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setActiveFolder('unread')}
-                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-2 transition-all ${
-                    activeFolder === 'unread'
-                      ? 'bg-sky-500/15 text-sky-600 dark:text-cyan-300 font-bold'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <span>Unread</span>
-                  </div>
-                  {counts.unread > 0 && (
-                    <span className="rounded-full bg-cyan-500 text-white font-black px-1.5 py-0.5 text-[10px]">
-                      {counts.unread}
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  onClick={() => setActiveFolder('open')}
-                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-2 transition-all ${
-                    activeFolder === 'open'
-                      ? 'bg-sky-500/15 text-sky-600 dark:text-cyan-300 font-bold'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    <span>Open Threads</span>
-                  </div>
-                  <span className="rounded-full bg-gray-200/70 px-1.5 py-0.5 text-[10px] text-gray-700 dark:bg-white/10 dark:text-gray-300">
-                    {counts.open}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setActiveFolder('waiting')}
-                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-2 transition-all ${
-                    activeFolder === 'waiting'
-                      ? 'bg-sky-500/15 text-sky-600 dark:text-cyan-300 font-bold'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Awaiting Client</span>
-                  </div>
-                  <span className="rounded-full bg-gray-200/70 px-1.5 py-0.5 text-[10px] text-gray-700 dark:bg-white/10 dark:text-gray-300">
-                    {counts.waiting}
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => setActiveFolder('closed')}
-                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-2 transition-all ${
-                    activeFolder === 'closed'
-                      ? 'bg-sky-500/15 text-sky-600 dark:text-cyan-300 font-bold'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Resolved / Closed</span>
-                  </div>
-                  <span className="rounded-full bg-gray-200/70 px-1.5 py-0.5 text-[10px] text-gray-700 dark:bg-white/10 dark:text-gray-300">
-                    {counts.closed}
-                  </span>
-                </button>
-              </nav>
-            </div>
-
-            {/* Channels Filter */}
-            <div>
-              <div className="flex items-center justify-between px-2 mb-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                  Filter by Channel
+                <span className="flex items-center gap-2">
+                  <span className="text-xs">{f.icon}</span>
+                  <span>{f.label}</span>
                 </span>
-                <button
-                  onClick={() => setShowConnectModal(true)}
-                  className="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 hover:underline"
-                >
-                  Manage
-                </button>
-              </div>
-
-              <nav className="space-y-1 text-xs font-semibold">
-                <button
-                  onClick={() => setActiveChannel('all')}
-                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-1.5 transition-all ${
-                    activeChannel === 'all'
-                      ? 'bg-sky-500/15 text-sky-600 dark:text-cyan-300 font-bold'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <span>All Channels</span>
-                </button>
-
-                {/* WhatsApp */}
-                <button
-                  onClick={() => setActiveChannel('WHATSAPP')}
-                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-1.5 transition-all ${
-                    activeChannel === 'WHATSAPP'
-                      ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 font-bold'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                    <span>WhatsApp</span>
-                  </div>
-                </button>
-
-                {/* Email */}
-                <button
-                  onClick={() => setActiveChannel('EMAIL')}
-                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-1.5 transition-all ${
-                    activeChannel === 'EMAIL'
-                      ? 'bg-sky-500/15 text-sky-600 dark:text-cyan-300 font-bold'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-sky-500" />
-                    <span>Email</span>
-                  </div>
-                </button>
-
-                {/* Instagram */}
-                <button
-                  onClick={() => setActiveChannel('INSTAGRAM')}
-                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-1.5 transition-all ${
-                    activeChannel === 'INSTAGRAM'
-                      ? 'bg-pink-500/15 text-pink-600 dark:text-pink-300 font-bold'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-pink-500" />
-                    <span>Instagram</span>
-                  </div>
-                  {connectedAccounts.some((a) => a.channel === 'INSTAGRAM') && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" title="Connected" />
-                  )}
-                </button>
-
-                {/* Facebook */}
-                <button
-                  onClick={() => setActiveChannel('FACEBOOK')}
-                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-1.5 transition-all ${
-                    activeChannel === 'FACEBOOK'
-                      ? 'bg-blue-500/15 text-blue-600 dark:text-blue-300 font-bold'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-blue-600" />
-                    <span>Facebook</span>
-                  </div>
-                  {connectedAccounts.some((a) => a.channel === 'FACEBOOK') && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" title="Connected" />
-                  )}
-                </button>
-
-                {/* TikTok */}
-                <button
-                  onClick={() => setActiveChannel('TIKTOK')}
-                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-1.5 transition-all ${
-                    activeChannel === 'TIKTOK'
-                      ? 'bg-teal-500/15 text-teal-600 dark:text-teal-300 font-bold'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-teal-400" />
-                    <span>TikTok</span>
-                  </div>
-                  {connectedAccounts.some((a) => a.channel === 'TIKTOK') && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" title="Connected" />
-                  )}
-                </button>
-
-                {/* X */}
-                <button
-                  onClick={() => setActiveChannel('X')}
-                  className={`w-full flex items-center justify-between rounded-xl px-2.5 py-1.5 transition-all ${
-                    activeChannel === 'X'
-                      ? 'bg-slate-500/15 text-slate-700 dark:text-slate-200 font-bold'
-                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-slate-400" />
-                    <span>X (Twitter)</span>
-                  </div>
-                  {connectedAccounts.some((a) => a.channel === 'X') && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" title="Connected" />
-                  )}
-                </button>
-              </nav>
-            </div>
-          </div>
-
-          <div className="p-2.5 rounded-xl bg-gray-50/70 dark:bg-[#053048]/60 text-[11px] text-gray-500 dark:text-gray-400">
-            <p className="font-bold text-gray-800 dark:text-gray-200">Omnichannel Routing</p>
-            <p className="mt-0.5 leading-tight">
-              Instagram, FB, TikTok & X DMs sync directly into lead timelines with AI Deal Copilot insight.
-            </p>
-          </div>
-        </div>
-
-        {/* PANE 2: Conversation Thread List (Cols: 3.5) */}
-        <div className={`col-span-12 md:col-span-4 lg:col-span-3 border-r border-gray-200/80 dark:border-white/10 flex-col min-h-0 ${mobileView === 'THREADS' ? 'flex' : 'hidden md:flex'}`}>
-          <div className="p-3 border-b border-gray-200/80 dark:border-white/10">
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <input
-                  type="text"
-                  placeholder="Search conversations..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 pl-8 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
-                />
-                <svg className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <button
-                onClick={() => setMobileView('CHANNELS')}
-                className="md:hidden shrink-0 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-white/5 px-2.5 py-2 text-xs font-bold text-gray-700 dark:text-gray-200"
-                title="Filter Channels & Inboxes"
-              >
-                Filters
-              </button>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto divide-y divide-gray-100 dark:divide-white/5">
-            {loading ? (
-              <div className="p-8 text-center text-xs text-gray-400">Loading inbox...</div>
-            ) : filteredConversations.length === 0 ? (
-              <div className="p-8 text-center text-xs text-gray-400">
-                No conversations match the current folder or channel filter.
-              </div>
-            ) : (
-              filteredConversations.map((item) => {
-                const isSelected = item.id === selectedId;
-                const isUnread = item.unreadCount > 0;
-                const meta = getChannelMeta(item.channel);
-                const winProb = item.lead?.aiInsight?.winProbability;
-                const sentiment = item.lead?.aiInsight?.sentimentLabel;
-
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => {
-                      setSelectedId(item.id);
-                      setMobileView('CHAT');
-                    }}
-                    className={`p-3 cursor-pointer transition-all ${
-                      isSelected
-                        ? 'bg-sky-500/10 dark:bg-cyan-500/10 border-l-4 border-sky-500'
-                        : 'hover:bg-gray-50/80 dark:hover:bg-white/5'
+                {f.count > 0 && (
+                  <span
+                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                      isActive ? 'bg-sky-500 text-white' : 'bg-white/10 text-slate-300'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className={`h-2 w-2 rounded-full shrink-0 ${meta.dot}`} />
-                        <span className={`text-xs truncate ${isUnread ? 'font-black text-gray-900 dark:text-white' : 'font-semibold text-gray-800 dark:text-gray-200'}`}>
-                          {item.lead?.contactName}
-                        </span>
-                      </div>
-                      <span className="text-[10px] text-gray-400 shrink-0">
-                        {new Date(item.lastMessageAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                      </span>
-                    </div>
+                    {f.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
 
-                    <div className="mt-1 flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-                      <div className="flex items-center gap-1.5 truncate">
-                        <span className={`rounded px-1.5 py-0.2 text-[9px] font-bold ${meta.badge}`}>
-                          {meta.label}
-                        </span>
-                        <span className="truncate">{item.lead?.companyName || 'Independent'}</span>
-                      </div>
-                      {isUnread && (
-                        <span className="h-4 w-4 rounded-full bg-cyan-500 text-white font-black text-[9px] flex items-center justify-center shrink-0">
-                          {item.unreadCount}
-                        </span>
-                      )}
-                    </div>
+        {/* Communication Channels Filter */}
+        <div className="space-y-1 pt-2">
+          <div className="flex items-center justify-between px-2 pb-1">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+              Channels
+            </p>
+            <Link
+              href="/settings/integrations"
+              className="text-[10px] text-sky-400 hover:text-sky-300 font-medium"
+            >
+              Manage
+            </Link>
+          </div>
 
-                    <p className={`mt-1 text-xs truncate ${isUnread ? 'font-bold text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}`}>
-                      {item.lastMessageSnippet || 'No messages yet'}
-                    </p>
+          {[
+            { id: 'all', label: 'All Channels', icon: '🌐' },
+            { id: 'EMAIL', label: 'Email', icon: 'EMAIL' },
+            { id: 'WHATSAPP', label: 'WhatsApp', icon: 'WHATSAPP' },
+            { id: 'INSTAGRAM', label: 'Instagram', icon: 'INSTAGRAM' },
+            { id: 'FACEBOOK', label: 'Facebook', icon: 'FACEBOOK' },
+            { id: 'X', label: 'X (Twitter)', icon: 'X' },
+            { id: 'TIKTOK', label: 'TikTok', icon: 'TIKTOK' },
+          ].map((ch) => {
+            const isActive = activeChannel === ch.id;
+            const isConn = ch.id === 'all' || channelStatuses[ch.id]?.connected;
+            return (
+              <button
+                key={ch.id}
+                type="button"
+                onClick={() => setActiveChannel(ch.id)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${
+                  isActive
+                    ? 'bg-sky-600/20 text-sky-400 border border-sky-500/30 font-semibold'
+                    : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                }`}
+              >
+                <span className="flex items-center gap-2.5">
+                  {ch.id === 'all' ? (
+                    <span>🌐</span>
+                  ) : (
+                    <ChannelIcon channel={ch.id} className="h-4 w-4" />
+                  )}
+                  <span>{ch.label}</span>
+                </span>
+                {ch.id !== 'all' && (
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      isConn ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]' : 'bg-slate-600'
+                    }`}
+                    title={isConn ? 'Channel Connected' : 'Not Connected'}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
 
-                    {/* Sentiment & Win Prob Indicators */}
-                    <div className="mt-2 flex items-center gap-2">
-                      {winProb !== undefined && (
-                        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                          {winProb}% Win
-                        </span>
-                      )}
-                      {sentiment && (
-                        <span
-                          className={`rounded-full px-1.5 py-0.2 text-[9px] font-bold ${
-                            sentiment === 'POSITIVE'
-                              ? 'bg-emerald-500/10 text-emerald-600'
-                              : sentiment === 'CONCERN'
-                              ? 'bg-rose-500/10 text-rose-600'
-                              : 'bg-gray-500/10 text-gray-600'
-                          }`}
-                        >
-                          {sentiment}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            )}
+        {/* Channel Health Footer */}
+        <div className="mt-auto pt-4 border-t border-white/10">
+          <Link
+            href="/settings/integrations"
+            className="rounded-xl bg-white/5 p-3 flex items-center justify-between border border-white/5 hover:border-sky-500/30 transition group"
+          >
+            <div>
+              <p className="text-[11px] font-bold text-white group-hover:text-sky-400 transition">
+                Channel Integrations
+              </p>
+              <p className="text-[10px] text-slate-400">
+                {Object.values(channelStatuses).filter((s) => s.connected).length} of 6 Connected
+              </p>
+            </div>
+            <span className="text-slate-400 group-hover:text-white text-xs">→</span>
+          </Link>
+        </div>
+      </aside>
+
+      {/* ========================================================================= */}
+      {/* COLUMN 2: CONVERSATION LIST (MIDDLE COLUMN) */}
+      {/* ========================================================================= */}
+      <section
+        className={`w-full md:w-80 lg:w-96 shrink-0 flex-col border-r border-white/10 bg-[#073b58]/50 backdrop-blur-md flex ${
+          mobileView !== 'LIST' ? 'hidden md:flex' : 'flex'
+        }`}
+      >
+        {/* Search and Filters Header */}
+        <div className="p-3.5 border-b border-white/10 space-y-2.5">
+          <div className="relative">
+            <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              placeholder="Search conversations, contacts, messages..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-[#042a40] border border-white/10 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+            />
+          </div>
+
+          <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="flex items-center gap-1.5">
+              <span>Status:</span>
+              <select
+                value={activeStatus}
+                onChange={(e) => setActiveStatus(e.target.value)}
+                className="bg-[#042a40] border border-white/10 rounded-lg px-2 py-0.5 text-xs text-white focus:outline-none"
+              >
+                <option value="all">All</option>
+                <option value="OPEN">Open</option>
+                <option value="WAITING_ON_US">Waiting on Us</option>
+                <option value="WAITING_ON_CUSTOMER">Waiting on Client</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+            </div>
+
+            <span className="text-[10px]">Updated {formatRelativeTime(lastUpdated.toISOString())}</span>
           </div>
         </div>
 
-        {/* PANE 3: Live Message Stream & Smart Composer (Cols: 6.5) */}
-        <div className={`col-span-12 md:col-span-5 lg:col-span-7 flex-col min-h-0 h-full ${mobileView === 'CHAT' ? 'flex' : 'hidden md:flex'}`}>
-          {!selectedConversation ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-gray-400">
-              <svg className="h-12 w-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300">Select a conversation</h3>
-              <p className="text-xs text-gray-400 mt-1 max-w-sm">
-                Choose a client from the thread list on the left to review their unified history across Email, WhatsApp, Instagram, Facebook, TikTok, and X.
+        {/* Conversation Rows */}
+        <div className="flex-1 overflow-y-auto divide-y divide-white/5">
+          {loading ? (
+            <div className="p-8 text-center text-xs text-slate-400">Loading inbox...</div>
+          ) : conversations.length === 0 ? (
+            <div className="p-8 text-center space-y-2">
+              <div className="text-3xl">📭</div>
+              <p className="text-xs font-bold text-white">No conversations found</p>
+              <p className="text-[11px] text-slate-400 max-w-[200px] mx-auto">
+                Connect your communication channels or adjust your filters.
               </p>
-              <button
-                onClick={() => setMobileView('THREADS')}
-                className="mt-4 md:hidden rounded-xl bg-sky-600 px-4 py-2 text-xs font-bold text-white shadow-md"
-              >
-                ← View Conversations
-              </button>
             </div>
           ) : (
-            <>
-              {/* Thread Header */}
-              <div className="p-3 border-b border-gray-200/80 dark:border-white/10 flex items-center justify-between shrink-0 bg-white/50 dark:bg-[#073652]/60 gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <button
-                    onClick={() => setMobileView('THREADS')}
-                    className="md:hidden p-1.5 -ml-1 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/10 shrink-0"
-                    title="Back to conversation list"
-                  >
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </button>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h2 className="text-base font-black text-gray-900 dark:text-white truncate">
-                        {selectedConversation.lead?.contactName}
-                      </h2>
-                      <span className="text-xs text-gray-400 truncate">
-                        {selectedConversation.lead?.companyName && `· ${selectedConversation.lead?.companyName}`}
-                      </span>
+            conversations.map((conv) => {
+              const isSelected = selectedId === conv.id;
+              const hasUnread = conv.unreadCount > 0;
+              const contactDisplayName =
+                conv.contactName || conv.lead?.contactName || conv.contactEmail || conv.contactHandle || 'Unknown Contact';
+
+              return (
+                <div
+                  key={conv.id}
+                  onClick={() => {
+                    setSelectedId(conv.id);
+                    setMobileView('CHAT');
+                    setShowIntelPanel(false);
+                  }}
+                  className={`p-3.5 cursor-pointer transition relative flex gap-3 group ${
+                    isSelected
+                      ? 'bg-sky-600/15 border-l-4 border-sky-400'
+                      : 'hover:bg-white/5 border-l-4 border-transparent'
+                  }`}
+                >
+                  {/* Avatar with Channel Badge */}
+                  <div className="relative shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#053048] to-[#0a486c] border border-white/10 flex items-center justify-center text-xs font-bold text-sky-300">
+                      {contactDisplayName.slice(0, 2).toUpperCase()}
+                    </div>
+                    <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-[#042a40] border border-white/10 flex items-center justify-center p-0.5 shadow">
+                      <ChannelIcon channel={conv.channel} className="h-2.5 w-2.5 text-sky-400" />
+                    </span>
+                  </div>
+
+                  {/* Content Preview */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
                       <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                          selectedConversation.status === 'OPEN'
-                            ? 'bg-emerald-500/10 text-emerald-600'
-                            : selectedConversation.status === 'CLOSED'
-                            ? 'bg-gray-500/10 text-gray-500'
-                            : 'bg-amber-500/10 text-amber-600'
+                        className={`text-xs truncate ${
+                          hasUnread ? 'font-bold text-white' : 'font-semibold text-slate-200'
                         }`}
                       >
-                        {selectedConversation.status}
+                        {contactDisplayName}
+                      </span>
+                      <span className="text-[10px] text-slate-400 shrink-0">
+                        {formatRelativeTime(conv.lastMessageAt)}
                       </span>
                     </div>
 
-                  <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
-                    {selectedConversation.lead?.email}
-                    {selectedConversation.lead?.phone && ` · ${selectedConversation.lead?.phone}`}
-                    {selectedConversation.lead?.instagram && ` · IG: ${selectedConversation.lead?.instagram}`}
-                    {selectedConversation.lead?.xHandle && ` · X: ${selectedConversation.lead?.xHandle}`}
-                    {' · Stage: '}
-                    <strong className="text-gray-800 dark:text-gray-200">{selectedConversation.lead?.pipelineStage}</strong>
-                    {selectedConversation.lead?.dealValue && (
-                      <span> · Deal: {formatCurrency(selectedConversation.lead?.dealValue)}</span>
+                    {conv.lead?.companyName && (
+                      <p className="text-[10px] text-slate-400 truncate">{conv.lead.companyName}</p>
                     )}
-                  </p>
-                </div>
-              </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setShowSimulateModal(true)}
-                    className="flex items-center gap-1 rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-2.5 py-1 text-xs font-bold text-cyan-700 dark:text-cyan-300 hover:bg-cyan-500/20 transition-all"
-                  >
-                    <span>Simulate Reply</span>
-                  </button>
+                    <p
+                      className={`text-xs truncate mt-1 ${
+                        hasUnread ? 'font-medium text-slate-200' : 'text-slate-400'
+                      }`}
+                    >
+                      {conv.lastMessageSnippet || 'No messages'}
+                    </p>
 
-                  <button
-                    onClick={() =>
-                      handleToggleStatus(selectedConversation.status === 'CLOSED' ? 'OPEN' : 'CLOSED')
-                    }
-                    className="rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:bg-[#053048] dark:text-gray-200"
-                  >
-                    {selectedConversation.status === 'CLOSED' ? 'Reopen' : 'Close'}
-                  </button>
-
-                  <Link
-                    href={`/leads/${selectedConversation.leadId}`}
-                    className="rounded-lg bg-gray-100 p-1.5 text-gray-600 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-300"
-                    title="View Full Lead Dossier"
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Message Feed Stream */}
-              <div className="flex-1 p-4 overflow-y-auto space-y-3 min-h-0 bg-gray-50/30 dark:bg-black/10">
-                {messagesLoading ? (
-                  <div className="text-center p-8 text-xs text-gray-400">Loading conversation history...</div>
-                ) : messages.length === 0 ? (
-                  <div className="text-center p-8 text-xs text-gray-400">No messages in this thread yet. Send a reply below.</div>
-                ) : (
-                  messages.map((m) => {
-                    if (m.isInternal || m.channel === 'INTERNAL_NOTE') {
-                      return (
-                        <div
-                          key={m.id}
-                          className="rounded-xl border border-amber-300/40 bg-amber-50/70 dark:bg-amber-950/20 dark:border-amber-700/30 p-3 text-xs"
-                        >
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
-                              <svg className="h-3.5 w-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                              </svg>
-                              <span>Internal Team Note · {m.senderName}</span>
-                            </span>
-                            <span className="text-[10px] text-amber-700/70 dark:text-amber-400/60">
-                              {new Date(m.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          </div>
-                          <p className="whitespace-pre-wrap text-amber-950 dark:text-amber-100 font-sans">
-                            {m.content}
-                          </p>
-                        </div>
-                      );
-                    }
-
-                    const isAgent = m.senderType === 'AGENT' || m.senderType === 'AI_COPILOT';
-                    const meta = getChannelMeta(m.channel);
-
-                    return (
-                      <div
-                        key={m.id}
-                        className={`flex flex-col ${isAgent ? 'items-end' : 'items-start'}`}
-                      >
-                        <div className="flex items-center gap-1.5 mb-1 px-1">
-                          <span className="text-[10px] font-bold text-gray-500 dark:text-gray-400">
-                            {isAgent ? m.senderName || 'You' : selectedConversation.lead?.contactName}
+                    {/* Indicators Footer */}
+                    <div className="flex items-center justify-between gap-1 mt-2">
+                      <div className="flex items-center gap-1.5">
+                        {conv.priority === 'URGENT' && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                            Urgent
                           </span>
-                          <span className={`rounded px-1.5 py-0.2 text-[9px] font-bold ${meta.badge}`}>
-                            {meta.label}
+                        )}
+                        {conv.priority === 'HIGH' && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            High
                           </span>
-                          <span className="text-[9px] text-gray-400">
-                            {new Date(m.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        )}
+                        {conv.lead?.pipelineStage && (
+                          <span className="px-1.5 py-0.5 rounded text-[9px] bg-white/5 text-slate-300 border border-white/10">
+                            {conv.lead.pipelineStage.replace('_', ' ')}
                           </span>
-                        </div>
+                        )}
+                      </div>
 
-                        <div
-                          className={`max-w-md md:max-w-lg rounded-2xl p-3 text-xs leading-relaxed whitespace-pre-wrap font-sans ${
-                            isAgent
-                              ? 'bg-gradient-to-tr from-sky-600 to-cyan-500 text-white shadow-sm rounded-br-none'
-                              : 'bg-white dark:bg-[#053048] text-gray-900 dark:text-white border border-gray-200/80 dark:border-white/10 shadow-sm rounded-bl-none'
+                      <div className="flex items-center gap-2">
+                        {/* Star Toggle */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleStar(conv.id, conv.isStarred);
+                          }}
+                          className={`text-xs ${
+                            conv.isStarred ? 'text-amber-400' : 'text-slate-500 hover:text-slate-300'
                           }`}
                         >
-                          {m.content}
+                          ★
+                        </button>
+
+                        {/* Unread Badge */}
+                        {hasUnread && (
+                          <span className="h-4 min-w-[16px] px-1 rounded-full bg-sky-500 text-[10px] font-bold text-white flex items-center justify-center shadow">
+                            {conv.unreadCount}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* COLUMN 3: MESSAGE THREAD & COMPOSER */}
+      {/* ========================================================================= */}
+      <main
+        className={`flex-1 flex-col bg-[#053048] min-w-0 flex ${
+          mobileView !== 'CHAT' ? 'hidden md:flex' : 'flex'
+        }`}
+      >
+        {selectedConversation ? (
+          <>
+            {/* Sticky Conversation Header */}
+            <header className="px-5 py-3 border-b border-white/10 bg-[#073b58]/80 backdrop-blur-md flex items-center justify-between gap-3 shrink-0">
+              <div className="flex items-center gap-2 min-w-0">
+                {/* Mobile Back Button */}
+                <button
+                  type="button"
+                  onClick={() => setMobileView('LIST')}
+                  className="p-1 rounded-lg text-slate-400 hover:text-white md:hidden"
+                >
+                  ←
+                </button>
+
+                {/* Clickable Client Profile */}
+                <button
+                  type="button"
+                  onClick={() => setShowIntelPanel((prev) => !prev)}
+                  className={`flex items-center gap-3 min-w-0 text-left p-1.5 -ml-1.5 rounded-2xl transition border ${
+                    showIntelPanel
+                      ? 'bg-sky-500/15 border-sky-500/30 ring-1 ring-sky-500/30'
+                      : 'border-transparent hover:bg-white/5 hover:border-white/10'
+                  }`}
+                  title={
+                    showIntelPanel
+                      ? 'Click to close profile & return to texting'
+                      : 'Click to view client profile & lead overview in texting area'
+                  }
+                >
+                  <div className="relative shrink-0">
+                    <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-sky-600 to-cyan-400 text-white font-bold flex items-center justify-center text-xs shadow">
+                      {(selectedConversation.contactName || selectedConversation.lead?.contactName || 'C')
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </div>
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-sm font-bold text-white truncate">
+                        {selectedConversation.contactName ||
+                          selectedConversation.lead?.contactName ||
+                          'Unknown Contact'}
+                      </h2>
+                      <span className="flex items-center gap-1 text-[11px] font-semibold text-sky-400 px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20 shrink-0">
+                        <ChannelIcon channel={selectedConversation.channel} className="h-3 w-3" />
+                        <span>{selectedConversation.channel}</span>
+                      </span>
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full border transition shrink-0 hidden sm:inline-flex items-center gap-1 ${
+                          showIntelPanel
+                            ? 'bg-sky-500/30 text-sky-200 border-sky-400/50 font-semibold'
+                            : 'bg-white/5 text-slate-300 border-white/10 hover:text-white'
+                        }`}
+                      >
+                        {showIntelPanel ? 'Close Profile ✕' : 'Client Profile'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 truncate">
+                      {selectedConversation.lead?.companyName ||
+                        selectedConversation.contactEmail ||
+                        selectedConversation.contactPhone ||
+                        'Inbound conversation thread'}
+                    </p>
+                  </div>
+                </button>
+              </div>
+
+              {/* Priority / Assign Controls (Waiting on us status dropdown removed to avoid blocking view) */}
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Priority Dropdown */}
+                <select
+                  value={selectedConversation.priority}
+                  onChange={(e) => handlePriorityChange(selectedConversation.id, e.target.value)}
+                  className="bg-[#042a40] border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white focus:outline-none hidden sm:block"
+                >
+                  <option value="NORMAL">Normal Priority</option>
+                  <option value="HIGH">High Priority</option>
+                  <option value="URGENT">Urgent Priority</option>
+                  <option value="LOW">Low Priority</option>
+                </select>
+
+                {/* Assignee Dropdown */}
+                <select
+                  value={selectedConversation.assignedToId || ''}
+                  onChange={(e) => handleAssignChange(selectedConversation.id, e.target.value)}
+                  className="bg-[#042a40] border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white focus:outline-none hidden lg:block"
+                >
+                  <option value="">Unassigned</option>
+                  {teamMembers.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {m.name || m.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </header>
+
+            {/* Messages Scroll Area */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+              {messagesLoading ? (
+                <div className="py-20 text-center text-xs text-slate-400">Loading conversation history...</div>
+              ) : messages.length === 0 ? (
+                <div className="py-20 text-center text-xs text-slate-400 space-y-2">
+                  <p className="text-2xl">💬</p>
+                  <p className="font-semibold text-white">Conversation initiated</p>
+                  <p>Send a message or record an internal note below.</p>
+                </div>
+              ) : (
+                messages.map((msg) => {
+                  const isInternal = msg.isInternal || msg.channel === 'INTERNAL_NOTE';
+                  const isOutbound = msg.direction === 'OUTBOUND' || msg.senderType === 'AGENT';
+
+                  if (isInternal) {
+                    return (
+                      <div key={msg.id} className="max-w-2xl mx-auto my-3">
+                        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-200 shadow space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <span className="flex items-center gap-1.5 font-bold text-amber-300">
+                              <span>🔒</span>
+                              <span>Internal Note · {msg.senderName || 'Team Member'}</span>
+                            </span>
+                            <span className="text-[10px] text-amber-400/80">
+                              {new Date(msg.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                          <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                         </div>
                       </div>
                     );
-                  })
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* AI Smart Reply Suggestions Bar */}
-              {smartReplies.length > 0 && (
-                <div className="px-3 py-2 border-t border-gray-200/60 dark:border-white/5 bg-gray-50/50 dark:bg-[#053048]/40 flex items-center gap-2 overflow-x-auto">
-                  <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-400 shrink-0">
-                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                    </svg>
-                    <span>AI Copilot:</span>
-                  </div>
-                  {smartReplies.map((reply) => (
-                    <button
-                      key={reply.id}
-                      onClick={() => {
-                        setComposerMode('REPLY');
-                        setComposerChannel(reply.channel as any);
-                        setComposerContent(reply.text);
-                      }}
-                      className="rounded-lg border border-sky-300/40 bg-sky-500/10 px-2.5 py-1 text-[11px] font-medium text-sky-800 dark:text-cyan-200 hover:bg-sky-500/20 shrink-0 transition-colors truncate max-w-xs"
-                    >
-                      {reply.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Omnichannel Composer */}
-              <div className="p-3 border-t border-gray-200/80 dark:border-white/10 bg-white/70 dark:bg-[#073652]/80">
-                {/* Composer Mode & Channel Toggles */}
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setComposerMode('REPLY')}
-                      className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
-                        composerMode === 'REPLY'
-                          ? 'bg-sky-600 text-white shadow-sm'
-                          : 'text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white'
-                      }`}
-                    >
-                      Reply to Client
-                    </button>
-                    <button
-                      onClick={() => setComposerMode('INTERNAL_NOTE')}
-                      className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
-                        composerMode === 'INTERNAL_NOTE'
-                          ? 'bg-amber-500 text-white shadow-sm'
-                          : 'text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-white'
-                      }`}
-                    >
-                      Internal Note
-                    </button>
-                  </div>
-
-                  {composerMode === 'REPLY' && (
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <div className="flex items-center gap-1.5">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase">Via:</label>
-                        <select
-                          value={composerChannel}
-                          onChange={(e: any) => setComposerChannel(e.target.value)}
-                          className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-semibold dark:border-white/10 dark:bg-[#053048] dark:text-white"
-                        >
-                          <option value="EMAIL">Email</option>
-                          <option value="WHATSAPP">WhatsApp</option>
-                          <option value="INSTAGRAM">Instagram DM</option>
-                          <option value="FACEBOOK">Facebook Messenger</option>
-                          <option value="TIKTOK">TikTok Direct</option>
-                          <option value="X">X (Twitter) DM</option>
-                        </select>
-                      </div>
-
-                      {/* Connection status indicator */}
-                      {activeComposerAccount ? (
-                        <span className="flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-300">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                          <span>{activeComposerAccount.accountHandle}</span>
-                        </span>
-                      ) : ['INSTAGRAM', 'FACEBOOK', 'TIKTOK', 'X'].includes(composerChannel) ? (
-                        <button
-                          onClick={() => {
-                            setActiveConnectTab(composerChannel as any);
-                            setShowConnectModal(true);
-                          }}
-                          className="flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-300 hover:underline"
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                          <span>Not Connected · Link {composerChannel}</span>
-                        </button>
-                      ) : null}
-
-                      {/* Canned Template Picker */}
-                      <select
-                        onChange={(e) => {
-                          const chosen = CANNED_RESPONSES.find((r) => r.id === e.target.value);
-                          if (chosen) applyCannedResponse(chosen);
-                          e.target.value = '';
-                        }}
-                        defaultValue=""
-                        className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs font-semibold dark:border-white/10 dark:bg-[#053048] dark:text-white"
-                      >
-                        <option value="" disabled>Templates</option>
-                        {CANNED_RESPONSES.map((r) => (
-                          <option key={r.id} value={r.id}>{r.title}</option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                </div>
-
-                {composerMode === 'REPLY' && composerChannel === 'EMAIL' && (
-                  <input
-                    type="text"
-                    placeholder="Subject..."
-                    value={composerSubject}
-                    onChange={(e) => setComposerSubject(e.target.value)}
-                    className="w-full mb-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
-                  />
-                )}
-
-                <div className="relative">
-                  <textarea
-                    rows={3}
-                    placeholder={
-                      composerMode === 'INTERNAL_NOTE'
-                        ? 'Write a private note visible only to your internal team...'
-                        : `Write a message to send via ${getChannelMeta(composerChannel).label}... (Press Ctrl+Enter to send)`
-                    }
-                    value={composerContent}
-                    onChange={(e) => setComposerContent(e.target.value)}
-                    onKeyDown={(e) => {
-                      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                        handleSendMessage();
-                      }
-                    }}
-                    className={`w-full rounded-xl border p-2.5 text-xs outline-none focus:border-sky-500 ${
-                      composerMode === 'INTERNAL_NOTE'
-                        ? 'border-amber-400/40 bg-amber-50/40 dark:bg-amber-950/10 dark:border-amber-700/40 text-gray-900 dark:text-white'
-                        : 'border-gray-200 bg-white dark:border-white/10 dark:bg-[#053048] text-gray-900 dark:text-white'
-                    }`}
-                  />
-
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-[10px] text-gray-400">
-                      Shortcut: <kbd className="font-mono bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded">Ctrl+Enter</kbd>
-                    </span>
-
-                    <button
-                      onClick={() => handleSendMessage()}
-                      disabled={sending || !composerContent.trim()}
-                      className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-white shadow-sm transition-all disabled:opacity-50 ${
-                        composerMode === 'INTERNAL_NOTE'
-                          ? 'bg-amber-600 hover:bg-amber-500'
-                          : 'bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400'
-                      }`}
-                    >
-                      <span>
-                        {sending
-                          ? 'Sending...'
-                          : composerMode === 'INTERNAL_NOTE'
-                          ? 'Post Note'
-                          : `Send via ${getChannelMeta(composerChannel).label}`}
-                      </span>
-                      <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* CONNECT CHANNELS MODAL (Instagram, Facebook, TikTok, X) */}
-      <AnimatePresence>
-        {showConnectModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#073652] max-h-[90vh] overflow-y-auto"
-            >
-              <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/10 pb-3">
-                <div>
-                  <h3 className="text-base font-black text-gray-900 dark:text-white">
-                    Connect Social & Messaging Channels
-                  </h3>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    Link your official accounts to receive and dispatch messages directly from the Unified Inbox.
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowConnectModal(false)}
-                  className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/10"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {connectStatusMsg && (
-                <div
-                  className={`mt-4 rounded-xl p-3 text-xs font-semibold ${
-                    connectStatusMsg.type === 'success'
-                      ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30'
-                      : 'bg-rose-500/10 text-rose-600 border border-rose-500/30'
-                  }`}
-                >
-                  {connectStatusMsg.text}
-                </div>
-              )}
-
-              {/* Channel Tabs */}
-              <div className="mt-4 flex border-b border-gray-200 dark:border-white/10">
-                {(['INSTAGRAM', 'FACEBOOK', 'TIKTOK', 'X'] as const).map((tab) => {
-                  const meta = getChannelMeta(tab);
-                  const isCurrent = activeConnectTab === tab;
-                  const isLinked = connectedAccounts.some((a) => a.channel === tab);
+                  }
 
                   return (
-                    <button
-                      key={tab}
-                      onClick={() => {
-                        setActiveConnectTab(tab);
-                        setConnectStatusMsg(null);
-                      }}
-                      className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-xs font-bold transition-all ${
-                        isCurrent
-                          ? 'border-cyan-500 text-cyan-600 dark:text-cyan-300'
-                          : 'border-transparent text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                    <div
+                      key={msg.id}
+                      className={`flex flex-col ${isOutbound ? 'items-end' : 'items-start'} max-w-2xl ${
+                        isOutbound ? 'ml-auto' : 'mr-auto'
                       }`}
                     >
-                      <span className={`h-2 w-2 rounded-full ${meta.dot}`} />
-                      <span>{meta.label}</span>
-                      {isLinked && (
-                        <span className="rounded-full bg-emerald-500/20 px-1.5 py-0.2 text-[9px] text-emerald-600 dark:text-emerald-400 font-bold">
-                          Active
+                      <div className="flex items-center gap-2 mb-1 px-1 text-[11px] text-slate-400">
+                        <span className="font-semibold text-slate-300">
+                          {msg.senderName || (isOutbound ? 'You' : 'Customer')}
                         </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Tab Content */}
-              <div className="mt-4 space-y-4">
-                {/* Active Connected Account Card */}
-                {activeTabAccount ? (
-                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-cyan-600 to-sky-400 flex items-center justify-center text-white font-bold text-sm">
-                          {activeTabAccount.accountHandle.replace('@', '').slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-black text-gray-900 dark:text-white">
-                              {activeTabAccount.accountHandle}
-                            </span>
-                            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-                              Connected
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                            {activeTabAccount.accountName} · Linked on {new Date(activeTabAccount.connectedAt).toLocaleDateString()}
-                          </p>
-                        </div>
+                        <span>·</span>
+                        <span>
+                          {new Date(msg.sentAt).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                        <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.2 rounded bg-white/5 border border-white/10">
+                          <ChannelIcon channel={msg.channel} className="h-2.5 w-2.5" />
+                          <span>{msg.channel}</span>
+                        </span>
                       </div>
 
-                      <button
-                        onClick={() => handleDisconnectChannel(activeTabAccount.id)}
-                        className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-bold text-rose-600 hover:bg-rose-500/20 transition-colors"
+                      <div
+                        className={`rounded-2xl p-4 text-xs shadow-md leading-relaxed whitespace-pre-wrap ${
+                          isOutbound
+                            ? 'bg-gradient-to-tr from-sky-700 to-cyan-600 text-white rounded-tr-none'
+                            : 'bg-[#073b58] border border-white/10 text-slate-100 rounded-tl-none'
+                        }`}
                       >
-                        Disconnect
-                      </button>
-                    </div>
+                        {msg.content}
+                      </div>
 
-                    <div className="mt-4 pt-3 border-t border-emerald-500/20 grid grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-gray-400">Inbound Webhook Token</span>
-                        <p className="font-mono text-[11px] text-gray-700 dark:text-gray-300 truncate">
-                          {activeTabAccount.webhookSecret || 'Default CRM verify secret'}
-                        </p>
+                      {/* Delivery Status */}
+                      {isOutbound && (
+                        <div className="flex items-center gap-1 mt-1 px-1 text-[10px] text-slate-400">
+                          {msg.deliveryStatus === 'FAILED' ? (
+                            <span className="text-rose-400">⚠️ Delivery Failed</span>
+                          ) : (
+                            <span>✓ {msg.deliveryStatus || 'Sent'}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Conditional Texting Area: Normal Composer OR Client Profile & Lead Overview */}
+            {showIntelPanel ? (
+              /* Client Profile & Lead Overview in Texting Area */
+              <footer className="p-4 sm:p-5 border-t border-sky-500/30 bg-[#06334f] shadow-2xl space-y-4 shrink-0 max-h-[460px] overflow-y-auto">
+                {/* Header: Title + Open Lead + Close Button */}
+                <div className="flex items-center justify-between pb-3 border-b border-white/10 gap-2">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-sky-600 to-cyan-400 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow">
+                      {(selectedConversation.contactName || selectedConversation.lead?.contactName || 'C')
+                        .slice(0, 2)
+                        .toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-white truncate">
+                          {selectedConversation.contactName ||
+                            selectedConversation.lead?.contactName ||
+                            'Client Profile'}
+                        </h3>
+                        <span className="flex items-center gap-1 text-[10px] font-semibold text-sky-400 px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/20 shrink-0">
+                          <ChannelIcon channel={selectedConversation.channel} className="h-3 w-3" />
+                          <span>{selectedConversation.channel}</span>
+                        </span>
                       </div>
-                      <div>
-                        <span className="text-[10px] uppercase font-bold text-gray-400">Channel Mode</span>
-                        <p className="font-semibold text-[11px] text-emerald-600 dark:text-emerald-400">
-                          Live Omnichannel Bi-directional Relay
-                        </p>
-                      </div>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        {selectedConversation.lead?.companyName ||
+                          selectedConversation.contactEmail ||
+                          selectedConversation.contactPhone ||
+                          'Inbound conversation identity'}
+                      </p>
                     </div>
                   </div>
-                ) : (
-                  <div className="rounded-xl border border-dashed border-gray-300 dark:border-white/20 p-5 text-center">
-                    <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 mb-2">
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                      </svg>
-                    </div>
-                    <h4 className="text-xs font-bold text-gray-800 dark:text-gray-200">
-                      No {getChannelMeta(activeConnectTab).label} Account Connected Yet
-                    </h4>
-                    <p className="text-[11px] text-gray-400 mt-1 max-w-md mx-auto">
-                      Authorize your account via 1-click Quick Connect or configure your live developer API credentials below.
-                    </p>
 
-                    <div className="mt-4 flex justify-center gap-2">
-                      <button
-                        onClick={() => handleConnectChannel(true)}
-                        disabled={connecting}
-                        className="rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2 text-xs font-bold text-white shadow-md hover:from-sky-500 hover:to-cyan-400 disabled:opacity-50 transition-all"
+                  <div className="flex items-center gap-2 shrink-0">
+                    {selectedConversation.lead && (
+                      <Link
+                        href={`/leads`}
+                        className="text-xs text-sky-300 hover:text-white px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 transition flex items-center gap-1 font-medium shadow-sm"
                       >
-                        {connecting ? 'Authorizing...' : `1-Click Quick Connect (${getChannelMeta(activeConnectTab).label})`}
-                      </button>
+                        <span>Open in Leads</span>
+                        <span>→</span>
+                      </Link>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowIntelPanel(false)}
+                      className="text-xs font-semibold text-white px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 hover:border-white/30 transition flex items-center gap-1.5 shadow"
+                      title="Return to normal texting area"
+                    >
+                      <span>✕</span>
+                      <span>Back to Texting</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Content */}
+                {!selectedConversation.lead ? (
+                  <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-3">
+                    <div className="flex items-center gap-2 text-amber-300 text-xs font-bold">
+                      <span>⚠️</span>
+                      <span>Unknown Contact (Not linked to a CRM lead)</span>
+                    </div>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      This conversation originated from an external identity that isn&apos;t connected to a lead profile yet.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowConvertModal(true)}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 text-white font-bold text-xs shadow transition"
+                    >
+                      + Convert to CRM Lead
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    {/* Card 1: Lead Details */}
+                    <div className="rounded-2xl border border-white/10 bg-[#042a40]/90 p-3.5 space-y-2.5">
+                      <div className="flex items-center justify-between border-b border-white/5 pb-1.5">
+                        <span className="font-bold text-white text-xs">Lead Details</span>
+                        <span className="text-[10px] text-sky-400 font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-sky-500/10 border border-sky-500/20">
+                          {selectedConversation.lead.pipelineStage.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <div className="space-y-1.5 text-xs">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400">Company:</span>
+                          <span className="font-semibold text-white truncate max-w-[140px]">
+                            {selectedConversation.lead.companyName || 'None'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400">Deal Value:</span>
+                          <span className="font-bold text-emerald-400">
+                            {formatCurrency(selectedConversation.lead.dealValue || 0)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-400">Email:</span>
+                          <span className="text-slate-200 truncate max-w-[140px]">
+                            {selectedConversation.lead.email}
+                          </span>
+                        </div>
+                        {selectedConversation.lead.phone && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-slate-400">Phone:</span>
+                            <span className="text-slate-200">{selectedConversation.lead.phone}</span>
+                          </div>
+                        )}
+                        <div className="pt-2 border-t border-white/5 space-y-1.5">
+                          <label className="text-slate-400 text-xs block font-medium">
+                            Conversation Status:
+                          </label>
+                          <select
+                            value={selectedConversation.status}
+                            onChange={(e) => handleStatusChange(selectedConversation.id, e.target.value)}
+                            className="w-full bg-[#073b58] hover:bg-[#094266] border border-white/15 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-sky-400 transition shadow-inner cursor-pointer"
+                          >
+                            <option value="OPEN">Open</option>
+                            <option value="WAITING_ON_US">Waiting on Us</option>
+                            <option value="WAITING_ON_CUSTOMER">Waiting on Client</option>
+                            <option value="CLOSED">Closed</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card 2: Customer Success & AI Signals */}
+                    <div className="rounded-2xl border border-white/10 bg-[#042a40]/90 p-3.5 space-y-2.5">
+                      <div className="flex items-center justify-between border-b border-white/5 pb-1.5">
+                        <span className="font-bold text-white text-xs">Retention & AI Signals</span>
+                        {selectedConversation.lead.customerSuccess && (
+                          <span className="font-bold text-emerald-400 text-xs">
+                            {selectedConversation.lead.customerSuccess.healthScore}% Health
+                          </span>
+                        )}
+                      </div>
+                      <div className="space-y-1.5 text-xs">
+                        {selectedConversation.lead.customerSuccess && (
+                          <>
+                            <div className="flex justify-between items-center">
+                              <span className="text-slate-400">Lifecycle:</span>
+                              <span className="font-medium text-slate-200">
+                                {selectedConversation.lead.customerSuccess.lifecycleStage}
+                              </span>
+                            </div>
+                            {selectedConversation.lead.customerSuccess.renewalDate && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-slate-400">Renewal Date:</span>
+                                <span className="text-slate-200">
+                                  {new Date(
+                                    selectedConversation.lead.customerSuccess.renewalDate
+                                  ).toLocaleDateString()}
+                                </span>
+                              </div>
+                            )}
+                          </>
+                        )}
+                        {selectedConversation.lead.aiInsight && (
+                          <>
+                            <div className="flex justify-between items-center">
+                              <span className="text-slate-400">Win Probability:</span>
+                              <span className="font-bold text-sky-400">
+                                {selectedConversation.lead.aiInsight.winProbability}%
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-slate-400">Sentiment:</span>
+                              <span className="font-medium text-emerald-400">
+                                {selectedConversation.lead.aiInsight.sentimentLabel}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-slate-400">Churn Risk:</span>
+                              <span className="font-medium text-amber-400">
+                                {selectedConversation.lead.aiInsight.churnRisk}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                        {!selectedConversation.lead.customerSuccess && !selectedConversation.lead.aiInsight && (
+                          <p className="text-slate-400 italic py-3 text-center">
+                            Standard account engagement.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Card 3: Follow-up Tasks */}
+                    <div className="rounded-2xl border border-white/10 bg-[#042a40]/90 p-3.5 space-y-2.5">
+                      <div className="flex items-center justify-between border-b border-white/5 pb-1.5">
+                        <span className="font-bold text-white text-xs">Follow-up Tasks</span>
+                        <button
+                          type="button"
+                          onClick={() => setShowTaskModal(true)}
+                          className="text-xs text-sky-400 hover:text-sky-300 font-medium"
+                        >
+                          + Add Task
+                        </button>
+                      </div>
+                      <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
+                        {selectedConversation.lead.tasks && selectedConversation.lead.tasks.length > 0 ? (
+                          selectedConversation.lead.tasks.map((t) => (
+                            <div
+                              key={t.id}
+                              className="rounded-xl border border-white/5 bg-[#073b58]/50 p-2 text-xs flex justify-between items-center gap-2"
+                            >
+                              <span className="truncate text-slate-200">{t.title}</span>
+                              {t.dueDate && (
+                                <span className="text-[10px] text-slate-400 shrink-0">
+                                  {new Date(t.dueDate).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-slate-400 italic py-3 text-center text-xs">
+                            No open tasks.
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
-
-                {/* Manual Credentials Configuration Section */}
-                <div className="rounded-xl border border-gray-200/80 bg-gray-50/60 p-4 dark:border-white/10 dark:bg-white/5">
-                  <h4 className="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider mb-3">
-                    {activeTabAccount ? 'Update or Add Secondary Account' : 'Direct API Token Configuration'}
-                  </h4>
-
-                  <div className="space-y-3 text-xs">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                          Account Handle / Username *
-                        </label>
-                        <input
-                          type="text"
-                          placeholder={activeConnectTab === 'FACEBOOK' ? 'Page Name / ID' : '@username'}
-                          value={connectHandle}
-                          onChange={(e) => setConnectHandle(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                          Display Label
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Straten Agency Official"
-                          value={connectAccountName}
-                          onChange={(e) => setConnectAccountName(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                          App ID / Client Key
-                        </label>
-                        <input
-                          type="text"
-                          placeholder="Optional Client ID"
-                          value={connectAppId}
-                          onChange={(e) => setConnectAppId(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                          Access Token / Bearer Token
-                        </label>
-                        <input
-                          type="password"
-                          placeholder="API Access Token"
-                          value={connectAccessToken}
-                          onChange={(e) => setConnectAccessToken(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end pt-2">
+              </footer>
+            ) : (
+              <>
+                {/* Smart Suggestions Bar */}
+                {smartSuggestions.length > 0 && composerMode === 'REPLY' && (
+                  <div className="px-5 py-2 border-t border-white/5 bg-[#042a40]/50 flex items-center gap-2 overflow-x-auto text-[11px]">
+                    <span className="text-slate-400 shrink-0 font-medium">⚡ Quick Replies:</span>
+                    {smartSuggestions.map((s) => (
                       <button
-                        onClick={() => handleConnectChannel(false)}
-                        disabled={connecting || !connectHandle.trim()}
-                        className="rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2 font-bold text-white shadow-sm hover:from-sky-500 hover:to-cyan-400 disabled:opacity-50 transition-all"
+                        key={s.id}
+                        type="button"
+                        onClick={() => setComposerContent(s.text)}
+                        className="whitespace-nowrap px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 text-sky-300 border border-white/10 transition"
                       >
-                        {connecting ? 'Saving...' : 'Save & Verify Channel'}
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Sticky Unified Composer */}
+                <footer className="p-4 border-t border-white/10 bg-[#073b58]/95 backdrop-blur-md space-y-3 shrink-0">
+                  {/* Mode & Channel Controls */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex rounded-xl bg-[#042a40] p-0.5 border border-white/10 text-xs">
+                        <button
+                          type="button"
+                          onClick={() => setComposerMode('REPLY')}
+                          className={`px-3 py-1 rounded-lg font-semibold transition ${
+                            composerMode === 'REPLY'
+                              ? 'bg-sky-600 text-white shadow'
+                              : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          Reply to Customer
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setComposerMode('INTERNAL_NOTE')}
+                          className={`px-3 py-1 rounded-lg font-semibold transition ${
+                            composerMode === 'INTERNAL_NOTE'
+                              ? 'bg-amber-600 text-white shadow'
+                              : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          🔒 Internal Note
+                        </button>
+                      </div>
+
+                      {composerMode === 'REPLY' && (
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <span className="text-slate-400 text-[11px] hidden sm:inline">Send via:</span>
+                          <select
+                            value={composerChannel}
+                            onChange={(e) => setComposerChannel(e.target.value)}
+                            className="bg-[#042a40] border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white focus:outline-none"
+                          >
+                            <option value="EMAIL">Email</option>
+                            <option value="WHATSAPP">WhatsApp</option>
+                            <option value="INSTAGRAM">Instagram</option>
+                            <option value="FACEBOOK">Facebook</option>
+                            <option value="X">X (Twitter)</option>
+                            <option value="TIKTOK">TikTok</option>
+                          </select>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowTemplates((prev) => !prev)}
+                        className="text-xs text-slate-300 hover:text-white px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 transition"
+                      >
+                        📋 Templates
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowTaskModal(true)}
+                        className="text-xs text-sky-400 hover:text-sky-300 px-2.5 py-1 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 transition hidden sm:inline-flex"
+                      >
+                        ⏰ Follow-up
                       </button>
                     </div>
                   </div>
-                </div>
 
-                {/* Developer Documentation Info */}
-                <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 text-[11px] text-sky-800 dark:text-cyan-200">
-                  <p className="font-bold flex items-center gap-1.5">
-                    <svg className="h-4 w-4 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Developer Portals Reference</span>
-                  </p>
-                  <p className="mt-1 leading-relaxed text-gray-600 dark:text-gray-300">
-                    {activeConnectTab === 'INSTAGRAM' && (
-                      <>Generate Page Access Tokens and subscribe to <code>instagram_manage_messages</code> via Meta for Developers (Graph API v21.0).</>
-                    )}
-                    {activeConnectTab === 'FACEBOOK' && (
-                      <>Connect Facebook Page ID with <code>pages_messaging</code> permission on Meta Graph API.</>
-                    )}
-                    {activeConnectTab === 'TIKTOK' && (
-                      <>Enable TikTok Direct Messaging API via TikTok for Business Developer Console with <code>im.message.send</code> scope.</>
-                    )}
-                    {activeConnectTab === 'X' && (
-                      <>Create an App in the X Developer Portal with v2 Read, Write, and Direct Message privileges to generate OAuth 2.0 Bearer Tokens.</>
-                    )}
-                  </p>
-                </div>
+                  {/* Templates Dropdown */}
+                  {showTemplates && (
+                    <div className="rounded-2xl border border-white/10 bg-[#042a40] p-3 space-y-2 shadow-2xl">
+                      <p className="text-[11px] font-bold text-slate-300">Select Canned Response</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {CANNED_RESPONSES.map((t) => (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => {
+                              setComposerContent(
+                                t.content
+                                  .replace(
+                                    '{{name}}',
+                                    selectedConversation.contactName?.split(' ')[0] || 'there'
+                                  )
+                                  .replace(
+                                    '{{company}}',
+                                    selectedConversation.lead?.companyName || 'your company'
+                                  )
+                              );
+                              setShowTemplates(false);
+                            }}
+                            className="text-left p-2 rounded-xl bg-white/5 hover:bg-white/10 transition border border-white/5"
+                          >
+                            <p className="text-xs font-semibold text-white">{t.title}</p>
+                            <p className="text-[10px] text-slate-400 truncate">{t.content}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-                {/* Live Production Webhook Endpoint Card */}
-                <div className="p-3.5 rounded-xl bg-gray-50/90 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-xs space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-gray-800 dark:text-gray-200">
-                      Live Server Webhook Endpoint (Omnichannel Inbound)
-                    </span>
-                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                      Production Ready
-                    </span>
+                  {/* Channel Disconnected Warning Banner */}
+                  {!isSelectedChannelConnected && composerMode === 'REPLY' && (
+                    <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-amber-300">
+                      <div className="flex items-center gap-2">
+                        <span>⚠️</span>
+                        <span>
+                          {composerChannel} isn&apos;t connected. Connect credentials to send live messages from this channel.
+                        </span>
+                      </div>
+                      <Link
+                        href="/settings/integrations"
+                        className="inline-flex whitespace-nowrap px-3 py-1 rounded-lg bg-amber-500 text-slate-900 font-bold text-[11px] hover:bg-amber-400 transition"
+                      >
+                        Connect {composerChannel}
+                      </Link>
+                    </div>
+                  )}
+
+                  {composerError && (
+                    <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-2.5 text-xs text-rose-300">
+                      {composerError}
+                    </div>
+                  )}
+
+                  {/* Subject Input for Email */}
+                  {composerMode === 'REPLY' && composerChannel === 'EMAIL' && (
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="Email Subject..."
+                        value={composerSubject}
+                        onChange={(e) => setComposerSubject(e.target.value)}
+                        className="w-full rounded-xl bg-[#042a40] border border-white/10 px-3 py-1.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                      />
+                    </div>
+                  )}
+
+                  {/* Composer Textarea */}
+                  <div className="relative">
+                    <textarea
+                      rows={3}
+                      placeholder={
+                        composerMode === 'INTERNAL_NOTE'
+                          ? 'Write an internal team note (not sent to customer)...'
+                          : `Reply via ${composerChannel}... (Ctrl+Enter to send)`
+                      }
+                      value={composerContent}
+                      onChange={(e) => setComposerContent(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                          e.preventDefault();
+                          handleSendMessage();
+                        }
+                      }}
+                      className={`w-full rounded-2xl p-3 text-xs text-white placeholder:text-slate-500 focus:outline-none border transition resize-none ${
+                        composerMode === 'INTERNAL_NOTE'
+                          ? 'bg-amber-950/20 border-amber-500/30 focus:border-amber-400'
+                          : 'bg-[#042a40] border-white/10 focus:border-sky-400'
+                      }`}
+                    />
                   </div>
-                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
-                    Paste this endpoint into your Meta Developer App (Instagram / Facebook / WhatsApp), TikTok Developer Console, or X Webhooks:
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 p-2 rounded-lg bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 text-[11px] font-mono text-cyan-600 dark:text-cyan-400 select-all overflow-x-auto">
-                      {typeof window !== 'undefined' ? `${window.location.origin}/api/inbox/webhook` : 'https://[your-domain]/api/inbox/webhook'}
-                    </code>
+
+                  {/* Action Toolbar */}
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-2 text-slate-400 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setComposerContent((p) => p + ' 😊')}
+                        className="p-1.5 hover:text-white rounded-lg hover:bg-white/5 transition"
+                        title="Insert Emoji"
+                      >
+                        😊
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDraftSaved(true);
+                          setTimeout(() => setDraftSaved(false), 2000);
+                        }}
+                        className="p-1.5 hover:text-white rounded-lg hover:bg-white/5 transition text-[11px]"
+                      >
+                        {draftSaved ? '✓ Saved' : 'Save Draft'}
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={
+                        sending ||
+                        !composerContent.trim() ||
+                        (!isSelectedChannelConnected && composerMode === 'REPLY')
+                      }
+                      onClick={() => handleSendMessage()}
+                      className={`px-5 py-2 rounded-xl text-xs font-bold text-white shadow-lg transition flex items-center gap-2 ${
+                        composerMode === 'INTERNAL_NOTE'
+                          ? 'bg-gradient-to-r from-amber-600 to-yellow-500 hover:from-amber-500 hover:to-yellow-400 shadow-amber-500/20'
+                          : 'bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 shadow-sky-500/20 disabled:opacity-50'
+                      }`}
+                    >
+                      {sending ? (
+                        <span>Sending...</span>
+                      ) : composerMode === 'INTERNAL_NOTE' ? (
+                        <span>Add Internal Note</span>
+                      ) : (
+                        <span>Send Message</span>
+                      )}
+                    </button>
                   </div>
-                  <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                    <span>Verify Token:</span>
-                    <code className="px-1.5 py-0.5 rounded bg-gray-200/70 dark:bg-white/10 font-mono text-gray-800 dark:text-gray-200 text-[11px]">
-                      straten_inbox_verify_token
-                    </code>
-                    <span className="text-[10px] text-gray-400">(customizable via INBOX_WEBHOOK_VERIFY_TOKEN env)</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+                </footer>
+              </>
+            )}
+          </>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-slate-400 space-y-3">
+            <div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl">
+              📬
+            </div>
+            <h3 className="text-base font-bold text-white">Select a conversation</h3>
+            <p className="text-xs max-w-sm">
+              Choose a conversation from your inbox on the left to read messages, collaborate with notes, or respond across channels.
+            </p>
           </div>
         )}
-      </AnimatePresence>
+      </main>
 
-      {/* NEW CONVERSATION MODAL */}
-      <AnimatePresence>
-        {showNewModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#073652]"
-            >
-              <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/10 pb-3">
-                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Start New Conversation</h3>
-                <button onClick={() => setShowNewModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+      {/* ========================================================================= */}
+      {/* MODAL: SCHEDULE FOLLOW-UP TASK */}
+      {/* ========================================================================= */}
+      {showTaskModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-white/15 bg-[#073b58] p-6 shadow-2xl space-y-4 text-slate-100">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <h3 className="text-base font-bold text-white">Schedule Follow-up Task</h3>
+              <button
+                type="button"
+                onClick={() => setShowTaskModal(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateTask} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Task Title</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Call back regarding pricing proposal"
+                  value={taskTitle}
+                  onChange={(e) => setTaskTitle(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                />
               </div>
 
-              <form onSubmit={handleCreateNewThread} className="mt-4 space-y-4 text-xs">
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                    Select Lead / Prospect
-                  </label>
-                  <select
-                    value={newLeadId}
-                    onChange={(e) => setNewLeadId(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
-                  >
-                    {workspaceLeads.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.companyName ? `${l.companyName} (${l.contactName})` : l.contactName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Due Date</label>
+                <input
+                  type="datetime-local"
+                  value={taskDueDate}
+                  onChange={(e) => setTaskDueDate(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2.5 text-xs text-white focus:border-sky-400 focus:outline-none"
+                />
+              </div>
 
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                    Primary Channel
-                  </label>
-                  <select
-                    value={newChannel}
-                    onChange={(e: any) => setNewChannel(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
-                  >
-                    <option value="EMAIL">Email</option>
-                    <option value="WHATSAPP">WhatsApp</option>
-                    <option value="INSTAGRAM">Instagram DM</option>
-                    <option value="FACEBOOK">Facebook Messenger</option>
-                    <option value="TIKTOK">TikTok Direct</option>
-                    <option value="X">X (Twitter) DM</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Priority</label>
+                <select
+                  value={taskPriority}
+                  onChange={(e) => setTaskPriority(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2.5 text-xs text-white focus:border-sky-400 focus:outline-none"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
 
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowNewModal(false)}
-                    className="rounded-xl border border-gray-200 px-3 py-1.5 font-semibold text-gray-600 hover:bg-gray-50 dark:border-white/10 dark:text-gray-300"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-1.5 font-bold text-white shadow-sm"
-                  >
-                    Open Thread
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+              <div className="pt-2 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowTaskModal(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={creatingTask}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 text-xs font-bold text-white shadow transition disabled:opacity-60"
+                >
+                  {creatingTask ? 'Saving...' : 'Create Task'}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
-      {/* SIMULATE INBOUND REPLY MODAL */}
-      <AnimatePresence>
-        {showSimulateModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#073652]"
-            >
-              <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/10 pb-3">
-                <div>
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">Simulate Customer Inbound Message</h3>
-                  <p className="text-[10px] text-gray-400">Test omnichannel reactivity, unread counters, and AI smart replies.</p>
-                </div>
-                <button onClick={() => setShowSimulateModal(false)} className="text-gray-400 hover:text-gray-600">✕</button>
+      {/* ========================================================================= */}
+      {/* MODAL: CONVERT TO LEAD */}
+      {/* ========================================================================= */}
+      {showConvertModal && selectedConversation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-white/15 bg-[#073b58] p-6 shadow-2xl space-y-4 text-slate-100">
+            <div className="flex items-center justify-between pb-2 border-b border-white/10">
+              <h3 className="text-base font-bold text-white">Convert to CRM Lead</h3>
+              <button
+                type="button"
+                onClick={() => setShowConvertModal(false)}
+                className="text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300">
+              Create a formal lead profile for{' '}
+              <strong className="text-white">
+                {selectedConversation.contactName || selectedConversation.contactHandle}
+              </strong>{' '}
+              to track deals, proposals, and pipeline milestones.
+            </p>
+
+            <form onSubmit={handleConvertLead} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Company / Organization Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Acme Corp"
+                  value={convertCompanyName}
+                  onChange={(e) => setConvertCompanyName(e.target.value)}
+                  className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                />
               </div>
 
-              <div className="mt-4 space-y-4 text-xs">
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                    Channel
-                  </label>
-                  <select
-                    value={simulateChannel}
-                    onChange={(e: any) => setSimulateChannel(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
-                  >
-                    <option value="WHATSAPP">WhatsApp</option>
-                    <option value="EMAIL">Email</option>
-                    <option value="INSTAGRAM">Instagram DM</option>
-                    <option value="FACEBOOK">Facebook Messenger</option>
-                    <option value="TIKTOK">TikTok Direct</option>
-                    <option value="X">X (Twitter) DM</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
-                    Client Reply Content
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={simulateText}
-                    onChange={(e) => setSimulateText(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowSimulateModal(false)}
-                    className="rounded-xl border border-gray-200 px-3 py-1.5 font-semibold text-gray-600 hover:bg-gray-50 dark:border-white/10 dark:text-gray-300"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSimulateInbound}
-                    className="rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-1.5 font-bold text-white shadow-sm"
-                  >
-                    Simulate Message
-                  </button>
-                </div>
+              <div className="pt-2 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowConvertModal(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={convertingLead}
+                  className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 text-xs font-bold text-white shadow transition disabled:opacity-60"
+                >
+                  {convertingLead ? 'Converting...' : 'Convert to Lead'}
+                </button>
               </div>
-            </motion.div>
+            </form>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }

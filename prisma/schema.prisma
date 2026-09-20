@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url = env("DATABASE_URL")
 }
 
@@ -96,6 +96,7 @@ model Lead {
   aiInsight         AiDealInsight?
   meetingSummaries  AiMeetingSummary[]
   conversations     Conversation[]
+  channelIdentities ContactChannelIdentity[]
   assignedToId       String?
   assignedTo         User?       @relation("LeadAssignee", fields: [assignedToId], references: [id])
   organizationId     String?
@@ -361,6 +362,7 @@ model Organization {
   meetingSummaries      AiMeetingSummary[]
   conversations         Conversation[]
   connectedChannels     ConnectedChannelAccount[]
+  channelIdentities     ContactChannelIdentity[]
 
   @@index([slug])
   @@index([suspendedAt])
@@ -562,41 +564,86 @@ model Conversation {
   id                  String               @id @default(uuid())
   organizationId      String
   organization        Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  leadId              String
-  lead                Lead                 @relation(fields: [leadId], references: [id], onDelete: Cascade)
-  channel             String               @default("EMAIL") // EMAIL, WHATSAPP, SMS, MULTI
-  status              String               @default("OPEN")  // OPEN, WAITING_ON_CUSTOMER, WAITING_ON_US, CLOSED, SNOOZED
+  leadId              String?
+  lead                Lead?                @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  contactName         String?
+  contactEmail        String?
+  contactPhone        String?
+  contactHandle       String?
   subject             String?
-  lastMessageAt       DateTime             @default(now())
-  lastMessageSnippet  String?
-  unreadCount         Int                  @default(0)
+  status              String               @default("OPEN")  // OPEN, PENDING, RESOLVED, CLOSED, WAITING_ON_CUSTOMER
+  priority            String               @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
   assignedToId        String?
   assignedTo          User?                @relation("ConversationAssignee", fields: [assignedToId], references: [id])
+  channel             String               @default("EMAIL") // EMAIL, WHATSAPP, INSTAGRAM, FACEBOOK, X, TIKTOK, MULTI
+  primaryChannel      String?
+  lastMessageAt       DateTime             @default(now())
+  lastMessageSnippet  String?
+  lastMessagePreview  String?
+  unreadCount         Int                  @default(0)
+  isStarred           Boolean              @default(false)
+  isArchived          Boolean              @default(false)
+  isClosed            Boolean              @default(false)
+  tags                Json?
   messages            ConversationMessage[]
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
   @@index([organizationId, status])
   @@index([organizationId, lastMessageAt])
+  @@index([organizationId, isStarred])
+  @@index([organizationId, isArchived])
   @@index([leadId])
   @@index([assignedToId])
+  @@index([channel])
 }
 
 model ConversationMessage {
-  id             String       @id @default(uuid())
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  senderType     String       // AGENT, LEAD, SYSTEM, AI_COPILOT
-  senderId       String?
-  senderName     String?
-  channel        String       // EMAIL, WHATSAPP, SMS, INSTAGRAM, FACEBOOK, TIKTOK, X, INTERNAL_NOTE
-  content        String
-  metadata       Json?
-  isInternal     Boolean      @default(false)
-  status         String       @default("SENT") // SENT, DELIVERED, READ, FAILED, PENDING
-  sentAt         DateTime     @default(now())
+  id                String       @id @default(uuid())
+  conversationId    String
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  channel           String       // EMAIL, WHATSAPP, SMS, INSTAGRAM, FACEBOOK, TIKTOK, X, INTERNAL_NOTE
+  direction         String       @default("OUTBOUND") // INBOUND, OUTBOUND
+  senderType        String       // AGENT, LEAD, CUSTOMER, USER, SYSTEM, AI_COPILOT
+  senderId          String?
+  senderName        String?
+  senderExternalId  String?
+  content           String
+  contentType       String       @default("TEXT") // TEXT, HTML, MEDIA, NOTE
+  externalMessageId String?
+  deliveryStatus    String       @default("SENT") // DRAFT, QUEUED, SENT, DELIVERED, READ, FAILED
+  status            String       @default("SENT") // Backward compatibility
+  readAt            DateTime?
+  sentAt            DateTime     @default(now())
+  receivedAt        DateTime?
+  metadata          Json?
+  attachments       Json?
+  isInternal        Boolean      @default(false)
+  createdAt         DateTime     @default(now())
 
   @@index([conversationId, sentAt])
+  @@index([externalMessageId])
+  @@index([channel])
+}
+
+model ContactChannelIdentity {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leadId         String
+  lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  channel        String       // EMAIL, WHATSAPP, INSTAGRAM, FACEBOOK, X, TIKTOK
+  externalUserId String
+  username       String?
+  displayName    String?
+  profileUrl     String?
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([organizationId, channel, externalUserId])
+  @@index([organizationId, channel])
+  @@index([leadId])
 }
 
 model ConnectedChannelAccount {
@@ -609,10 +656,13 @@ model ConnectedChannelAccount {
   externalAccountId String?      // e.g. Meta Page ID, Instagram Business Account ID, TikTok Open ID, X User ID
   accessToken       String?      // API Token / OAuth User or Page Access Token
   refreshToken      String?      // Refresh token if applicable
+  tokenExpiresAt    DateTime?
   appId             String?      // App ID / Client Key
   appSecret         String?      // App Secret / Client Secret
   webhookSecret     String?      // Webhook verification token
-  status            String       @default("CONNECTED") // CONNECTED, DISCONNECTED, ERROR
+  status            String       @default("CONNECTED") // CONNECTED, DISCONNECTED, ERROR, PENDING
+  lastSyncAt        DateTime?
+  errorMessage      String?
   avatarUrl         String?
   metadata          Json?        // Channel specific metadata (scopes, permissions, followers)
   connectedAt       DateTime     @default(now())
@@ -622,5 +672,6 @@ model ConnectedChannelAccount {
   @@index([organizationId, channel])
   @@index([status])
 }
+
 
 

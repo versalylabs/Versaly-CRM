@@ -8,7 +8,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { id } = await params;
     const body = await request.json();
     const data: any = {};
-    for (const key of ["title", "description", "status"]) if (body[key] !== undefined) data[key] = body[key];
+    for (const key of ["leadId", "title", "description", "status"]) if (body[key] !== undefined) data[key] = body[key];
     if (body.value !== undefined) data.value = body.value === "" || body.value == null ? null : Number(body.value);
     if (body.status === "sent" && body.previousStatus !== "sent") data.sentAt = new Date();
     if (["accepted","rejected"].includes(body.status) && body.previousStatus !== body.status) data.respondedAt = new Date();

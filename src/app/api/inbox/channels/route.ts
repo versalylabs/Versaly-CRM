@@ -7,6 +7,8 @@ import {
   disconnectChannelAccount,
 } from '@/lib/inbox';
 
+import { providerRegistry } from '@/lib/communication-providers';
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -15,8 +17,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const accounts = await getConnectedChannelAccounts(organizationId);
-    return NextResponse.json({ accounts }, { status: 200 });
+    const [accounts, providers] = await Promise.all([
+      getConnectedChannelAccounts(organizationId),
+      Promise.all(providerRegistry.getAllProviders().map(p => p.getConnectionStatus(organizationId))),
+    ]);
+
+    return NextResponse.json({ accounts, channels: providers }, { status: 200 });
   } catch (error: any) {
     console.error('Error in GET /api/inbox/channels:', error);
     return NextResponse.json({ error: error.message || 'Failed to fetch connected channels' }, { status: 500 });

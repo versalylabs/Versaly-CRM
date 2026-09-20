@@ -14,6 +14,20 @@ export default function IntegrationsPage(){
  return <div className="mx-auto max-w-6xl space-y-6">
   <div><p className="text-sm font-medium text-accent-700">Developer platform</p><h1 className="mt-1 text-3xl font-bold text-gray-900 dark:text-gray-100">Integrations & API</h1><p className="mt-2 text-gray-600 dark:text-gray-400">Connect websites, automation platforms and your own software with workspace-scoped credentials and signed events.</p></div>
   {message&&<div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">{message}</div>}
+  <div className="rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-900/30 via-[#073b58] to-cyan-900/30 p-5 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <div className="flex items-center gap-2">
+        <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <h2 className="text-base font-bold text-white">Unified Communication Channels</h2>
+      </div>
+      <p className="mt-1 text-xs text-slate-300 max-w-xl">
+        Configure omnichannel messaging for Email, WhatsApp, Instagram, Facebook Messenger, X, and TikTok with inbound webhooks and real-time delivery.
+      </p>
+    </div>
+    <a href="/settings/integrations" className="inline-flex items-center justify-center whitespace-nowrap rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-sky-500/25 hover:from-sky-500 hover:to-cyan-400 transition">
+      Manage Channels →
+    </a>
+  </div>
   {(newKey||newSecret)&&<div className="rounded-xl border border-emerald-300 bg-emerald-50 p-5 dark:border-emerald-800 dark:bg-emerald-950/30"><h2 className="font-semibold text-emerald-900 dark:text-emerald-200">Save this secret now</h2><p className="mt-1 text-sm text-emerald-800 dark:text-emerald-300">For security, the full secret will not be shown again.</p>{newKey&&<code className="mt-3 block break-all rounded bg-white p-3 text-xs dark:bg-gray-950">{newKey}</code>}{newSecret&&<code className="mt-3 block break-all rounded bg-white p-3 text-xs dark:bg-gray-950">{newSecret}</code>}<button className="mt-3 rounded-lg border px-3 py-2 text-sm" onClick={()=>{navigator.clipboard.writeText(newKey||newSecret);setMessage('Secret copied.')}}>Copy secret</button></div>}
   <div className="grid gap-6 lg:grid-cols-2">
    <section className="rounded-xl border border-gray-200 bg-white p-6 shadow-soft dark:border-gray-800 dark:bg-gray-950"><h2 className="text-xl font-semibold">API keys</h2><p className="mt-1 text-sm text-gray-500">Create credentials for the versioned API. Full keys are displayed only once.</p><div className="mt-4 flex gap-2"><input className={field+' mt-0'} placeholder="Key name" value={name} onChange={e=>setName(e.target.value)}/><button className="btn-primary whitespace-nowrap" onClick={createKey}>Create key</button></div><div className="mt-5 space-y-2">{keys.map(k=><div key={k.id} className="flex items-center justify-between rounded-lg border p-3 text-sm dark:border-gray-800"><div><div className="font-medium">{k.name}</div><div className="text-xs text-gray-500">{k.keyPrefix}… · {k.revokedAt?'Revoked':k.lastUsedAt?`Used ${new Date(k.lastUsedAt).toLocaleDateString()}`:'Never used'}</div></div>{!k.revokedAt&&<button onClick={()=>revoke(k.id)} className="text-xs font-semibold text-red-600">Revoke</button>}</div>)}{!keys.length&&<p className="text-sm text-gray-500">No API keys yet.</p>}</div></section>
