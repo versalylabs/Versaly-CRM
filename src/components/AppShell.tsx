@@ -29,7 +29,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} />
 
       {/* Mobile Top Navigation Bar (< lg screens) */}
-      <header className="fixed top-0 inset-x-0 z-20 flex h-14 items-center justify-between border-b border-white/10 bg-[#073652]/95 px-4 backdrop-blur-xl lg:hidden">
+      <header className="fixed top-0 inset-x-0 z-20 flex h-14 items-center justify-between border-b border-white/10 bg-[#14213d]/95 px-4 backdrop-blur-xl lg:hidden">
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setMobileOpen(true)}
@@ -41,7 +41,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </svg>
           </button>
           <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-sky-600 to-cyan-400 text-xs font-black text-white">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-600 to-[#fca311] text-xs font-black text-slate-950 shadow-sm shadow-[#fca311]/25">
               V
             </span>
             <span className="text-xs font-bold text-white truncate max-w-[140px]">

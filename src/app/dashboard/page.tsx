@@ -300,7 +300,7 @@ export default function Dashboard() {
          ========================================= */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {/* Total Leads */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#073652]/80 backdrop-blur-xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] transition hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.38)] hover:border-sky-400/30">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#1b2a4a]/80 backdrop-blur-xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] transition hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.38)] hover:border-sky-400/30">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-400">Total Prospects</p>
@@ -324,7 +324,7 @@ export default function Dashboard() {
         </div>
 
         {/* Active Pipeline */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#073652]/80 backdrop-blur-xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] transition hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.38)] hover:border-emerald-400/30">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#1b2a4a]/80 backdrop-blur-xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] transition hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.38)] hover:border-emerald-400/30">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-400">Active Pipeline Value</p>
@@ -348,7 +348,7 @@ export default function Dashboard() {
         </div>
 
         {/* Won Deals */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#073652]/80 backdrop-blur-xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] transition hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.38)] hover:border-emerald-400/30">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#1b2a4a]/80 backdrop-blur-xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] transition hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.38)] hover:border-emerald-400/30">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-400">Won Revenue</p>
@@ -372,7 +372,7 @@ export default function Dashboard() {
         </div>
 
         {/* Conversion Rate */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#073652]/80 backdrop-blur-xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] transition hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.38)] hover:border-emerald-400/30">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#1b2a4a]/80 backdrop-blur-xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] transition hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.38)] hover:border-emerald-400/30">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-400">Conversion Rate</p>
@@ -401,7 +401,7 @@ export default function Dashboard() {
          ========================================= */}
       <section className="grid gap-6 xl:grid-cols-[1.55fr_1fr]">
         {/* Main Trajectory Area Chart (Shopeers / Pivora inspired) */}
-        <div className="rounded-2xl border border-white/10 bg-[#073652]/80 backdrop-blur-xl p-6 shadow-sm">
+        <div className="rounded-2xl border border-white/10 bg-[#1b2a4a]/80 backdrop-blur-xl p-6 shadow-sm">
           <RevenueTrendChart
             data={data.trajectory || []}
             formatCurrency={formatCurrency}
@@ -412,7 +412,7 @@ export default function Dashboard() {
         {/* Side Visuals: Conversion Radial Gauge & Weekly Activity Bar Chart */}
         <div className="flex flex-col gap-6">
           {/* Radial Semi-Circle Conversion Arc */}
-          <div className="rounded-2xl border border-white/10 bg-[#073652]/80 backdrop-blur-xl p-6 shadow-sm">
+          <div className="rounded-2xl border border-white/10 bg-[#1b2a4a]/80 backdrop-blur-xl p-6 shadow-sm">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="text-sm font-bold text-white">Conversion Velocity</h3>
               <Link href="/pipeline" className="text-xs font-semibold text-cyan-400 hover:text-cyan-300">
@@ -429,7 +429,7 @@ export default function Dashboard() {
 
           {/* Weekly Activity Velocity Bars */}
           {data.weeklyActivity && (
-            <div className="rounded-2xl border border-white/10 bg-[#073652]/80 backdrop-blur-xl p-6 shadow-sm">
+            <div className="rounded-2xl border border-white/10 bg-[#1b2a4a]/80 backdrop-blur-xl p-6 shadow-sm">
               <WeeklyActivityBarChart days={data.weeklyActivity} />
             </div>
           )}
@@ -439,7 +439,7 @@ export default function Dashboard() {
       {/* =========================================
           5. Smart Needs Attention Action Center
          ========================================= */}
-      <section className="rounded-2xl border border-white/10 bg-[#073652]/80 backdrop-blur-xl p-6 shadow-sm">
+      <section className="rounded-2xl border border-white/10 bg-[#1b2a4a]/80 backdrop-blur-xl p-6 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4">
           <div>
             <h2 className="text-base font-bold text-white flex items-center gap-2">

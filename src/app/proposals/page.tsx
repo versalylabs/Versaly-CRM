@@ -183,7 +183,7 @@ export default function ProposalsPage() {
   const fmt = (n: number) => formatCurrency(n);
 
   return (
-    <div className="min-h-screen bg-[#053048] text-slate-100">
+    <div className="min-h-screen bg-[#14213d] text-slate-100">
       <div className="container-custom py-8 space-y-8">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -221,7 +221,7 @@ export default function ProposalsPage() {
           ].map((item, idx) => (
             <div
               key={idx}
-              className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-b from-[#073652]/70 to-[#042438]/80 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl"
+              className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-b from-[#1b2a4a]/70 to-[#0e172a]/80 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent" />
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{item.label}</p>
@@ -233,7 +233,7 @@ export default function ProposalsPage() {
         {/* Main Grid: Form + Proposal Templates List */}
         <div className="grid gap-6 xl:grid-cols-[400px_1fr]">
           {/* Create Proposal Form (Liquid Glass Panel) */}
-          <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl h-fit space-y-5">
+          <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl h-fit space-y-5">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
 
             <div>
@@ -290,7 +290,7 @@ export default function ProposalsPage() {
                           applyTemplate(tmpl);
                         }
                       }}
-                      className="text-left rounded-xl border border-white/5 bg-[#042438]/60 hover:bg-sky-500/15 hover:border-sky-400/30 p-2.5 transition text-xs group"
+                      className="text-left rounded-xl border border-white/5 bg-[#0e172a]/60 hover:bg-sky-500/15 hover:border-sky-400/30 p-2.5 transition text-xs group"
                     >
                       <div className="font-semibold text-white group-hover:text-cyan-200 transition flex items-center justify-between">
                         <span className="truncate">{tmpl.title}</span>
@@ -318,7 +318,7 @@ export default function ProposalsPage() {
                   required
                   value={form.leadId}
                   onChange={(e) => setForm({ ...form, leadId: e.target.value })}
-                  className="w-full rounded-xl bg-[#042438] border border-white/10 p-2.5 text-xs text-white focus:outline-none focus:border-sky-400 transition"
+                  className="w-full rounded-xl bg-[#0e172a] border border-white/10 p-2.5 text-xs text-white focus:outline-none focus:border-sky-400 transition"
                 >
                   <option value="">Select a lead...</option>
                   {leads.map((l) => (
@@ -336,7 +336,7 @@ export default function ProposalsPage() {
                   placeholder="e.g. Luxury Home Marketing Package"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full rounded-xl bg-[#042438] border border-white/10 p-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition"
+                  className="w-full rounded-xl bg-[#0e172a] border border-white/10 p-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition"
                 />
               </div>
 
@@ -347,7 +347,7 @@ export default function ProposalsPage() {
                   placeholder="Details of the agreement or deliverable milestones..."
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  className="w-full rounded-xl bg-[#042438] border border-white/10 p-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition resize-none"
+                  className="w-full rounded-xl bg-[#0e172a] border border-white/10 p-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition resize-none"
                 />
               </div>
 
@@ -361,7 +361,7 @@ export default function ProposalsPage() {
                     placeholder="e.g. 15000"
                     value={form.value}
                     onChange={(e) => setForm({ ...form, value: e.target.value })}
-                    className="w-full rounded-xl bg-[#042438] border border-white/10 p-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition"
+                    className="w-full rounded-xl bg-[#0e172a] border border-white/10 p-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition"
                   />
                 </div>
                 <div>
@@ -369,7 +369,7 @@ export default function ProposalsPage() {
                   <select
                     value={form.status}
                     onChange={(e) => setForm({ ...form, status: e.target.value })}
-                    className="w-full rounded-xl bg-[#042438] border border-white/10 p-2.5 text-xs text-white focus:outline-none focus:border-sky-400 transition"
+                    className="w-full rounded-xl bg-[#0e172a] border border-white/10 p-2.5 text-xs text-white focus:outline-none focus:border-sky-400 transition"
                   >
                     {statuses.map((s) => (
                       <option key={s} value={s}>
@@ -415,7 +415,7 @@ export default function ProposalsPage() {
           </div>
 
           {/* Proposals List (React Bits Liquid Glass Styling) */}
-          <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-5">
+          <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-5">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
 
             {/* Filter & Search Bar */}
@@ -426,13 +426,13 @@ export default function ProposalsPage() {
                   placeholder="Search proposals, leads, or companies..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="w-full rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition"
+                  className="w-full rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition"
                 />
               </div>
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
-                className="w-full sm:w-auto rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 transition"
+                className="w-full sm:w-auto rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 transition"
               >
                 <option value="all">All statuses</option>
                 {statuses.map((s) => (
@@ -475,8 +475,8 @@ export default function ProposalsPage() {
                       key={p.id}
                       className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 backdrop-blur-xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.14)] ${
                         isBeingEdited
-                          ? 'border-cyan-400 bg-gradient-to-b from-[#084266]/85 via-[#073652]/90 to-[#042438]/95 shadow-[0_12px_40px_0_rgba(56,189,248,0.25)] ring-1 ring-cyan-400'
-                          : 'border-white/[0.12] hover:border-sky-400/40 bg-gradient-to-b from-[#073652]/70 via-[#062c44]/80 to-[#042438]/90 hover:shadow-[0_12px_40px_0_rgba(56,189,248,0.18)]'
+                          ? 'border-cyan-400 bg-gradient-to-b from-[#22355e]/85 via-[#1b2a4a]/90 to-[#0e172a]/95 shadow-[0_12px_40px_0_rgba(252, 163, 17,0.25)] ring-1 ring-cyan-400'
+                          : 'border-white/[0.12] hover:border-sky-400/40 bg-gradient-to-b from-[#1b2a4a]/70 via-[#16233f]/80 to-[#0e172a]/90 hover:shadow-[0_12px_40px_0_rgba(252, 163, 17,0.18)]'
                       }`}
                     >
                       {/* Top Specular Light Refraction Line (Liquid Glass) */}
@@ -535,11 +535,11 @@ export default function ProposalsPage() {
                             value={p.status}
                             onChange={(e) => updateStatus(p, e.target.value)}
                             className={`rounded-xl border px-3 py-1.5 text-xs font-semibold focus:outline-none focus:border-sky-400 transition backdrop-blur-md cursor-pointer ${
-                              statusColors[p.status] || 'text-white bg-[#042438] border-white/10'
+                              statusColors[p.status] || 'text-white bg-[#0e172a] border-white/10'
                             }`}
                           >
                             {statuses.map((s) => (
-                              <option key={s} value={s} className="bg-[#053048] text-white">
+                              <option key={s} value={s} className="bg-[#14213d] text-white">
                                 {s[0].toUpperCase() + s.slice(1)}
                               </option>
                             ))}

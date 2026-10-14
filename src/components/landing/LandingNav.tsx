@@ -36,8 +36,8 @@ export function LandingNav() {
     <motion.header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-[#031d2e]/25 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/[0.12] shadow-[0_8px_32px_0_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.15)] py-2.5'
-          : 'bg-[#031d2e]/10 backdrop-blur-xl backdrop-saturate-150 border-b border-white/[0.06] shadow-[0_4px_20px_0_rgba(0,0,0,0.15),inset_0_1px_0_0_rgba(255,255,255,0.1)] py-3.5'
+          ? 'bg-[#0c1527]/25 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/[0.12] shadow-[0_8px_32px_0_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.15)] py-2.5'
+          : 'bg-[#0c1527]/10 backdrop-blur-xl backdrop-saturate-150 border-b border-white/[0.06] shadow-[0_4px_20px_0_rgba(0,0,0,0.15),inset_0_1px_0_0_rgba(255,255,255,0.1)] py-3.5'
       }`}
     >
       {/* Specular Top Edge Light Refraction */}
@@ -153,7 +153,7 @@ export function LandingNav() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="border-b border-white/10 bg-[#05293d]/85 px-5 py-5 backdrop-blur-2xl sm:hidden shadow-2xl"
+            className="border-b border-white/10 bg-[#16233f]/85 px-5 py-5 backdrop-blur-2xl sm:hidden shadow-2xl"
           >
             <nav className="flex flex-col gap-3 text-sm font-bold text-sky-100">
               <a

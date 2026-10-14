@@ -60,7 +60,7 @@ export function FaqSection() {
         </div>
 
         {/* FAQ Accordion List with Level 2 Glass */}
-        <div className="relative overflow-hidden mt-8 divide-y divide-white/10 rounded-3xl border border-white/[0.12] bg-[#073652]/60 p-5 sm:p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.14)] backdrop-blur-xl">
+        <div className="relative overflow-hidden mt-8 divide-y divide-white/10 rounded-3xl border border-white/[0.12] bg-[#1b2a4a]/60 p-5 sm:p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.14)] backdrop-blur-xl">
           <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
           {FAQS.map((faq, index) => {
             const isOpen = openIndex === index;

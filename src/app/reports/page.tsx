@@ -244,7 +244,7 @@ export default function ReportsPage() {
 
         <div className="flex flex-wrap items-center gap-2.5">
           {data.viewer.canViewTeam && (
-            <div className="inline-flex rounded-xl border border-gray-200/80 bg-white/80 p-1 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-[#073652]/80">
+            <div className="inline-flex rounded-xl border border-gray-200/80 bg-white/80 p-1 shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-[#1b2a4a]/80">
               <button
                 onClick={() => setScope('team')}
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
@@ -273,7 +273,7 @@ export default function ReportsPage() {
           <select
             value={range}
             onChange={(e) => setRange(e.target.value)}
-            className="rounded-xl border border-gray-200/80 bg-white/80 px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm outline-none transition focus:border-sky-500 dark:border-white/10 dark:bg-[#073652]/80 dark:text-gray-200"
+            className="rounded-xl border border-gray-200/80 bg-white/80 px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm outline-none transition focus:border-sky-500 dark:border-white/10 dark:bg-[#1b2a4a]/80 dark:text-gray-200"
           >
             {rangeOptions.map((item) => (
               <option key={item.value} value={item.value}>
@@ -281,11 +281,11 @@ export default function ReportsPage() {
               </option>
             ))}
           </select>
-          <button onClick={exportCsv} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200/80 bg-white/80 px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-sky-300 hover:text-sky-700 dark:border-white/10 dark:bg-[#073652]/80 dark:text-gray-200 dark:hover:border-sky-700">
+          <button onClick={exportCsv} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200/80 bg-white/80 px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-sky-300 hover:text-sky-700 dark:border-white/10 dark:bg-[#1b2a4a]/80 dark:text-gray-200 dark:hover:border-sky-700">
             <Download className="h-3.5 w-3.5" />
             <span>Export CSV</span>
           </button>
-          <button onClick={printReport} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200/80 bg-white/80 px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-sky-300 hover:text-sky-700 dark:border-white/10 dark:bg-[#073652]/80 dark:text-gray-200 dark:hover:border-sky-700">
+          <button onClick={printReport} className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200/80 bg-white/80 px-3 py-2 text-xs font-semibold text-gray-700 shadow-sm transition hover:border-sky-300 hover:text-sky-700 dark:border-white/10 dark:bg-[#1b2a4a]/80 dark:text-gray-200 dark:hover:border-sky-700">
             <Printer className="h-3.5 w-3.5" />
             <span>Print / PDF</span>
           </button>
@@ -297,7 +297,7 @@ export default function ReportsPage() {
          ========================================= */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {/* Total Leads */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:shadow-md dark:border-white/10 dark:bg-[#073652]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:shadow-md dark:border-white/10 dark:bg-[#1b2a4a]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Total Inbound & Sourced</p>
@@ -321,7 +321,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Conversion Rate */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:shadow-md dark:border-white/10 dark:bg-[#073652]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:shadow-md dark:border-white/10 dark:bg-[#1b2a4a]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Conversion Velocity</p>
@@ -345,7 +345,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Active Pipeline Value */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:shadow-md dark:border-white/10 dark:bg-[#073652]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:shadow-md dark:border-white/10 dark:bg-[#1b2a4a]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Active Pipeline Value</p>
@@ -369,7 +369,7 @@ export default function ReportsPage() {
         </div>
 
         {/* Outreach Reply Rate */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:shadow-md dark:border-white/10 dark:bg-[#073652]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl transition hover:shadow-md dark:border-white/10 dark:bg-[#1b2a4a]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">Outreach Engagement</p>
@@ -456,9 +456,9 @@ export default function ReportsPage() {
                 })}
 
                 {/* Spline Paths */}
-                <path d={leadPath} fill="none" stroke="#0284c7" strokeWidth="2.5" strokeLinecap="round" />
+                <path d={leadPath} fill="none" stroke="#fca311" strokeWidth="2.5" strokeLinecap="round" />
                 <path d={outreachPath} fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" />
-                <path d={proposalPath} fill="none" stroke="#06b6d4" strokeWidth="2.5" strokeLinecap="round" />
+                <path d={proposalPath} fill="none" stroke="#e5e5e5" strokeWidth="2.5" strokeLinecap="round" />
 
                 {/* Labels */}
                 {trendPoints.map((t, i) => {

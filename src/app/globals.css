@@ -242,24 +242,25 @@ p {
   color: #9ca3af;
 }
 
-/* Application dark theme. Existing CRM pages use Tailwind utility classes, so these
-   mappings keep the current UI intact while providing a consistent dark surface. */
+/* Versaly brand dark theme (#14213d, #e5e5e5, #fca311).
+   Existing CRM pages use Tailwind utility classes, so these
+   mappings keep the current UI intact while aligning directly with Versaly branding. */
 html,
 html.dark,
 body {
-  background: #053048;
-  color: #f3f4f6;
+  background: #14213d;
+  color: #e5e5e5;
 }
-.bg-white { background-color: #073b58 !important; }
-.bg-gray-50 { background-color: #053048 !important; }
-.bg-gray-100 { background-color: #0a405c !important; }
-.bg-gray-200 { background-color: #15516b !important; }
-.text-gray-900, .text-gray-800 { color: #f9fafb !important; }
-.text-gray-700 { color: #e5e7eb !important; }
-.text-gray-600 { color: #d1d5db !important; }
-.text-gray-500 { color: #9ca3af !important; }
-.text-gray-400 { color: #9ca3af !important; }
-.border-gray-100, .border-gray-200, .border-gray-300 { border-color: #15516b !important; }
+.bg-white { background-color: #1b2a4a !important; }
+.bg-gray-50 { background-color: #14213d !important; }
+.bg-gray-100 { background-color: #1e3054 !important; }
+.bg-gray-200 { background-color: #243862 !important; }
+.text-gray-900, .text-gray-800 { color: #ffffff !important; }
+.text-gray-700 { color: #e5e5e5 !important; }
+.text-gray-600 { color: #d4d4d8 !important; }
+.text-gray-500 { color: #a1a1aa !important; }
+.text-gray-400 { color: #a1a1aa !important; }
+.border-gray-100, .border-gray-200, .border-gray-300 { border-color: #243862 !important; }
 .hover\:bg-gray-50:hover,
 .hover\:bg-gray-50\/80:hover,
 .hover\:bg-gray-50\/70:hover,
@@ -272,19 +273,19 @@ body {
 .hover\:bg-slate-50:hover,
 .hover\:bg-slate-100:hover,
 tbody tr:hover {
-  background-color: #0f4965 !important;
+  background-color: #203358 !important;
 }
 .hover\:text-gray-900:hover { color: #ffffff !important; }
 input, textarea, select, .lead-input {
-  background-color: #042a40 !important;
-  color: #f9fafb !important;
-  border-color: #1b5973 !important;
+  background-color: #0e172a !important;
+  color: #e5e5e5 !important;
+  border-color: #283e6b !important;
 }
-input::placeholder, textarea::placeholder { color: #6b7280 !important; }
-.lead-label { color: #d1d5db; }
-.bg-accent-50 { background-color: rgba(5, 48, 72, 0.72) !important; }
-.text-accent-800 { color: #bfdbfe !important; }
-.text-accent-600 { color: #93c5fd !important; }
+input::placeholder, textarea::placeholder { color: #71717a !important; }
+.lead-label { color: #e5e5e5; }
+.bg-accent-50 { background-color: rgba(20, 33, 61, 0.72) !important; }
+.text-accent-800 { color: #fde68a !important; }
+.text-accent-600 { color: #fca311 !important; }
 .bg-red-50 { background-color: rgba(127, 29, 29, 0.25) !important; }
 .border-red-200 { border-color: #7f1d1d !important; }
 .bg-emerald-50 { background-color: rgba(6, 78, 59, 0.25) !important; }

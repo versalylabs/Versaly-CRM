@@ -274,7 +274,7 @@ export default function CopilotPage() {
           <button
             onClick={() => loadOverview()}
             disabled={loading}
-            className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white/80 px-4 py-2.5 text-xs font-bold text-gray-700 shadow-sm backdrop-blur-md hover:bg-gray-50 dark:border-white/10 dark:bg-[#073652]/80 dark:text-gray-200 dark:hover:bg-[#073652]"
+            className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white/80 px-4 py-2.5 text-xs font-bold text-gray-700 shadow-sm backdrop-blur-md hover:bg-gray-50 dark:border-white/10 dark:bg-[#1b2a4a]/80 dark:text-gray-200 dark:hover:bg-[#1b2a4a]"
           >
             <svg className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -323,7 +323,7 @@ export default function CopilotPage() {
       {/* KPI Glass Cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {/* Metric 1: Deals Evaluated */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/80">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/80">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Evaluated Deals
@@ -343,7 +343,7 @@ export default function CopilotPage() {
         </div>
 
         {/* Metric 2: Average Win Probability */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/80">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/80">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Avg Win Probability
@@ -366,7 +366,7 @@ export default function CopilotPage() {
         </div>
 
         {/* Metric 3: High Intent Opportunities */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/80">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/80">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               High-Intent Deals
@@ -386,7 +386,7 @@ export default function CopilotPage() {
         </div>
 
         {/* Metric 4: At-Risk Deals */}
-        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/80">
+        <div className="relative overflow-hidden rounded-2xl border border-gray-200/80 bg-white/70 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/80">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               At-Risk Flags
@@ -413,7 +413,7 @@ export default function CopilotPage() {
           className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
             activeTab === 'matrix'
               ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
-              : 'bg-white/60 text-gray-600 hover:bg-white hover:text-gray-900 dark:bg-[#073652]/50 dark:text-gray-300 dark:hover:bg-[#073652]'
+              : 'bg-white/60 text-gray-600 hover:bg-white hover:text-gray-900 dark:bg-[#1b2a4a]/50 dark:text-gray-300 dark:hover:bg-[#1b2a4a]'
           }`}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -427,7 +427,7 @@ export default function CopilotPage() {
           className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
             activeTab === 'summarizer'
               ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
-              : 'bg-white/60 text-gray-600 hover:bg-white hover:text-gray-900 dark:bg-[#073652]/50 dark:text-gray-300 dark:hover:bg-[#073652]'
+              : 'bg-white/60 text-gray-600 hover:bg-white hover:text-gray-900 dark:bg-[#1b2a4a]/50 dark:text-gray-300 dark:hover:bg-[#1b2a4a]'
           }`}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -441,7 +441,7 @@ export default function CopilotPage() {
           className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
             activeTab === 'drafter'
               ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
-              : 'bg-white/60 text-gray-600 hover:bg-white hover:text-gray-900 dark:bg-[#073652]/50 dark:text-gray-300 dark:hover:bg-[#073652]'
+              : 'bg-white/60 text-gray-600 hover:bg-white hover:text-gray-900 dark:bg-[#1b2a4a]/50 dark:text-gray-300 dark:hover:bg-[#1b2a4a]'
           }`}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -455,14 +455,14 @@ export default function CopilotPage() {
       {activeTab === 'matrix' && (
         <div className="space-y-4">
           {/* Filters Bar */}
-          <div className="flex flex-col gap-3 rounded-2xl border border-gray-200/80 bg-white/70 p-4 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/80 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-3 rounded-2xl border border-gray-200/80 bg-white/70 p-4 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/80 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <input
                 type="text"
                 placeholder="Search lead or company name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2 pl-9 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
+                className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2 pl-9 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#14213d] dark:text-white"
               />
               <svg className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -472,7 +472,7 @@ export default function CopilotPage() {
             <select
               value={riskFilter}
               onChange={(e: any) => setRiskFilter(e.target.value)}
-              className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold dark:border-white/10 dark:bg-[#053048] dark:text-white"
+              className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold dark:border-white/10 dark:bg-[#14213d] dark:text-white"
             >
               <option value="ALL">All Risk Levels</option>
               <option value="LOW">Low Risk</option>
@@ -483,7 +483,7 @@ export default function CopilotPage() {
             <select
               value={sentimentFilter}
               onChange={(e: any) => setSentimentFilter(e.target.value)}
-              className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold dark:border-white/10 dark:bg-[#053048] dark:text-white"
+              className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs font-semibold dark:border-white/10 dark:bg-[#14213d] dark:text-white"
             >
               <option value="ALL">All Sentiments</option>
               <option value="POSITIVE">Positive Sentiment</option>
@@ -493,10 +493,10 @@ export default function CopilotPage() {
           </div>
 
           {/* Matrix Table */}
-          <div className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/90">
+          <div className="overflow-hidden rounded-2xl border border-gray-200/80 bg-white/80 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/90">
             <div className="overflow-x-auto">
               <table className="min-w-full text-left">
-                <thead className="border-b border-gray-100 bg-gray-50/70 dark:border-white/10 dark:bg-[#053048]/60">
+                <thead className="border-b border-gray-100 bg-gray-50/70 dark:border-white/10 dark:bg-[#14213d]/60">
                   <tr>
                     <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Deal &amp; Prospect</th>
                     <th className="px-5 py-3.5 text-[11px] font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Stage &amp; Value</th>
@@ -610,7 +610,7 @@ export default function CopilotPage() {
                           <td className="px-5 py-4 text-right space-x-1.5">
                             <button
                               onClick={() => setInspectedLead(item)}
-                              className="rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:bg-[#053048] dark:text-gray-200"
+                              className="rounded-lg border border-gray-200 bg-white px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:bg-[#14213d] dark:text-gray-200"
                             >
                               Signals
                             </button>
@@ -648,7 +648,7 @@ export default function CopilotPage() {
         <div className="grid gap-6 lg:grid-cols-12">
           {/* Input form */}
           <div className="lg:col-span-6 space-y-4">
-            <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/90">
+            <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/90">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                 Transcript &amp; Call Note Analyzer
               </h2>
@@ -664,7 +664,7 @@ export default function CopilotPage() {
                   <select
                     value={meetingLeadId}
                     onChange={(e) => setMeetingLeadId(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs font-medium outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
+                    className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs font-medium outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#14213d] dark:text-white"
                   >
                     <option value="">-- No specific lead (General Workspace Meeting) --</option>
                     {leads.map((l) => (
@@ -685,7 +685,7 @@ export default function CopilotPage() {
                     value={rawTranscript}
                     onChange={(e) => setRawTranscript(e.target.value)}
                     placeholder="E.g. Spoke with Sarah from Acme Corp. She loved our automation engine and mentioned budget is ready for Q4. However, their CTO is concerned about migration downtime. She asked if we can provide SOC2 compliance docs by next Tuesday..."
-                    className="w-full rounded-xl border border-gray-200 bg-white p-3 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
+                    className="w-full rounded-xl border border-gray-200 bg-white p-3 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#14213d] dark:text-white"
                   />
                 </div>
 
@@ -716,7 +716,7 @@ export default function CopilotPage() {
             </div>
 
             {/* Past Meeting Summaries */}
-            <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/90">
+            <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/90">
               <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3">
                 Recent Intelligence Logs
               </h3>
@@ -728,7 +728,7 @@ export default function CopilotPage() {
                     <div
                       key={m.id}
                       onClick={() => setActiveMeetingResult(m)}
-                      className="cursor-pointer rounded-xl border border-gray-100 bg-gray-50/60 p-3 hover:border-sky-400/40 hover:bg-sky-500/5 transition-all dark:border-white/5 dark:bg-[#053048]/60"
+                      className="cursor-pointer rounded-xl border border-gray-100 bg-gray-50/60 p-3 hover:border-sky-400/40 hover:bg-sky-500/5 transition-all dark:border-white/5 dark:bg-[#14213d]/60"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-gray-900 dark:text-white">
@@ -750,7 +750,7 @@ export default function CopilotPage() {
 
           {/* Output Display */}
           <div className="lg:col-span-6">
-            <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/90 h-full">
+            <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/90 h-full">
               <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/10 pb-3">
                 <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white">
                   Copilot Intelligence Report
@@ -798,7 +798,7 @@ export default function CopilotPage() {
                       {(activeMeetingResult.actionItems || []).map((item: any, idx: number) => (
                         <div
                           key={idx}
-                          className="flex items-start justify-between rounded-xl border border-gray-100 bg-gray-50/60 p-3 dark:border-white/5 dark:bg-[#053048]/60 text-xs"
+                          className="flex items-start justify-between rounded-xl border border-gray-100 bg-gray-50/60 p-3 dark:border-white/5 dark:bg-[#14213d]/60 text-xs"
                         >
                           <div className="flex items-center gap-2">
                             <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
@@ -865,7 +865,7 @@ export default function CopilotPage() {
         <div className="grid gap-6 lg:grid-cols-12">
           {/* Configurator */}
           <div className="lg:col-span-5 space-y-4">
-            <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/90">
+            <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/90">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                 Contextual Outreach Drafter
               </h2>
@@ -881,7 +881,7 @@ export default function CopilotPage() {
                   <select
                     value={drafterLeadId}
                     onChange={(e) => setDrafterLeadId(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs font-medium outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
+                    className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs font-medium outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#14213d] dark:text-white"
                   >
                     {leads.map((l) => (
                       <option key={l.id} value={l.id}>
@@ -899,7 +899,7 @@ export default function CopilotPage() {
                     <select
                       value={drafterChannel}
                       onChange={(e: any) => setDrafterChannel(e.target.value)}
-                      className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs font-medium outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
+                      className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs font-medium outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#14213d] dark:text-white"
                     >
                       <option value="EMAIL">Email</option>
                       <option value="WHATSAPP">WhatsApp</option>
@@ -913,7 +913,7 @@ export default function CopilotPage() {
                     <select
                       value={drafterTone}
                       onChange={(e: any) => setDrafterTone(e.target.value)}
-                      className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs font-medium outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
+                      className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs font-medium outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#14213d] dark:text-white"
                     >
                       <option value="PROFESSIONAL">Professional</option>
                       <option value="WARM">Warm &amp; Consultative</option>
@@ -930,7 +930,7 @@ export default function CopilotPage() {
                   <select
                     value={drafterObjective}
                     onChange={(e: any) => setDrafterObjective(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs font-medium outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
+                    className="w-full rounded-xl border border-gray-200 bg-white p-2.5 text-xs font-medium outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#14213d] dark:text-white"
                   >
                     <option value="FOLLOW_UP">Follow Up on Prior Discussion</option>
                     <option value="CLOSE_DEAL">Accelerate Closing / Sign Proposal</option>
@@ -948,7 +948,7 @@ export default function CopilotPage() {
                     value={drafterNotes}
                     onChange={(e) => setDrafterNotes(e.target.value)}
                     placeholder="E.g. Mention that we can offer a 10% discount if closed this month, or reference our new SOC2 certification..."
-                    className="w-full rounded-xl border border-gray-200 bg-white p-3 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#053048] dark:text-white"
+                    className="w-full rounded-xl border border-gray-200 bg-white p-3 text-xs outline-none focus:border-sky-500 dark:border-white/10 dark:bg-[#14213d] dark:text-white"
                   />
                 </div>
 
@@ -968,7 +968,7 @@ export default function CopilotPage() {
 
           {/* Generated Draft Output */}
           <div className="lg:col-span-7">
-            <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/90 h-full flex flex-col justify-between">
+            <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-6 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/90 h-full flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/10 pb-3">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900 dark:text-white">
@@ -978,7 +978,7 @@ export default function CopilotPage() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={copyDraftToClipboard}
-                        className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:bg-[#053048] dark:text-gray-200"
+                        className="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-bold text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:bg-[#14213d] dark:text-gray-200"
                       >
                         <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -1013,7 +1013,7 @@ export default function CopilotPage() {
                 ) : (
                   <div className="mt-5 space-y-4">
                     {generatedDraft.channel === 'EMAIL' && (
-                      <div className="rounded-xl border border-gray-200/60 bg-gray-50/70 p-3.5 dark:border-white/10 dark:bg-[#053048]/60">
+                      <div className="rounded-xl border border-gray-200/60 bg-gray-50/70 p-3.5 dark:border-white/10 dark:bg-[#14213d]/60">
                         <span className="block text-[10px] font-bold uppercase tracking-wider text-gray-400">
                           Subject Line
                         </span>
@@ -1023,7 +1023,7 @@ export default function CopilotPage() {
                       </div>
                     )}
 
-                    <div className="rounded-xl border border-gray-200/60 bg-gray-50/70 p-4 dark:border-white/10 dark:bg-[#053048]/60">
+                    <div className="rounded-xl border border-gray-200/60 bg-gray-50/70 p-4 dark:border-white/10 dark:bg-[#14213d]/60">
                       <span className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">
                         Message Body
                       </span>
@@ -1059,7 +1059,7 @@ export default function CopilotPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#073652]"
+              className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#1b2a4a]"
             >
               <div className="flex items-start justify-between border-b border-gray-100 dark:border-white/10 pb-4">
                 <div>
@@ -1083,7 +1083,7 @@ export default function CopilotPage() {
 
               <div className="mt-5 space-y-5 text-xs">
                 {/* Score & Risk Summary Banner */}
-                <div className="grid grid-cols-3 gap-3 rounded-xl border border-gray-100 bg-gray-50 p-3.5 dark:border-white/5 dark:bg-[#053048]">
+                <div className="grid grid-cols-3 gap-3 rounded-xl border border-gray-100 bg-gray-50 p-3.5 dark:border-white/5 dark:bg-[#14213d]">
                   <div>
                     <span className="text-[10px] uppercase font-bold text-gray-400">Win Probability</span>
                     <p className="mt-1 text-xl font-black text-emerald-600 dark:text-emerald-400">
@@ -1109,7 +1109,7 @@ export default function CopilotPage() {
                   <h4 className="font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
                     Copilot Assessment
                   </h4>
-                  <p className="rounded-xl border border-gray-100 bg-gray-50 p-3 text-gray-700 dark:border-white/5 dark:bg-[#053048] dark:text-gray-200">
+                  <p className="rounded-xl border border-gray-100 bg-gray-50 p-3 text-gray-700 dark:border-white/5 dark:bg-[#14213d] dark:text-gray-200">
                     {inspectedLead.insight.summaryNotes}
                   </p>
                 </div>
@@ -1167,7 +1167,7 @@ export default function CopilotPage() {
                     {inspectedLead.insight.suggestedActions.map((act, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-2.5 dark:border-white/5 dark:bg-[#053048]"
+                        className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-2.5 dark:border-white/5 dark:bg-[#14213d]"
                       >
                         <div>
                           <p className="font-bold text-gray-900 dark:text-white">{act.action}</p>

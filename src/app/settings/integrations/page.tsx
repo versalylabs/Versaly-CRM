@@ -198,7 +198,7 @@ export default function CommunicationChannelsSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#053048] text-slate-100 p-6 md:p-8">
+    <div className="min-h-screen bg-[#14213d] text-slate-100 p-6 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-1">
@@ -256,7 +256,7 @@ export default function CommunicationChannelsSettingsPage() {
               return (
                 <div
                   key={chan.channel}
-                  className="rounded-2xl border border-white/10 bg-[#073b58]/80 backdrop-blur-md p-5 flex flex-col justify-between shadow-xl hover:border-sky-500/30 transition duration-200"
+                  className="rounded-2xl border border-white/10 bg-[#1b2a4a]/80 backdrop-blur-md p-5 flex flex-col justify-between shadow-xl hover:border-sky-500/30 transition duration-200"
                 >
                   <div className="space-y-4">
                     {/* Top row */}
@@ -284,7 +284,7 @@ export default function CommunicationChannelsSettingsPage() {
                     </div>
 
                     {/* Details */}
-                    <div className="space-y-2 text-xs text-slate-300 bg-[#042a40]/60 rounded-xl p-3 border border-white/5">
+                    <div className="space-y-2 text-xs text-slate-300 bg-[#0e172a]/60 rounded-xl p-3 border border-white/5">
                       {acc ? (
                         <>
                           <div className="flex justify-between">
@@ -334,7 +334,7 @@ export default function CommunicationChannelsSettingsPage() {
                           {copiedUrl === chan.channel ? '✓ Copied!' : 'Copy URL'}
                         </button>
                       </div>
-                      <div className="font-mono text-[10px] bg-[#031d2c] text-slate-400 p-2 rounded-lg truncate select-all border border-white/5">
+                      <div className="font-mono text-[10px] bg-[#0c1527] text-slate-400 p-2 rounded-lg truncate select-all border border-white/5">
                         {webhookUrl}
                       </div>
                     </div>
@@ -378,7 +378,7 @@ export default function CommunicationChannelsSettingsPage() {
         {/* Configuration Modal */}
         {selectedChannel && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-            <div className="w-full max-w-lg rounded-3xl border border-white/15 bg-[#073b58] p-6 md:p-8 shadow-2xl space-y-6 text-slate-100 animate-in fade-in zoom-in duration-200">
+            <div className="w-full max-w-lg rounded-3xl border border-white/15 bg-[#1b2a4a] p-6 md:p-8 shadow-2xl space-y-6 text-slate-100 animate-in fade-in zoom-in duration-200">
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <div className="flex items-center gap-3">
                   {CHANNEL_ICONS[selectedChannel]}
@@ -424,7 +424,7 @@ export default function CommunicationChannelsSettingsPage() {
                     placeholder={`e.g. Versaly Agency ${selectedChannel}`}
                     value={accountName}
                     onChange={(e) => setAccountName(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                    className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
                   />
                 </div>
 
@@ -438,7 +438,7 @@ export default function CommunicationChannelsSettingsPage() {
                     placeholder={selectedChannel === 'WHATSAPP' ? '+1 555-0199' : '@youraccount'}
                     value={accountHandle}
                     onChange={(e) => setAccountHandle(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                    className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
                   />
                 </div>
 
@@ -455,7 +455,7 @@ export default function CommunicationChannelsSettingsPage() {
                     placeholder="e.g. 104829482049182"
                     value={externalAccountId}
                     onChange={(e) => setExternalAccountId(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                    className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
                   />
                 </div>
 
@@ -468,7 +468,7 @@ export default function CommunicationChannelsSettingsPage() {
                     placeholder="Paste permanent API or Page Access Token"
                     value={accessToken}
                     onChange={(e) => setAccessToken(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none font-mono"
+                    className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none font-mono"
                   />
                 </div>
 
@@ -480,7 +480,7 @@ export default function CommunicationChannelsSettingsPage() {
                       placeholder="Optional"
                       value={appId}
                       onChange={(e) => setAppId(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none font-mono"
+                      className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none font-mono"
                     />
                   </div>
                   <div>
@@ -490,7 +490,7 @@ export default function CommunicationChannelsSettingsPage() {
                       placeholder="Optional"
                       value={appSecret}
                       onChange={(e) => setAppSecret(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none font-mono"
+                      className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none font-mono"
                     />
                   </div>
                 </div>

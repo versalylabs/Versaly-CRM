@@ -12,7 +12,7 @@ export function CtaSection() {
       <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[450px] w-[700px] rounded-full bg-gradient-to-r from-sky-500/20 via-cyan-400/15 to-sky-600/20 blur-[130px]" />
 
       {/* Level 3 Strong Glass Container */}
-      <div className="relative mx-auto max-w-5xl rounded-[2.5rem] border border-sky-400/40 bg-gradient-to-b from-[#0a466a]/85 via-[#073652]/90 to-[#042438]/95 p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.25)] backdrop-blur-2xl sm:p-12">
+      <div className="relative mx-auto max-w-5xl rounded-[2.5rem] border border-sky-400/40 bg-gradient-to-b from-[#22355e]/85 via-[#1b2a4a]/90 to-[#0e172a]/95 p-8 text-center shadow-[0_20px_60px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.25)] backdrop-blur-2xl sm:p-12">
         {/* Specular Top Edge Light Refraction */}
         <div className="pointer-events-none absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
 
@@ -39,7 +39,7 @@ export function CtaSection() {
 
           <Link
             href="/auth/signin"
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-sky-400/30 bg-[#041c2c]/90 px-8 py-3.5 text-base font-bold text-sky-200 backdrop-blur-md transition-all hover:border-sky-400/60 hover:bg-[#072a42] sm:w-auto"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-sky-400/30 bg-[#0e172a]/90 px-8 py-3.5 text-base font-bold text-sky-200 backdrop-blur-md transition-all hover:border-sky-400/60 hover:bg-[#072a42] sm:w-auto"
           >
             <span>Sign In to Existing Workspace</span>
           </Link>

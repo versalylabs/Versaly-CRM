@@ -48,7 +48,7 @@ export function Sparkline({ data, color = 'blue', height = 36, width = 110 }: Sp
   const fillD = `${pathD} L ${width},${height} L 0,${height} Z`;
 
   const colorMap = {
-    blue: { stroke: '#0284c7', stopStart: '#38bdf8', stopEnd: '#0284c7' },
+    blue: { stroke: '#fca311', stopStart: '#fcd34d', stopEnd: '#e5940f' },
     emerald: { stroke: '#10b981', stopStart: '#34d399', stopEnd: '#10b981' },
     purple: { stroke: '#10b981', stopStart: '#34d399', stopEnd: '#10b981' },
     amber: { stroke: '#10b981', stopStart: '#34d399', stopEnd: '#10b981' },
@@ -242,8 +242,8 @@ export function RevenueTrendChart({ data, formatCurrency, totalWon }: RevenueTre
 
             {/* Pipeline Gradient */}
             <linearGradient id={gradientPipelineId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#0284c7" stopOpacity="0.18" />
-              <stop offset="100%" stopColor="#0284c7" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#fca311" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#fca311" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
@@ -279,7 +279,7 @@ export function RevenueTrendChart({ data, formatCurrency, totalWon }: RevenueTre
           <path
             d={pipelineLine}
             fill="none"
-            stroke="#0284c7"
+            stroke="#fca311"
             strokeWidth="2.5"
             strokeDasharray="5 3"
             strokeLinecap="round"
@@ -348,7 +348,7 @@ export function RevenueTrendChart({ data, formatCurrency, totalWon }: RevenueTre
                 cx={hoveredPipePt.x}
                 cy={hoveredPipePt.y}
                 r="5.5"
-                fill="#0284c7"
+                fill="#fca311"
                 stroke="#ffffff"
                 strokeWidth="2"
               />
@@ -389,8 +389,8 @@ export function RevenueTrendChart({ data, formatCurrency, totalWon }: RevenueTre
                 </span>
               </div>
               <div className="flex items-center justify-between gap-4">
-                <span className="flex items-center gap-1.5 text-sky-600 font-medium">
-                  <span className="h-2 w-2 rounded-full bg-sky-500" /> Pipeline:
+                <span className="flex items-center gap-1.5 text-amber-500 font-medium">
+                  <span className="h-2 w-2 rounded-full bg-[#fca311]" /> Pipeline:
                 </span>
                 <span className="font-bold text-gray-700 dark:text-gray-300">
                   {formatCurrency(hoveredItem.pipeline)}
@@ -433,8 +433,8 @@ export function RadialGaugeChart({ rate, target = 80, wonCount, totalLeads }: Ra
         <svg width="200" height="115" viewBox="0 0 200 115" className="overflow-visible">
           <defs>
             <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#0284c7" />
-              <stop offset="50%" stopColor="#38bdf8" />
+              <stop offset="0%" stopColor="#fca311" />
+              <stop offset="50%" stopColor="#fcd34d" />
               <stop offset="100%" stopColor="#10b981" />
             </linearGradient>
           </defs>
@@ -593,7 +593,7 @@ export function SubscriptionQuotaCard({ subscription }: SubscriptionCardProps) {
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-2xl border border-sky-200/60 bg-gradient-to-r from-sky-50 via-white to-sky-50/50 p-5 shadow-sm transition hover:shadow-md dark:border-sky-800/40 dark:from-[#08293d] dark:via-[#053048] dark:to-[#08293d]">
+      <div className="relative overflow-hidden rounded-2xl border border-sky-200/60 bg-gradient-to-r from-sky-50 via-white to-sky-50/50 p-5 shadow-sm transition hover:shadow-md dark:border-sky-800/40 dark:from-[#16233f] dark:via-[#14213d] dark:to-[#16233f]">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Plan information */}
           <div className="flex items-center space-x-3.5">

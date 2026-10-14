@@ -84,7 +84,7 @@ export function ContactSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column: Direct Contact Info & Socials */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="rounded-3xl border border-sky-500/20 bg-gradient-to-b from-[#073652]/80 to-[#041c2c]/90 p-8 shadow-xl backdrop-blur-xl">
+            <div className="rounded-3xl border border-sky-500/20 bg-gradient-to-b from-[#1b2a4a]/80 to-[#0e172a]/90 p-8 shadow-xl backdrop-blur-xl">
               <h3 className="text-xl font-bold text-white tracking-tight">
                 Let&apos;s talk about your business
               </h3>
@@ -151,7 +151,7 @@ export function ContactSection() {
             </div>
 
             {/* Social channels card */}
-            <div className="rounded-3xl border border-sky-500/20 bg-gradient-to-br from-[#073652]/60 to-[#041c2c]/80 p-6 shadow-lg backdrop-blur-xl">
+            <div className="rounded-3xl border border-sky-500/20 bg-gradient-to-br from-[#1b2a4a]/60 to-[#0e172a]/80 p-6 shadow-lg backdrop-blur-xl">
               <span className="text-[10px] font-bold uppercase tracking-wider text-sky-300/70 block mb-3">
                 Follow & Message Our Socials
               </span>
@@ -213,7 +213,7 @@ export function ContactSection() {
 
           {/* Right Column: Contact Inquiry Form */}
           <div className="lg:col-span-7">
-            <div className="rounded-3xl border border-sky-500/20 bg-gradient-to-b from-[#073652]/90 to-[#041c2c]/95 p-8 sm:p-10 shadow-2xl backdrop-blur-2xl">
+            <div className="rounded-3xl border border-sky-500/20 bg-gradient-to-b from-[#1b2a4a]/90 to-[#0e172a]/95 p-8 sm:p-10 shadow-2xl backdrop-blur-2xl">
               {submitted ? (
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -324,7 +324,7 @@ export function ContactSection() {
                     <select
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      className="w-full rounded-xl border border-sky-500/20 bg-[#041c2c] px-3.5 py-2.5 text-xs text-white outline-none focus:border-cyan-400 transition-all"
+                      className="w-full rounded-xl border border-sky-500/20 bg-[#0e172a] px-3.5 py-2.5 text-xs text-white outline-none focus:border-cyan-400 transition-all"
                     >
                       <option value="General Inquiry">General Inquiry</option>
                       <option value="Custom Enterprise / Scale Plan">Custom Enterprise / Scale Plan</option>

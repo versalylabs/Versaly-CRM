@@ -658,12 +658,12 @@ export default function UnifiedInboxPage() {
   };
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] w-full overflow-hidden bg-[#053048] text-slate-100 font-sans">
+    <div className="flex h-[calc(100vh-4rem)] w-full overflow-hidden bg-[#14213d] text-slate-100 font-sans">
       {/* ========================================================================= */}
       {/* COLUMN 1: LEFT NAVIGATION & FOLDERS & CHANNEL FILTERS */}
       {/* ========================================================================= */}
       <aside
-        className={`w-64 shrink-0 flex-col border-r border-white/10 bg-[#042a40] p-4 space-y-6 overflow-y-auto hidden lg:flex`}
+        className={`w-64 shrink-0 flex-col border-r border-white/10 bg-[#0e172a] p-4 space-y-6 overflow-y-auto hidden lg:flex`}
       >
         {/* Brand / Inbox Header */}
         <div className="flex items-center justify-between pb-3 border-b border-white/10">
@@ -810,12 +810,12 @@ export default function UnifiedInboxPage() {
       {/* COLUMN 2: CONVERSATION LIST (MIDDLE COLUMN) */}
       {/* ========================================================================= */}
       <section
-        className={`w-full md:w-80 lg:w-96 shrink-0 flex-col border-r border-white/10 bg-[#073b58]/50 backdrop-blur-md flex ${
+        className={`w-full md:w-80 lg:w-96 shrink-0 flex-col border-r border-white/10 bg-[#1b2a4a]/50 backdrop-blur-md flex ${
           mobileView !== 'LIST' ? 'hidden md:flex' : 'flex'
         }`}
       >
         {/* Mobile Header Bar (Only visible on screens < lg) */}
-        <div className="p-3 border-b border-white/10 lg:hidden space-y-2 bg-[#053048]/80 backdrop-blur-md">
+        <div className="p-3 border-b border-white/10 lg:hidden space-y-2 bg-[#14213d]/80 backdrop-blur-md">
           <div className="flex items-center justify-between gap-2">
             <button
               type="button"
@@ -868,7 +868,7 @@ export default function UnifiedInboxPage() {
         </div>
 
         {/* Search, Pills & Filters Header */}
-        <div className="p-3 border-b border-white/10 space-y-2 bg-[#073b58]/40">
+        <div className="p-3 border-b border-white/10 space-y-2 bg-[#1b2a4a]/40">
           {/* Search Bar */}
           <div className="relative">
             <span className="absolute inset-y-0 left-3 flex items-center pointer-events-none text-slate-400">
@@ -881,7 +881,7 @@ export default function UnifiedInboxPage() {
               placeholder="Search conversations, contacts, messages..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 rounded-xl bg-[#042a40] border border-white/10 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+              className="w-full pl-9 pr-8 py-2 rounded-xl bg-[#0e172a] border border-white/10 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
             />
             {searchQuery && (
               <button
@@ -907,7 +907,7 @@ export default function UnifiedInboxPage() {
                   className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-medium transition border ${
                     isActive
                       ? 'bg-sky-600/30 text-sky-200 border-sky-400/50 shadow-sm font-semibold'
-                      : 'bg-[#042a40]/70 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white'
+                      : 'bg-[#0e172a]/70 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   <span className="text-[11px]">{f.icon}</span>
@@ -939,7 +939,7 @@ export default function UnifiedInboxPage() {
                   className={`shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-medium transition border ${
                     isActive
                       ? 'bg-cyan-600/30 text-cyan-200 border-cyan-400/50 shadow-sm font-semibold'
-                      : 'bg-[#042a40]/70 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white'
+                      : 'bg-[#0e172a]/70 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   {ch.id === 'all' ? (
@@ -968,7 +968,7 @@ export default function UnifiedInboxPage() {
                 <select
                   value={activeStatus}
                   onChange={(e) => setActiveStatus(e.target.value)}
-                  className="bg-[#042a40] border border-white/10 rounded-lg px-2 py-0.5 text-xs text-white focus:outline-none"
+                  className="bg-[#0e172a] border border-white/10 rounded-lg px-2 py-0.5 text-xs text-white focus:outline-none"
                 >
                   <option value="all">All</option>
                   <option value="OPEN">Open</option>
@@ -983,7 +983,7 @@ export default function UnifiedInboxPage() {
                 <select
                   value={activeChannel}
                   onChange={(e) => setActiveChannel(e.target.value)}
-                  className="bg-[#042a40] border border-white/10 rounded-lg px-2 py-0.5 text-xs text-white focus:outline-none"
+                  className="bg-[#0e172a] border border-white/10 rounded-lg px-2 py-0.5 text-xs text-white focus:outline-none"
                 >
                   <option value="all">All Channels</option>
                   <option value="EMAIL">Email</option>
@@ -1113,10 +1113,10 @@ export default function UnifiedInboxPage() {
                 >
                   {/* Avatar with Channel Badge */}
                   <div className="relative shrink-0">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#053048] to-[#0a486c] border border-white/10 flex items-center justify-center text-xs font-bold text-sky-300">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-[#14213d] to-[#22355e] border border-white/10 flex items-center justify-center text-xs font-bold text-sky-300">
                       {contactDisplayName.slice(0, 2).toUpperCase()}
                     </div>
-                    <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-[#042a40] border border-white/10 flex items-center justify-center p-0.5 shadow">
+                    <span className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-[#0e172a] border border-white/10 flex items-center justify-center p-0.5 shadow">
                       <ChannelIcon channel={conv.channel} className="h-2.5 w-2.5 text-sky-400" />
                     </span>
                   </div>
@@ -1203,14 +1203,14 @@ export default function UnifiedInboxPage() {
       {/* COLUMN 3: MESSAGE THREAD & COMPOSER */}
       {/* ========================================================================= */}
       <main
-        className={`flex-1 flex-col bg-[#053048] min-w-0 flex ${
+        className={`flex-1 flex-col bg-[#14213d] min-w-0 flex ${
           mobileView !== 'CHAT' ? 'hidden md:flex' : 'flex'
         }`}
       >
         {selectedConversation ? (
           <>
             {/* Sticky Conversation Header */}
-            <header className="px-5 py-3 border-b border-white/10 bg-[#073b58]/80 backdrop-blur-md flex items-center justify-between gap-3 shrink-0">
+            <header className="px-5 py-3 border-b border-white/10 bg-[#1b2a4a]/80 backdrop-blur-md flex items-center justify-between gap-3 shrink-0">
               <div className="flex items-center gap-2 min-w-0">
                 {/* Mobile Back Button */}
                 <button
@@ -1281,7 +1281,7 @@ export default function UnifiedInboxPage() {
                 <select
                   value={selectedConversation.priority}
                   onChange={(e) => handlePriorityChange(selectedConversation.id, e.target.value)}
-                  className="bg-[#042a40] border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white focus:outline-none hidden sm:block"
+                  className="bg-[#0e172a] border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white focus:outline-none hidden sm:block"
                 >
                   <option value="NORMAL">Normal Priority</option>
                   <option value="HIGH">High Priority</option>
@@ -1293,7 +1293,7 @@ export default function UnifiedInboxPage() {
                 <select
                   value={selectedConversation.assignedToId || ''}
                   onChange={(e) => handleAssignChange(selectedConversation.id, e.target.value)}
-                  className="bg-[#042a40] border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white focus:outline-none hidden lg:block"
+                  className="bg-[#0e172a] border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white focus:outline-none hidden lg:block"
                 >
                   <option value="">Unassigned</option>
                   {teamMembers.map((m) => (
@@ -1367,7 +1367,7 @@ export default function UnifiedInboxPage() {
                         className={`rounded-2xl p-4 text-xs shadow-md leading-relaxed whitespace-pre-wrap ${
                           isOutbound
                             ? 'bg-gradient-to-tr from-sky-700 to-cyan-600 text-white rounded-tr-none'
-                            : 'bg-[#073b58] border border-white/10 text-slate-100 rounded-tl-none'
+                            : 'bg-[#1b2a4a] border border-white/10 text-slate-100 rounded-tl-none'
                         }`}
                       >
                         {msg.content}
@@ -1393,7 +1393,7 @@ export default function UnifiedInboxPage() {
             {/* Conditional Texting Area: Normal Composer OR Client Profile & Lead Overview */}
             {showIntelPanel ? (
               /* Client Profile & Lead Overview in Texting Area */
-              <footer className="p-4 sm:p-5 border-t border-sky-500/30 bg-[#06334f] shadow-2xl space-y-4 shrink-0 max-h-[460px] overflow-y-auto">
+              <footer className="p-4 sm:p-5 border-t border-sky-500/30 bg-[#16233f] shadow-2xl space-y-4 shrink-0 max-h-[460px] overflow-y-auto">
                 {/* Header: Title + Open Lead + Close Button */}
                 <div className="flex items-center justify-between pb-3 border-b border-white/10 gap-2">
                   <div className="flex items-center gap-3 min-w-0">
@@ -1466,7 +1466,7 @@ export default function UnifiedInboxPage() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                     {/* Card 1: Lead Details */}
-                    <div className="rounded-2xl border border-white/10 bg-[#042a40]/90 p-3.5 space-y-2.5">
+                    <div className="rounded-2xl border border-white/10 bg-[#0e172a]/90 p-3.5 space-y-2.5">
                       <div className="flex items-center justify-between border-b border-white/5 pb-1.5">
                         <span className="font-bold text-white text-xs">Lead Details</span>
                         <span className="text-[10px] text-sky-400 font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-sky-500/10 border border-sky-500/20">
@@ -1505,7 +1505,7 @@ export default function UnifiedInboxPage() {
                           <select
                             value={selectedConversation.status}
                             onChange={(e) => handleStatusChange(selectedConversation.id, e.target.value)}
-                            className="w-full bg-[#073b58] hover:bg-[#094266] border border-white/15 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-sky-400 transition shadow-inner cursor-pointer"
+                            className="w-full bg-[#1b2a4a] hover:bg-[#203358] border border-white/15 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-sky-400 transition shadow-inner cursor-pointer"
                           >
                             <option value="OPEN">Open</option>
                             <option value="WAITING_ON_US">Waiting on Us</option>
@@ -1517,7 +1517,7 @@ export default function UnifiedInboxPage() {
                     </div>
 
                     {/* Card 2: Customer Success & AI Signals */}
-                    <div className="rounded-2xl border border-white/10 bg-[#042a40]/90 p-3.5 space-y-2.5">
+                    <div className="rounded-2xl border border-white/10 bg-[#0e172a]/90 p-3.5 space-y-2.5">
                       <div className="flex items-center justify-between border-b border-white/5 pb-1.5">
                         <span className="font-bold text-white text-xs">Retention & AI Signals</span>
                         {selectedConversation.lead.customerSuccess && (
@@ -1578,7 +1578,7 @@ export default function UnifiedInboxPage() {
                     </div>
 
                     {/* Card 3: Follow-up Tasks */}
-                    <div className="rounded-2xl border border-white/10 bg-[#042a40]/90 p-3.5 space-y-2.5">
+                    <div className="rounded-2xl border border-white/10 bg-[#0e172a]/90 p-3.5 space-y-2.5">
                       <div className="flex items-center justify-between border-b border-white/5 pb-1.5">
                         <span className="font-bold text-white text-xs">Follow-up Tasks</span>
                         <button
@@ -1594,7 +1594,7 @@ export default function UnifiedInboxPage() {
                           selectedConversation.lead.tasks.map((t) => (
                             <div
                               key={t.id}
-                              className="rounded-xl border border-white/5 bg-[#073b58]/50 p-2 text-xs flex justify-between items-center gap-2"
+                              className="rounded-xl border border-white/5 bg-[#1b2a4a]/50 p-2 text-xs flex justify-between items-center gap-2"
                             >
                               <span className="truncate text-slate-200">{t.title}</span>
                               {t.dueDate && (
@@ -1618,7 +1618,7 @@ export default function UnifiedInboxPage() {
               <>
                 {/* Smart Suggestions Bar */}
                 {smartSuggestions.length > 0 && composerMode === 'REPLY' && (
-                  <div className="px-5 py-2 border-t border-white/5 bg-[#042a40]/50 flex items-center gap-2 overflow-x-auto text-[11px]">
+                  <div className="px-5 py-2 border-t border-white/5 bg-[#0e172a]/50 flex items-center gap-2 overflow-x-auto text-[11px]">
                     <span className="text-slate-400 shrink-0 font-medium">⚡ Quick Replies:</span>
                     {smartSuggestions.map((s) => (
                       <button
@@ -1634,11 +1634,11 @@ export default function UnifiedInboxPage() {
                 )}
 
                 {/* Sticky Unified Composer */}
-                <footer className="p-4 border-t border-white/10 bg-[#073b58]/95 backdrop-blur-md space-y-3 shrink-0">
+                <footer className="p-4 border-t border-white/10 bg-[#1b2a4a]/95 backdrop-blur-md space-y-3 shrink-0">
                   {/* Mode & Channel Controls */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="flex rounded-xl bg-[#042a40] p-0.5 border border-white/10 text-xs">
+                      <div className="flex rounded-xl bg-[#0e172a] p-0.5 border border-white/10 text-xs">
                         <button
                           type="button"
                           onClick={() => setComposerMode('REPLY')}
@@ -1669,7 +1669,7 @@ export default function UnifiedInboxPage() {
                           <select
                             value={composerChannel}
                             onChange={(e) => setComposerChannel(e.target.value)}
-                            className="bg-[#042a40] border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white focus:outline-none"
+                            className="bg-[#0e172a] border border-white/10 rounded-xl px-2.5 py-1 text-xs text-white focus:outline-none"
                           >
                             <option value="EMAIL">Email</option>
                             <option value="WHATSAPP">WhatsApp</option>
@@ -1702,7 +1702,7 @@ export default function UnifiedInboxPage() {
 
                   {/* Templates Dropdown */}
                   {showTemplates && (
-                    <div className="rounded-2xl border border-white/10 bg-[#042a40] p-3 space-y-2 shadow-2xl">
+                    <div className="rounded-2xl border border-white/10 bg-[#0e172a] p-3 space-y-2 shadow-2xl">
                       <p className="text-[11px] font-bold text-slate-300">Select Canned Response</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {CANNED_RESPONSES.map((t) => (
@@ -1765,7 +1765,7 @@ export default function UnifiedInboxPage() {
                         placeholder="Email Subject..."
                         value={composerSubject}
                         onChange={(e) => setComposerSubject(e.target.value)}
-                        className="w-full rounded-xl bg-[#042a40] border border-white/10 px-3 py-1.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                        className="w-full rounded-xl bg-[#0e172a] border border-white/10 px-3 py-1.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
                       />
                     </div>
                   )}
@@ -1790,7 +1790,7 @@ export default function UnifiedInboxPage() {
                       className={`w-full rounded-2xl p-3 text-xs text-white placeholder:text-slate-500 focus:outline-none border transition resize-none ${
                         composerMode === 'INTERNAL_NOTE'
                           ? 'bg-amber-950/20 border-amber-500/30 focus:border-amber-400'
-                          : 'bg-[#042a40] border-white/10 focus:border-sky-400'
+                          : 'bg-[#0e172a] border-white/10 focus:border-sky-400'
                       }`}
                     />
                   </div>
@@ -1863,7 +1863,7 @@ export default function UnifiedInboxPage() {
       {/* ========================================================================= */}
       {showTaskModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-white/15 bg-[#073b58] p-6 shadow-2xl space-y-4 text-slate-100">
+          <div className="w-full max-w-md rounded-3xl border border-white/15 bg-[#1b2a4a] p-6 shadow-2xl space-y-4 text-slate-100">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <h3 className="text-base font-bold text-white">Schedule Follow-up Task</h3>
               <button
@@ -1884,7 +1884,7 @@ export default function UnifiedInboxPage() {
                   placeholder="e.g. Call back regarding pricing proposal"
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
                 />
               </div>
 
@@ -1894,7 +1894,7 @@ export default function UnifiedInboxPage() {
                   type="datetime-local"
                   value={taskDueDate}
                   onChange={(e) => setTaskDueDate(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2.5 text-xs text-white focus:border-sky-400 focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3.5 py-2.5 text-xs text-white focus:border-sky-400 focus:outline-none"
                 />
               </div>
 
@@ -1903,7 +1903,7 @@ export default function UnifiedInboxPage() {
                 <select
                   value={taskPriority}
                   onChange={(e) => setTaskPriority(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2.5 text-xs text-white focus:border-sky-400 focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3.5 py-2.5 text-xs text-white focus:border-sky-400 focus:outline-none"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -1937,7 +1937,7 @@ export default function UnifiedInboxPage() {
       {/* ========================================================================= */}
       {showConvertModal && selectedConversation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-white/15 bg-[#073b58] p-6 shadow-2xl space-y-4 text-slate-100">
+          <div className="w-full max-w-md rounded-3xl border border-white/15 bg-[#1b2a4a] p-6 shadow-2xl space-y-4 text-slate-100">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <h3 className="text-base font-bold text-white">Convert to CRM Lead</h3>
               <button
@@ -1967,7 +1967,7 @@ export default function UnifiedInboxPage() {
                   placeholder="e.g. Acme Corp"
                   value={convertCompanyName}
                   onChange={(e) => setConvertCompanyName(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
                 />
               </div>
 
@@ -1997,7 +1997,7 @@ export default function UnifiedInboxPage() {
       {/* ========================================================================= */}
       {showNewModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-white/15 bg-[#073b58] p-6 shadow-2xl space-y-4 text-slate-100">
+          <div className="w-full max-w-md rounded-3xl border border-white/15 bg-[#1b2a4a] p-6 shadow-2xl space-y-4 text-slate-100">
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <div className="flex items-center gap-2">
                 <span className="text-xl">💬</span>
@@ -2033,7 +2033,7 @@ export default function UnifiedInboxPage() {
                       className={`flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl text-xs font-semibold border transition ${
                         newChannel === ch.id
                           ? 'bg-sky-500/25 border-sky-400 text-sky-200 shadow-sm'
-                          : 'bg-[#042a40] border-white/10 text-slate-300 hover:bg-white/5'
+                          : 'bg-[#0e172a] border-white/10 text-slate-300 hover:bg-white/5'
                       }`}
                     >
                       <ChannelIcon channel={ch.id} className="h-3.5 w-3.5" />
@@ -2053,7 +2053,7 @@ export default function UnifiedInboxPage() {
                   placeholder="e.g. Sarah Jenkins or Acme Corp"
                   value={newContactName}
                   onChange={(e) => setNewContactName(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
                 />
               </div>
 
@@ -2067,7 +2067,7 @@ export default function UnifiedInboxPage() {
                     placeholder="client@example.com"
                     value={newContactEmail}
                     onChange={(e) => setNewContactEmail(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                    className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -2079,7 +2079,7 @@ export default function UnifiedInboxPage() {
                     placeholder="+1 555 0199 or @username"
                     value={newContactPhone}
                     onChange={(e) => setNewContactPhone(e.target.value)}
-                    className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                    className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
                   />
                 </div>
               </div>
@@ -2093,7 +2093,7 @@ export default function UnifiedInboxPage() {
                   placeholder="e.g. Project Consultation Inquiry"
                   value={newSubject}
                   onChange={(e) => setNewSubject(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#042a40] px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
+                  className="w-full rounded-xl border border-white/10 bg-[#0e172a] px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none"
                 />
               </div>
 
@@ -2106,7 +2106,7 @@ export default function UnifiedInboxPage() {
                   placeholder="Type an opening message..."
                   value={newInitialMessage}
                   onChange={(e) => setNewInitialMessage(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-[#042a40] p-3 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none resize-none"
+                  className="w-full rounded-xl border border-white/10 bg-[#0e172a] p-3 text-xs text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none resize-none"
                 />
               </div>
 
@@ -2143,7 +2143,7 @@ export default function UnifiedInboxPage() {
           />
 
           {/* Drawer Sidebar */}
-          <div className="relative w-72 max-w-[85vw] bg-[#042a40] border-r border-white/10 p-4 flex flex-col h-full shadow-2xl z-10 overflow-y-auto space-y-5 animate-in slide-in-from-left duration-200">
+          <div className="relative w-72 max-w-[85vw] bg-[#0e172a] border-r border-white/10 p-4 flex flex-col h-full shadow-2xl z-10 overflow-y-auto space-y-5 animate-in slide-in-from-left duration-200">
             {/* Drawer Header */}
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div className="flex items-center gap-2.5">

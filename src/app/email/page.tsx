@@ -8,7 +8,7 @@ type Template = { id: string; name: string; subject: string; body: string; categ
 type Config = { configured: boolean; from: string | null };
 
 const glassInput =
-  'w-full rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
+  'w-full rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
 
 function mergeTemplate(value: string, lead?: Lead | null) {
   if (!lead) return value;
@@ -173,7 +173,7 @@ export default function EmailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#053048] text-slate-100">
+    <div className="min-h-screen bg-[#14213d] text-slate-100">
       <div className="container-custom py-8 space-y-8">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -234,14 +234,14 @@ export default function EmailPage() {
 
         {/* Main Grid: Composer + Templates Library */}
         {loading ? (
-          <div className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-[#073652]/70 p-12 text-center text-xs text-slate-400 backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-[#1b2a4a]/70 p-12 text-center text-xs text-slate-400 backdrop-blur-xl">
             <div className="text-2xl animate-pulse">✉️</div>
             <p className="mt-2">Loading email workspace & templates...</p>
           </div>
         ) : (
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(340px,0.7fr)]">
             {/* Compose Email Panel (React Bits Liquid Glass) */}
-            <section className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-5">
+            <section className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-5">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
 
               <div>
@@ -264,7 +264,7 @@ export default function EmailPage() {
                     >
                       <option value="">Select a lead...</option>
                       {leads.map((lead) => (
-                        <option key={lead.id} value={lead.id} className="bg-[#053048] text-white">
+                        <option key={lead.id} value={lead.id} className="bg-[#14213d] text-white">
                           {lead.contactName}
                           {lead.companyName ? ` — ${lead.companyName}` : ''}
                         </option>
@@ -282,7 +282,7 @@ export default function EmailPage() {
                       {templates
                         .filter((template) => template.isActive)
                         .map((template) => (
-                          <option key={template.id} value={template.id} className="bg-[#053048] text-white">
+                          <option key={template.id} value={template.id} className="bg-[#14213d] text-white">
                             {template.name} ({template.category || 'General'})
                           </option>
                         ))}
@@ -342,7 +342,7 @@ export default function EmailPage() {
             </section>
 
             {/* Email Templates Sidebar (Liquid Glass Panel) */}
-            <aside className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-5">
+            <aside className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-5">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
 
               <div className="flex items-center justify-between">
@@ -366,7 +366,7 @@ export default function EmailPage() {
                   templates.map((template) => (
                     <div
                       key={template.id}
-                      className="group relative overflow-hidden rounded-xl border border-white/[0.08] hover:border-sky-400/40 bg-[#042438]/60 hover:bg-[#042438]/90 p-4 transition-all duration-200"
+                      className="group relative overflow-hidden rounded-xl border border-white/[0.08] hover:border-sky-400/40 bg-[#0e172a]/60 hover:bg-[#0e172a]/90 p-4 transition-all duration-200"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0 flex-1">
@@ -419,7 +419,7 @@ export default function EmailPage() {
         {/* Liquid Glass Modal for Creating / Editing Templates */}
         {showTemplateForm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
-            <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/[0.14] bg-gradient-to-b from-[#073652] via-[#062c44] to-[#042438] p-6 shadow-[0_16px_48px_rgba(0,0,0,0.6)] backdrop-blur-2xl space-y-5">
+            <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/[0.14] bg-gradient-to-b from-[#1b2a4a] via-[#16233f] to-[#0e172a] p-6 shadow-[0_16px_48px_rgba(0,0,0,0.6)] backdrop-blur-2xl space-y-5">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent" />
 
               <div className="flex items-center justify-between">

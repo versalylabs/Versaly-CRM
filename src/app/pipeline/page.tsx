@@ -305,7 +305,7 @@ export default function PipelinePage() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="min-h-screen bg-gray-50 dark:bg-[#053048]"
+      className="min-h-screen bg-gray-50 dark:bg-[#14213d]"
     >
       <div className="container-custom py-8 !max-w-none">
         
@@ -338,7 +338,7 @@ export default function PipelinePage() {
 
         {/* Executive KPI Summary Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#073652]/80 backdrop-blur-xl transition hover:border-sky-500/30">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#1b2a4a]/80 backdrop-blur-xl transition hover:border-sky-500/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Active Deals
@@ -354,7 +354,7 @@ export default function PipelinePage() {
             <p className="mt-1 text-[11px] text-gray-400">Open active opportunities in funnel</p>
           </div>
 
-          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#073652]/80 backdrop-blur-xl transition hover:border-emerald-500/30">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#1b2a4a]/80 backdrop-blur-xl transition hover:border-emerald-500/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Active Pipeline Value
@@ -371,7 +371,7 @@ export default function PipelinePage() {
             <p className="mt-1 text-[11px] text-gray-400">Total unweighted potential revenue</p>
           </div>
 
-          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#073652]/80 backdrop-blur-xl transition hover:border-teal-500/30">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#1b2a4a]/80 backdrop-blur-xl transition hover:border-teal-500/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Weighted Forecast
@@ -388,7 +388,7 @@ export default function PipelinePage() {
             <p className="mt-1 text-[11px] text-gray-400">Calculated by stage probabilities</p>
           </div>
 
-          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#073652]/80 backdrop-blur-xl transition hover:border-amber-500/30">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#1b2a4a]/80 backdrop-blur-xl transition hover:border-amber-500/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Won Rate
@@ -410,7 +410,7 @@ export default function PipelinePage() {
         </div>
 
         {/* Filter & Search Bar */}
-        <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-gray-200/80 bg-white/80 p-3.5 shadow-sm dark:border-white/10 dark:bg-[#073652]/80 backdrop-blur-xl">
+        <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-gray-200/80 bg-white/80 p-3.5 shadow-sm dark:border-white/10 dark:bg-[#1b2a4a]/80 backdrop-blur-xl">
           <div className="flex flex-1 items-center gap-2.5">
             <Search className="h-4 w-4 text-gray-400 shrink-0" />
             <input
@@ -432,7 +432,7 @@ export default function PipelinePage() {
 
           <div className="flex flex-wrap items-center gap-2 border-t sm:border-t-0 sm:border-l border-gray-200/60 sm:pl-3 pt-2 sm:pt-0 dark:border-white/10">
             {/* Quick Scope Filter */}
-            <div className="flex rounded-xl bg-gray-100/80 p-1 dark:bg-[#052b41]/80">
+            <div className="flex rounded-xl bg-gray-100/80 p-1 dark:bg-[#16233f]/80">
               <button
                 onClick={() => setActiveFilter('all')}
                 className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
@@ -470,7 +470,7 @@ export default function PipelinePage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="rounded-xl border border-gray-200/80 bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-gray-700 dark:border-white/10 dark:bg-[#052b41] dark:text-gray-200 outline-none"
+              className="rounded-xl border border-gray-200/80 bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-gray-700 dark:border-white/10 dark:bg-[#16233f] dark:text-gray-200 outline-none"
             >
               <option value="value_desc">Value: High to Low</option>
               <option value="value_asc">Value: Low to High</option>
@@ -493,14 +493,14 @@ export default function PipelinePage() {
 
         {/* Kanban Board Container */}
         {loading ? (
-          <div className="flex h-72 items-center justify-center rounded-2xl border border-gray-200/80 bg-white/80 p-12 text-center dark:border-white/10 dark:bg-[#073652]/60 backdrop-blur-xl">
+          <div className="flex h-72 items-center justify-center rounded-2xl border border-gray-200/80 bg-white/80 p-12 text-center dark:border-white/10 dark:bg-[#1b2a4a]/60 backdrop-blur-xl">
             <div className="space-y-3">
               <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
               <p className="text-xs text-gray-500 dark:text-gray-400">Loading pipeline deals...</p>
             </div>
           </div>
         ) : leads.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-300 bg-white/60 p-12 text-center dark:border-white/15 dark:bg-[#073652]/40 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.2)]">
+          <div className="rounded-2xl border border-dashed border-gray-300 bg-white/60 p-12 text-center dark:border-white/15 dark:bg-[#1b2a4a]/40 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.2)]">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-sky-500/20 bg-sky-500/10 text-sky-400">
               <TrendingUp className="h-7 w-7" />
             </div>
@@ -539,7 +539,7 @@ export default function PipelinePage() {
                       if (e.currentTarget === e.target) setActiveDropStage(null);
                     }}
                     onDrop={() => handleDrop(stage.id)}
-                    className={`flex flex-col rounded-2xl border-t-4 border border-gray-200/80 p-3.5 backdrop-blur-xl transition-all duration-150 ${stage.accentBorder} ${stage.columnBg} dark:border-white/10 dark:bg-[#073652]/60 ${
+                    className={`flex flex-col rounded-2xl border-t-4 border border-gray-200/80 p-3.5 backdrop-blur-xl transition-all duration-150 ${stage.accentBorder} ${stage.columnBg} dark:border-white/10 dark:bg-[#1b2a4a]/60 ${
                       isDropTarget
                         ? 'ring-2 ring-sky-500 bg-sky-50/80 dark:bg-sky-950/60 border-sky-400 dark:border-sky-500 scale-[1.01]'
                         : ''
@@ -554,7 +554,7 @@ export default function PipelinePage() {
                             {stage.label}
                           </h3>
                         </div>
-                        <span className="rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold text-gray-700 shadow-2xs dark:bg-[#052b41] dark:text-gray-200 dark:border dark:border-white/10">
+                        <span className="rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold text-gray-700 shadow-2xs dark:bg-[#16233f] dark:text-gray-200 dark:border dark:border-white/10">
                           {stageLeads.length}
                         </span>
                       </div>
@@ -587,7 +587,7 @@ export default function PipelinePage() {
                               setDraggedId(null);
                               setActiveDropStage(null);
                             }}
-                            className={`group relative rounded-xl border border-gray-200/80 bg-white/90 p-3.5 shadow-xs backdrop-blur-md transition hover:border-sky-400 hover:shadow-md dark:border-white/10 dark:bg-[#052b41]/90 dark:hover:border-sky-500/50 ${
+                            className={`group relative rounded-xl border border-gray-200/80 bg-white/90 p-3.5 shadow-xs backdrop-blur-md transition hover:border-sky-400 hover:shadow-md dark:border-white/10 dark:bg-[#16233f]/90 dark:hover:border-sky-500/50 ${
                               isDragging
                                 ? 'opacity-40 scale-[0.98] border-dashed border-sky-400 rotate-1'
                                 : ''
@@ -637,7 +637,7 @@ export default function PipelinePage() {
                             {/* Footer: Source, Owner, and Stage Select */}
                             <div className="mt-3 pt-2.5 border-t border-gray-100 dark:border-white/10">
                               <div className="flex items-center justify-between gap-2">
-                                <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-[#073652] dark:text-gray-300 dark:border dark:border-white/10">
+                                <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-[#1b2a4a] dark:text-gray-300 dark:border dark:border-white/10">
                                   {formatSource(lead.leadSource)}
                                 </span>
 
@@ -658,7 +658,7 @@ export default function PipelinePage() {
                                   disabled={isUpdating}
                                   onChange={(e) => moveLead(lead.id, e.target.value)}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="w-full rounded-lg border border-gray-200 bg-gray-50/70 px-2 py-1 text-[10px] font-medium text-gray-600 dark:border-white/10 dark:bg-[#073652] dark:text-gray-300 outline-none"
+                                  className="w-full rounded-lg border border-gray-200 bg-gray-50/70 px-2 py-1 text-[10px] font-medium text-gray-600 dark:border-white/10 dark:bg-[#1b2a4a] dark:text-gray-300 outline-none"
                                 >
                                   {STAGES.map((s) => (
                                     <option key={s.id} value={s.id}>

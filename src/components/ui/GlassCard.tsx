@@ -17,7 +17,7 @@ interface GlassCardProps extends HTMLMotionProps<'div'> {
 export function GlassCard({
   level = 'medium',
   glow = false,
-  glowColor = 'rgba(56, 189, 248, 0.15)',
+  glowColor = 'rgba(252, 163, 17, 0.15)',
   children,
   className,
   ...props
@@ -28,11 +28,11 @@ export function GlassCard({
   // Level 3 (Strong): Hero floating surfaces, highlighted plan, primary CTA
   const levelStyles = {
     subtle:
-      'bg-[#062c44]/40 backdrop-blur-md border border-white/[0.08] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.08)]',
+      'bg-[#16233f]/40 backdrop-blur-md border border-white/[0.08] shadow-[0_4px_24px_-4px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.08)]',
     medium:
-      'bg-[#073652]/50 backdrop-blur-xl border border-white/[0.12] shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.14)] hover:border-sky-400/40 hover:bg-[#073652]/65 transition-all duration-300',
+      'bg-[#1b2a4a]/50 backdrop-blur-xl border border-white/[0.12] shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.14)] hover:border-[#fca311]/40 hover:bg-[#1b2a4a]/65 transition-all duration-300',
     strong:
-      'bg-gradient-to-b from-[#0a466a]/75 via-[#073652]/80 to-[#042438]/90 backdrop-blur-2xl border border-sky-400/35 shadow-[0_20px_50px_0_rgba(0,0,0,0.45),inset_0_1px_1px_0_rgba(255,255,255,0.22)]',
+      'bg-gradient-to-b from-[#22355e]/75 via-[#1b2a4a]/80 to-[#0e172a]/90 backdrop-blur-2xl border border-[#fca311]/35 shadow-[0_20px_50px_0_rgba(0,0,0,0.45),inset_0_1px_1px_0_rgba(255,255,255,0.22)]',
   };
 
   return (
@@ -66,7 +66,7 @@ export function GlassBadge({
     <span
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold',
-        'bg-sky-500/10 backdrop-blur-md border border-sky-400/25 text-sky-200',
+        'bg-[#fca311]/10 backdrop-blur-md border border-[#fca311]/25 text-[#fca311]',
         'shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]',
         className
       )}

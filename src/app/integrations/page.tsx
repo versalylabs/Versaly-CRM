@@ -14,7 +14,7 @@ export default function IntegrationsPage(){
  return <div className="mx-auto max-w-6xl space-y-6">
   <div><p className="text-sm font-medium text-accent-700">Developer platform</p><h1 className="mt-1 text-3xl font-bold text-gray-900 dark:text-gray-100">Integrations & API</h1><p className="mt-2 text-gray-600 dark:text-gray-400">Connect websites, automation platforms and your own software with workspace-scoped credentials and signed events.</p></div>
   {message&&<div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">{message}</div>}
-  <div className="rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-900/30 via-[#073b58] to-cyan-900/30 p-5 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div className="rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-900/30 via-[#1b2a4a] to-cyan-900/30 p-5 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <div className="flex items-center gap-2">
         <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>

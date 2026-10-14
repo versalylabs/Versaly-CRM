@@ -113,7 +113,7 @@ export function PipelineVisualizer() {
   const filteredDeals = activeTab === 'all' ? deals : deals.filter((d) => d.stageId === activeTab);
 
   return (
-    <div className="relative mx-auto w-full max-w-6xl rounded-3xl border border-white/[0.14] bg-[#073652]/65 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.18)] backdrop-blur-2xl sm:p-7">
+    <div className="relative mx-auto w-full max-w-6xl rounded-3xl border border-white/[0.14] bg-[#1b2a4a]/65 p-5 shadow-[0_20px_50px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.18)] backdrop-blur-2xl sm:p-7">
       {/* Specular Top Edge Light Refraction */}
       <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
 
@@ -132,7 +132,7 @@ export function PipelineVisualizer() {
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-white/10 bg-[#041d2d]/90 p-1.5 backdrop-blur-md">
+        <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-white/10 bg-[#0e172a]/90 p-1.5 backdrop-blur-md">
           <button
             onClick={() => setActiveTab('all')}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
@@ -168,7 +168,7 @@ export function PipelineVisualizer() {
           return (
             <div
               key={stage.id}
-              className={`flex flex-col rounded-2xl border bg-[#042033]/85 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] backdrop-blur-md transition-opacity duration-300 ${
+              className={`flex flex-col rounded-2xl border bg-[#0e172a]/85 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] backdrop-blur-md transition-opacity duration-300 ${
                 stage.color
               } ${isSelectedTab ? 'opacity-100' : 'opacity-40'}`}
             >
@@ -194,8 +194,8 @@ export function PipelineVisualizer() {
                         key={deal.id}
                         className={`relative rounded-xl border p-3.5 transition-all ${
                           isHighlighted
-                            ? 'border-sky-400/60 bg-[#084266]/90 shadow-[0_8px_20px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.2)] backdrop-blur-sm'
-                            : 'border-white/10 bg-[#062c45]/75 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] hover:border-sky-500/40 hover:bg-[#073452]/80 backdrop-blur-sm'
+                            ? 'border-sky-400/60 bg-[#22355e]/90 shadow-[0_8px_20px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.2)] backdrop-blur-sm'
+                            : 'border-white/10 bg-[#16233f]/75 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] hover:border-sky-500/40 hover:bg-[#1b2a4a]/80 backdrop-blur-sm'
                         }`}
                       >
                         <div className="flex items-start justify-between gap-2">
@@ -223,7 +223,7 @@ export function PipelineVisualizer() {
                         </div>
 
                         {/* Stage Action status */}
-                        <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-[#031c2c] px-2 py-1 text-[10px] text-sky-300">
+                        <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-[#0c1527] px-2 py-1 text-[10px] text-sky-300">
                           <Clock className="h-3 w-3 shrink-0 text-sky-400" />
                           <span className="truncate">{deal.action}</span>
                         </div>
@@ -252,7 +252,7 @@ export function PipelineVisualizer() {
       </div>
 
       {/* Telemetry Summary Strip with Frosted Glass */}
-      <div className="mt-5 grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-[#031d2e]/85 p-3.5 sm:p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-md sm:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-[#0c1527]/85 p-3.5 sm:p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-md sm:grid-cols-4">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500/10 text-sky-400">
             <DollarSign className="h-5 w-5" />

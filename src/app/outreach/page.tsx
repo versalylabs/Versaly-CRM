@@ -44,7 +44,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 const glassInput =
-  'w-full rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
+  'w-full rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
 
 function label(value: string) {
   return value
@@ -216,7 +216,7 @@ export default function OutreachPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#053048] text-slate-100">
+    <div className="min-h-screen bg-[#14213d] text-slate-100">
       <div className="container-custom py-8 space-y-8">
         {/* Header Bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -274,7 +274,7 @@ export default function OutreachPage() {
           ].map((item, idx) => (
             <div
               key={idx}
-              className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-b from-[#073652]/70 to-[#042438]/80 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl"
+              className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-b from-[#1b2a4a]/70 to-[#0e172a]/80 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent" />
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{item.label}</p>
@@ -287,7 +287,7 @@ export default function OutreachPage() {
         {showForm && (
           <form
             onSubmit={saveOutreach}
-            className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-4"
+            className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-4"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
 
@@ -312,7 +312,7 @@ export default function OutreachPage() {
                 >
                   <option value="">Select a lead...</option>
                   {leads.map((lead) => (
-                    <option key={lead.id} value={lead.id} className="bg-[#053048] text-white">
+                    <option key={lead.id} value={lead.id} className="bg-[#14213d] text-white">
                       {lead.contactName}
                       {lead.companyName ? ` — ${lead.companyName}` : ''}
                     </option>
@@ -328,7 +328,7 @@ export default function OutreachPage() {
                   className={glassInput}
                 >
                   {TYPES.map((type) => (
-                    <option key={type.id} value={type.id} className="bg-[#053048] text-white">
+                    <option key={type.id} value={type.id} className="bg-[#14213d] text-white">
                       {type.label}
                     </option>
                   ))}
@@ -343,7 +343,7 @@ export default function OutreachPage() {
                   className={glassInput}
                 >
                   {STATUSES.map((status) => (
-                    <option key={status} value={status} className="bg-[#053048] text-white">
+                    <option key={status} value={status} className="bg-[#14213d] text-white">
                       {label(status)}
                     </option>
                   ))}
@@ -411,7 +411,7 @@ export default function OutreachPage() {
         )}
 
         {/* History List (Liquid Glass Panel) */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
 
           {/* Search & Filter Bar */}
@@ -427,16 +427,16 @@ export default function OutreachPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search leads, subjects, or notes..."
-                className="rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition"
+                className="rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition"
               />
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 transition cursor-pointer"
+                className="rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 transition cursor-pointer"
               >
-                <option value="" className="bg-[#053048]">All Channels</option>
+                <option value="" className="bg-[#14213d]">All Channels</option>
                 {TYPES.map((type) => (
-                  <option key={type.id} value={type.id} className="bg-[#053048]">
+                  <option key={type.id} value={type.id} className="bg-[#14213d]">
                     {type.label}
                   </option>
                 ))}
@@ -444,11 +444,11 @@ export default function OutreachPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 transition cursor-pointer"
+                className="rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 transition cursor-pointer"
               >
-                <option value="" className="bg-[#053048]">All Statuses</option>
+                <option value="" className="bg-[#14213d]">All Statuses</option>
                 {STATUSES.map((status) => (
-                  <option key={status} value={status} className="bg-[#053048]">
+                  <option key={status} value={status} className="bg-[#14213d]">
                     {label(status)}
                   </option>
                 ))}
@@ -529,10 +529,10 @@ export default function OutreachPage() {
                       <select
                         value={log.status}
                         onChange={(e) => updateStatus(log.id, e.target.value)}
-                        className="rounded-xl border border-white/10 bg-[#042438] px-2.5 py-1 text-xs text-white focus:outline-none focus:border-sky-400 transition cursor-pointer"
+                        className="rounded-xl border border-white/10 bg-[#0e172a] px-2.5 py-1 text-xs text-white focus:outline-none focus:border-sky-400 transition cursor-pointer"
                       >
                         {STATUSES.map((status) => (
-                          <option key={status} value={status} className="bg-[#053048]">
+                          <option key={status} value={status} className="bg-[#14213d]">
                             {label(status)}
                           </option>
                         ))}

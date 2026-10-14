@@ -201,7 +201,7 @@ export default function BillingPage() {
       <div
         className={`relative overflow-hidden rounded-2xl border p-5 shadow-sm ${
           session?.user?.isPlatformAdmin
-            ? 'border-emerald-200/80 bg-gradient-to-r from-emerald-50/80 via-[#073652] to-emerald-950/20 dark:border-emerald-900/40 dark:from-emerald-950/30 dark:via-gray-900 dark:to-emerald-950/20'
+            ? 'border-emerald-200/80 bg-gradient-to-r from-emerald-50/80 via-[#1b2a4a] to-emerald-950/20 dark:border-emerald-900/40 dark:from-emerald-950/30 dark:via-gray-900 dark:to-emerald-950/20'
             : org.isTrialing
             ? 'border-amber-200/80 bg-gradient-to-r from-amber-50 via-white to-amber-50/40 dark:border-amber-900/40 dark:from-amber-950/20 dark:via-gray-900 dark:to-amber-950/20'
             : 'border-emerald-200/80 bg-gradient-to-r from-emerald-50 via-white to-emerald-50/40 dark:border-emerald-900/40 dark:from-emerald-950/20 dark:via-gray-900 dark:to-emerald-950/20'

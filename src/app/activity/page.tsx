@@ -35,37 +35,37 @@ const TYPE_OPTIONS: { value: string; label: string }[] = [
 
 const TYPE_STYLE: Record<string, { dot: string; label: string; badge: string }> = {
   lead_created: {
-    dot: 'bg-sky-400 ring-[#053048]',
+    dot: 'bg-sky-400 ring-[#14213d]',
     label: 'Lead',
     badge: 'border-sky-400/30 bg-sky-500/15 text-sky-300',
   },
   outreach: {
-    dot: 'bg-cyan-400 ring-[#053048]',
+    dot: 'bg-cyan-400 ring-[#14213d]',
     label: 'Outreach',
     badge: 'border-cyan-400/30 bg-cyan-500/15 text-cyan-300',
   },
   task_created: {
-    dot: 'bg-amber-400 ring-[#053048]',
+    dot: 'bg-amber-400 ring-[#14213d]',
     label: 'Task',
     badge: 'border-amber-400/30 bg-amber-500/15 text-amber-300',
   },
   task_completed: {
-    dot: 'bg-emerald-400 ring-[#053048]',
+    dot: 'bg-emerald-400 ring-[#14213d]',
     label: 'Task Done',
     badge: 'border-emerald-400/30 bg-emerald-500/15 text-emerald-300',
   },
   proposal_created: {
-    dot: 'bg-slate-400 ring-[#053048]',
+    dot: 'bg-slate-400 ring-[#14213d]',
     label: 'Proposal',
     badge: 'border-slate-400/30 bg-slate-500/15 text-slate-300',
   },
   proposal_sent: {
-    dot: 'bg-sky-400 ring-[#053048]',
+    dot: 'bg-sky-400 ring-[#14213d]',
     label: 'Proposal Sent',
     badge: 'border-sky-400/30 bg-sky-500/15 text-sky-300',
   },
   proposal_responded: {
-    dot: 'bg-emerald-400 ring-[#053048]',
+    dot: 'bg-emerald-400 ring-[#14213d]',
     label: 'Proposal Response',
     badge: 'border-emerald-400/30 bg-emerald-500/15 text-emerald-300',
   },
@@ -136,7 +136,7 @@ export default function ActivityPage() {
   const leadEvents = events.filter((e) => e.type === 'lead_created').length;
 
   return (
-    <div className="min-h-screen bg-[#053048] text-slate-100">
+    <div className="min-h-screen bg-[#14213d] text-slate-100">
       <div className="container-custom py-8 space-y-8">
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -177,7 +177,7 @@ export default function ActivityPage() {
           ].map((item, idx) => (
             <div
               key={idx}
-              className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-b from-[#073652]/70 to-[#042438]/80 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl"
+              className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-b from-[#1b2a4a]/70 to-[#0e172a]/80 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent" />
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{item.label}</p>
@@ -187,7 +187,7 @@ export default function ActivityPage() {
         </div>
 
         {/* Main Activity Timeline (React Bits Liquid Glass Panel) */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-6">
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-6">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
 
           {/* Search & Filter Bar */}
@@ -196,15 +196,15 @@ export default function ActivityPage() {
               placeholder="Search events, leads, or companies..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="flex-1 w-full rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition"
+              className="flex-1 w-full rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition"
             />
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="w-full sm:w-auto rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 transition cursor-pointer"
+              className="w-full sm:w-auto rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 transition cursor-pointer"
             >
               {TYPE_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value} className="bg-[#053048] text-white">
+                <option key={o.value} value={o.value} className="bg-[#14213d] text-white">
                   {o.label}
                 </option>
               ))}
@@ -232,15 +232,15 @@ export default function ActivityPage() {
                   <div className="space-y-2 border-l border-white/10 ml-2 pl-4">
                     {items.map((e) => {
                       const style = TYPE_STYLE[e.type] ?? {
-                        dot: 'bg-slate-400 ring-[#053048]',
+                        dot: 'bg-slate-400 ring-[#14213d]',
                         label: e.type,
                         badge: 'border-white/10 bg-white/5 text-slate-300',
                       };
 
                       const content = (
-                        <div className="group relative rounded-xl border border-white/5 hover:border-sky-400/30 bg-[#042438]/50 hover:bg-[#042438]/80 p-3.5 transition flex items-start gap-3">
+                        <div className="group relative rounded-xl border border-white/5 hover:border-sky-400/30 bg-[#0e172a]/50 hover:bg-[#0e172a]/80 p-3.5 transition flex items-start gap-3">
                           <span
-                            className={`mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full ${style.dot} ring-4 ring-[#053048] shadow-sm`}
+                            className={`mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full ${style.dot} ring-4 ring-[#14213d] shadow-sm`}
                           />
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">

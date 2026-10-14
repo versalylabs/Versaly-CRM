@@ -299,7 +299,7 @@ export default function UserManagementPage() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="min-h-screen bg-gray-50 dark:bg-[#053048]"
+      className="min-h-screen bg-gray-50 dark:bg-[#14213d]"
     >
       <div className="container-custom py-8">
         
@@ -345,7 +345,7 @@ export default function UserManagementPage() {
         </div>
 
         {/* Seat Quota Callout Banner */}
-        <div className="mb-6 rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
+        <div className="mb-6 rounded-2xl border border-gray-200/80 bg-white/80 p-5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/80 dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.28)]">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400">
@@ -420,7 +420,7 @@ export default function UserManagementPage() {
         )}
 
         {/* Filters Bar */}
-        <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-gray-200/80 bg-white/80 p-3.5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#073652]/80">
+        <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-gray-200/80 bg-white/80 p-3.5 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-[#1b2a4a]/80">
           <div className="flex flex-1 items-center gap-2.5">
             <Search className="h-4 w-4 text-gray-400 shrink-0" />
             <input

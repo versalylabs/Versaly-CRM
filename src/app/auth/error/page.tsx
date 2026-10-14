@@ -28,8 +28,8 @@ function AuthErrorContent() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-gradient-to-b from-[#053048] to-[#031d2e] flex items-center justify-center px-4 py-12 text-white">
-      <div className="w-full max-w-md rounded-3xl border border-white/15 bg-[#073652]/80 p-8 shadow-2xl backdrop-blur-2xl text-center space-y-6">
+    <main className="min-h-screen w-full bg-gradient-to-b from-[#14213d] to-[#0c1527] flex items-center justify-center px-4 py-12 text-white">
+      <div className="w-full max-w-md rounded-3xl border border-white/15 bg-[#1b2a4a]/80 p-8 shadow-2xl backdrop-blur-2xl text-center space-y-6">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-500/20 text-sky-400 border border-sky-400/30 shadow-inner">
           <KeyRound className="h-7 w-7" />
         </div>
@@ -42,7 +42,7 @@ function AuthErrorContent() {
         <div className="space-y-3 pt-2">
           <Link
             href="/auth/signin"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 py-3.5 text-center text-xs font-black uppercase tracking-wider text-[#031d2e] shadow-lg shadow-sky-500/30 hover:brightness-110 active:scale-95 transition-all"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-cyan-400 py-3.5 text-center text-xs font-black uppercase tracking-wider text-[#0c1527] shadow-lg shadow-sky-500/30 hover:brightness-110 active:scale-95 transition-all"
           >
             <span>Sign In to Your Account →</span>
           </Link>
@@ -64,7 +64,7 @@ export default function AuthError() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#053048] grid place-items-center text-white text-xs">
+        <div className="min-h-screen bg-[#14213d] grid place-items-center text-white text-xs">
           Loading authentication status...
         </div>
       }

@@ -115,8 +115,8 @@ function PricingCard({
       {/* Most Popular Floating Badge - Positioned cleanly with high z-index and zero clipping */}
       {plan.popular && (
         <div className="absolute top-0.5 left-1/2 -translate-x-1/2 z-30 whitespace-nowrap">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-cyan-400 via-sky-300 to-cyan-400 px-4 py-1.5 text-[11px] font-black uppercase tracking-wider text-[#041e30] shadow-[0_4px_20px_rgba(34,211,238,0.55)] ring-2 ring-white/50">
-            <Sparkles className="h-3.5 w-3.5 fill-[#041e30] animate-pulse" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-cyan-400 via-sky-300 to-cyan-400 px-4 py-1.5 text-[11px] font-black uppercase tracking-wider text-[#0e172a] shadow-[0_4px_20px_rgba(34,211,238,0.55)] ring-2 ring-white/50">
+            <Sparkles className="h-3.5 w-3.5 fill-[#0e172a] animate-pulse" />
             Most Popular Choice
           </span>
         </div>
@@ -135,8 +135,8 @@ function PricingCard({
         whileHover={{ y: -8 }}
         className={`group relative flex flex-col justify-between rounded-3xl p-7 sm:p-8 transition-all duration-300 backdrop-blur-2xl ${
           plan.popular
-            ? 'border-2 border-sky-400/70 bg-gradient-to-b from-[#093d5f]/95 via-[#062d47]/95 to-[#041f32]/98 shadow-[0_20px_50px_rgba(0,0,0,0.55),0_0_35px_rgba(14,165,233,0.25),inset_0_1px_2px_rgba(255,255,255,0.3)]'
-            : 'border border-white/15 bg-gradient-to-b from-[#073652]/70 via-[#052b42]/75 to-[#031d2e]/85 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.15)] hover:border-sky-400/50 hover:shadow-[0_20px_45px_rgba(0,0,0,0.55),0_0_25px_rgba(14,165,233,0.18)]'
+            ? 'border-2 border-sky-400/70 bg-gradient-to-b from-[#22355e]/95 via-[#16233f]/95 to-[#0e172a]/98 shadow-[0_20px_50px_rgba(0,0,0,0.55),0_0_35px_rgba(252, 163, 17,0.25),inset_0_1px_2px_rgba(255,255,255,0.3)]'
+            : 'border border-white/15 bg-gradient-to-b from-[#1b2a4a]/70 via-[#16233f]/75 to-[#0c1527]/85 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.15)] hover:border-sky-400/50 hover:shadow-[0_20px_45px_rgba(0,0,0,0.55),0_0_25px_rgba(252, 163, 17,0.18)]'
         }`}
       >
         {/* Dynamic Mouse Spotlight Glow */}
@@ -144,7 +144,7 @@ function PricingCard({
           <div
             className="pointer-events-none absolute -inset-px rounded-3xl opacity-100 transition-opacity duration-300 z-0"
             style={{
-              background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(56, 189, 248, 0.18), transparent 70%)`,
+              background: `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(252, 163, 17, 0.18), transparent 70%)`,
             }}
           />
         )}
@@ -238,7 +238,7 @@ function PricingCard({
             href={`/auth/signup?plan=${plan.signupKey}&billing=${annual ? 'annual' : 'monthly'}`}
             className={`group/btn flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-center text-sm font-extrabold transition-all duration-200 ${
               plan.popular
-                ? 'bg-gradient-to-r from-sky-500 via-cyan-400 to-sky-500 bg-[length:200%_auto] text-[#031d2e] hover:brightness-110 shadow-[0_4px_20px_rgba(14,165,233,0.5)] active:scale-[0.98]'
+                ? 'bg-gradient-to-r from-sky-500 via-cyan-400 to-sky-500 bg-[length:200%_auto] text-[#0c1527] hover:brightness-110 shadow-[0_4px_20px_rgba(252, 163, 17,0.5)] active:scale-[0.98]'
                 : 'border border-sky-400/40 bg-sky-950/50 text-white hover:bg-sky-500/20 hover:border-sky-300 shadow-[0_4px_16px_rgba(0,0,0,0.3)] active:scale-[0.98]'
             }`}
           >
@@ -281,7 +281,7 @@ export function PricingSection() {
       <div className="relative mx-auto max-w-7xl">
         {/* Section Header */}
         <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/40 bg-sky-950/70 px-4 py-1.5 text-xs font-bold text-sky-300 shadow-[0_0_20px_rgba(56,189,248,0.2)]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-sky-400/40 bg-sky-950/70 px-4 py-1.5 text-xs font-bold text-sky-300 shadow-[0_0_20px_rgba(252, 163, 17,0.2)]">
             <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
             <span>Transparent Subscription Pricing</span>
           </div>
@@ -295,7 +295,7 @@ export function PricingSection() {
           </p>
 
           {/* Billing Switcher with Frosted Glass Pill */}
-          <div className="mt-7 inline-flex items-center gap-3 rounded-full border border-white/15 bg-[#031d2e]/90 p-1.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_8px_24px_rgba(0,0,0,0.4)] backdrop-blur-xl">
+          <div className="mt-7 inline-flex items-center gap-3 rounded-full border border-white/15 bg-[#0c1527]/90 p-1.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_8px_24px_rgba(0,0,0,0.4)] backdrop-blur-xl">
             <button
               type="button"
               onClick={() => setAnnual(false)}
@@ -343,7 +343,7 @@ export function PricingSection() {
         </div>
 
         {/* Security, Compliance & Multi-Currency Assurance Bar */}
-        <div className="mt-10 lg:mt-12 flex flex-wrap items-center justify-center gap-6 rounded-2xl border border-white/15 bg-[#031e30]/80 px-6 py-4 text-xs font-semibold text-sky-200/90 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+        <div className="mt-10 lg:mt-12 flex flex-wrap items-center justify-center gap-6 rounded-2xl border border-white/15 bg-[#0c1527]/80 px-6 py-4 text-xs font-semibold text-sky-200/90 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-sky-400" />
             <span>Encrypted Multi-Tenant Isolation</span>

@@ -41,7 +41,7 @@ export function BentoGridFeatures() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-[#073652]/60 p-6 sm:p-7 shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-xl md:col-span-2 hover:border-sky-400/40 hover:bg-[#073652]/75 transition-all"
+            className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-[#1b2a4a]/60 p-6 sm:p-7 shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-xl md:col-span-2 hover:border-sky-400/40 hover:bg-[#1b2a4a]/75 transition-all"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
             <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-sky-500/10 blur-3xl group-hover:bg-sky-500/20 transition-all" />
@@ -63,7 +63,7 @@ export function BentoGridFeatures() {
             </p>
 
             {/* Simulated Live Chat / Outreach UI */}
-            <div className="mt-5 rounded-2xl border border-white/10 bg-[#042033]/80 p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+            <div className="mt-5 rounded-2xl border border-white/10 bg-[#0e172a]/80 p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
               <div className="flex items-center justify-between border-b border-white/5 pb-2.5 text-xs text-sky-300">
                 <span className="font-semibold flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
@@ -73,7 +73,7 @@ export function BentoGridFeatures() {
               </div>
               
               <div className="mt-3 space-y-2 text-xs">
-                <div className="max-w-[80%] rounded-xl rounded-tl-sm bg-[#0a3550] p-3 text-sky-100 border border-sky-500/20">
+                <div className="max-w-[80%] rounded-xl rounded-tl-sm bg-[#22355e] p-3 text-sky-100 border border-sky-500/20">
                   <p className="font-medium text-sky-300 text-[10px]">Automated Trigger · Deal in Discovery &gt; 48h</p>
                   <p className="mt-0.5">Hi Kevin! We noticed you checked our Growth Pro pricing. Would you like a 10-minute walkthrough tailored for Safari Logistics?</p>
                   <span className="mt-1 block text-[9px] text-sky-400 text-right">09:14 AM · Delivered ✓✓</span>
@@ -94,7 +94,7 @@ export function BentoGridFeatures() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-[#073652]/60 p-6 sm:p-7 shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-xl hover:border-sky-400/40 hover:bg-[#073652]/75 transition-all flex flex-col justify-between"
+            className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-[#1b2a4a]/60 p-6 sm:p-7 shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-xl hover:border-sky-400/40 hover:bg-[#1b2a4a]/75 transition-all flex flex-col justify-between"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
             <div>
@@ -116,7 +116,7 @@ export function BentoGridFeatures() {
             </div>
 
             {/* Retention Gauge Simulation */}
-            <div className="mt-5 rounded-2xl border border-white/10 bg-[#042033]/80 p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+            <div className="mt-5 rounded-2xl border border-white/10 bg-[#0e172a]/80 p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400">Account Health Index</span>
@@ -139,7 +139,7 @@ export function BentoGridFeatures() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-[#073652]/60 p-6 sm:p-7 shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-xl hover:border-sky-400/40 hover:bg-[#073652]/75 transition-all flex flex-col justify-between"
+            className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-[#1b2a4a]/60 p-6 sm:p-7 shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-xl hover:border-sky-400/40 hover:bg-[#1b2a4a]/75 transition-all flex flex-col justify-between"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
             <div>
@@ -161,7 +161,7 @@ export function BentoGridFeatures() {
             </div>
 
             {/* Mini Trend Bar Chart */}
-            <div className="mt-5 rounded-2xl border border-white/10 bg-[#042033]/80 p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+            <div className="mt-5 rounded-2xl border border-white/10 bg-[#0e172a]/80 p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-white">Monthly MRR Growth</span>
                 <span className="font-bold text-cyan-400">+24.6% MoM</span>
@@ -185,7 +185,7 @@ export function BentoGridFeatures() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-[#073652]/60 p-6 sm:p-7 shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-xl md:col-span-2 hover:border-sky-400/40 hover:bg-[#073652]/75 transition-all"
+            className="group relative overflow-hidden rounded-3xl border border-white/[0.12] bg-[#1b2a4a]/60 p-6 sm:p-7 shadow-[0_8px_32px_0_rgba(0,0,0,0.37),inset_0_1px_0_0_rgba(255,255,255,0.15)] backdrop-blur-xl md:col-span-2 hover:border-sky-400/40 hover:bg-[#1b2a4a]/75 transition-all"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
             <div className="flex items-center justify-between">
@@ -205,17 +205,17 @@ export function BentoGridFeatures() {
             </p>
 
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-white/10 bg-[#042033]/80 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+              <div className="rounded-xl border border-white/10 bg-[#0e172a]/80 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
                 <p className="text-[10px] font-bold uppercase text-sky-400">Auto Task Dispatch</p>
                 <p className="mt-1 text-sm font-bold text-white">Call within 15 min</p>
                 <p className="mt-0.5 text-[10px] text-sky-200/60">Assigned to best available rep</p>
               </div>
-              <div className="rounded-xl border border-white/10 bg-[#042033]/80 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+              <div className="rounded-xl border border-white/10 bg-[#0e172a]/80 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
                 <p className="text-[10px] font-bold uppercase text-amber-400">SLA Warning Alert</p>
                 <p className="mt-1 text-sm font-bold text-white">Overdue Escalation</p>
                 <p className="mt-0.5 text-[10px] text-sky-200/60">Manager alerted after 24h idle</p>
               </div>
-              <div className="rounded-xl border border-white/10 bg-[#042033]/80 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+              <div className="rounded-xl border border-white/10 bg-[#0e172a]/80 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
                 <p className="text-[10px] font-bold uppercase text-emerald-400">Workload Balance</p>
                 <p className="mt-1 text-sm font-bold text-white">Fair Lead Rotation</p>
                 <p className="mt-0.5 text-[10px] text-sky-200/60">Weighted round-robin algorithm</p>

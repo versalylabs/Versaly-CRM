@@ -19,7 +19,7 @@ export function BackgroundGrid({ className, pattern = 'grid' }: BackgroundGridPr
       {/* Grid Pattern */}
       {pattern === 'grid' ? (
         <div
-          className="absolute inset-0 bg-[linear-gradient(to_right,#0b4a6828_1px,transparent_1px),linear-gradient(to_bottom,#0b4a6828_1px,transparent_1px)] bg-[size:4rem_4rem]"
+          className="absolute inset-0 bg-[linear-gradient(to_right,#22355e28_1px,transparent_1px),linear-gradient(to_bottom,#22355e28_1px,transparent_1px)] bg-[size:4rem_4rem]"
           style={{
             maskImage: 'radial-gradient(ellipse 60% 50% at 50% 30%, #000 70%, transparent 100%)',
             WebkitMaskImage: 'radial-gradient(ellipse 60% 50% at 50% 30%, #000 70%, transparent 100%)',
@@ -27,7 +27,7 @@ export function BackgroundGrid({ className, pattern = 'grid' }: BackgroundGridPr
         />
       ) : (
         <div
-          className="absolute inset-0 bg-[radial-gradient(#0b4a6840_1px,transparent_1px)] [background-size:24px_24px]"
+          className="absolute inset-0 bg-[radial-gradient(#22355e40_1px,transparent_1px)] [background-size:24px_24px]"
           style={{
             maskImage: 'radial-gradient(ellipse 60% 50% at 50% 40%, #000 70%, transparent 100%)',
             WebkitMaskImage: 'radial-gradient(ellipse 60% 50% at 50% 40%, #000 70%, transparent 100%)',

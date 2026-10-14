@@ -6,32 +6,69 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Premium creative agency palette
-        primary: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#0b4a68',
-          700: '#053048',
-          800: '#04263a',
-          900: '#031e2f',
+        // Versaly Official Brand Palette (#14213d, #e5e5e5, #fca311)
+        versaly: {
+          navy: '#14213d',
+          platinum: '#e5e5e5',
+          gold: '#fca311',
+          amber: '#fca311',
+          card: '#1b2a4a',
+          surface: '#16233f',
+          input: '#0e172a',
+          border: '#243862',
+          hover: '#203358',
         },
-        // Accent color - sophisticated blue-gray
+        primary: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#fca311', // Signature Versaly Gold Accent
+          600: '#e5940f',
+          700: '#1b2a4a',
+          800: '#14213d', // Versaly Brand Navy
+          900: '#0e172a',
+        },
         accent: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0284c7',
-          600: '#0369a1',
-          700: '#075985',
-          800: '#0c4a6e',
-          900: '#083344',
-        }
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#fca311', // Versaly Gold
+          600: '#e5940f',
+          700: '#d97706',
+          800: '#b45309',
+          900: '#78350f',
+        },
+        // Harmonize sky & cyan with Versaly's warm gold / amber signature accent
+        sky: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#fca311', // Versaly Gold Accent
+          600: '#e5940f',
+          700: '#d97706',
+          800: '#b45309',
+          900: '#78350f',
+          950: '#451a03',
+        },
+        cyan: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fca311', // Versaly Gold
+          500: '#e5940f',
+          600: '#d97706',
+          700: '#b45309',
+          800: '#78350f',
+          900: '#451a03',
+          950: '#291002',
+        },
       },
       fontFamily: {
         sans: [

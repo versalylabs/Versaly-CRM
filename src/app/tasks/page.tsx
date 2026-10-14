@@ -23,7 +23,7 @@ const dateKey = (d?: string | null) => (d ? new Date(d).toISOString().slice(0, 1
 const label = (p: string) => p.charAt(0).toUpperCase() + p.slice(1);
 
 const glassInput =
-  'w-full rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
+  'w-full rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -146,7 +146,7 @@ export default function TasksPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#053048] text-slate-100">
+    <div className="min-h-screen bg-[#14213d] text-slate-100">
       <div className="container-custom py-8 space-y-8">
         {/* Header Bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -187,7 +187,7 @@ export default function TasksPage() {
           ].map((item, idx) => (
             <div
               key={idx}
-              className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-b from-[#073652]/70 to-[#042438]/80 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl"
+              className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-b from-[#1b2a4a]/70 to-[#0e172a]/80 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent" />
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{item.label}</p>
@@ -200,7 +200,7 @@ export default function TasksPage() {
         {showForm && (
           <form
             onSubmit={createTask}
-            className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-4"
+            className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-4"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
 
@@ -233,7 +233,7 @@ export default function TasksPage() {
                 >
                   <option value="">No lead attached</option>
                   {leads.map((l) => (
-                    <option key={l.id} value={l.id} className="bg-[#053048] text-white">
+                    <option key={l.id} value={l.id} className="bg-[#14213d] text-white">
                       {l.contactName} {l.companyName ? ` — ${l.companyName}` : ''}
                     </option>
                   ))}
@@ -249,7 +249,7 @@ export default function TasksPage() {
                 >
                   <option value="">Unassigned</option>
                   {users.map((u) => (
-                    <option key={u.id} value={u.id} className="bg-[#053048] text-white">
+                    <option key={u.id} value={u.id} className="bg-[#14213d] text-white">
                       {u.name || u.email} · {u.role}
                     </option>
                   ))}
@@ -273,9 +273,9 @@ export default function TasksPage() {
                   onChange={(e) => setForm({ ...form, priority: e.target.value })}
                   className={glassInput}
                 >
-                  <option value="low" className="bg-[#053048] text-white">Low Priority</option>
-                  <option value="medium" className="bg-[#053048] text-white">Medium Priority</option>
-                  <option value="high" className="bg-[#053048] text-white">High Priority</option>
+                  <option value="low" className="bg-[#14213d] text-white">Low Priority</option>
+                  <option value="medium" className="bg-[#14213d] text-white">Medium Priority</option>
+                  <option value="high" className="bg-[#14213d] text-white">High Priority</option>
                 </select>
               </div>
 
@@ -310,7 +310,7 @@ export default function TasksPage() {
         )}
 
         {/* Tasks Container (React Bits Liquid Glass Panel) */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
 
           {/* Search & Filter Bar */}
@@ -319,17 +319,17 @@ export default function TasksPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search tasks, descriptions, or leads..."
-              className="flex-1 rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition"
+              className="flex-1 rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 transition"
             />
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
-              className="rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 transition"
+              className="rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2 text-xs text-white focus:outline-none focus:border-sky-400 transition"
             >
-              <option value="" className="bg-[#053048]">All Priorities</option>
-              <option value="high" className="bg-[#053048]">High Priority</option>
-              <option value="medium" className="bg-[#053048]">Medium Priority</option>
-              <option value="low" className="bg-[#053048]">Low Priority</option>
+              <option value="" className="bg-[#14213d]">All Priorities</option>
+              <option value="high" className="bg-[#14213d]">High Priority</option>
+              <option value="medium" className="bg-[#14213d]">Medium Priority</option>
+              <option value="low" className="bg-[#14213d]">Low Priority</option>
             </select>
           </div>
 
@@ -383,7 +383,7 @@ export default function TasksPage() {
                       type="checkbox"
                       checked={t.completed}
                       onChange={(e) => update(t.id, { completed: e.target.checked })}
-                      className="h-4 w-4 rounded border-white/20 bg-[#042438] text-sky-500 focus:ring-0 cursor-pointer"
+                      className="h-4 w-4 rounded border-white/20 bg-[#0e172a] text-sky-500 focus:ring-0 cursor-pointer"
                     />
 
                     <div className="min-w-0 flex-1">
@@ -447,11 +447,11 @@ export default function TasksPage() {
                       <select
                         value={t.priority}
                         onChange={(e) => update(t.id, { priority: e.target.value })}
-                        className="rounded-xl border border-white/10 bg-[#042438] px-2.5 py-1 text-xs text-white focus:outline-none focus:border-sky-400 transition cursor-pointer"
+                        className="rounded-xl border border-white/10 bg-[#0e172a] px-2.5 py-1 text-xs text-white focus:outline-none focus:border-sky-400 transition cursor-pointer"
                       >
-                        <option value="high" className="bg-[#053048]">High</option>
-                        <option value="medium" className="bg-[#053048]">Medium</option>
-                        <option value="low" className="bg-[#053048]">Low</option>
+                        <option value="high" className="bg-[#14213d]">High</option>
+                        <option value="medium" className="bg-[#14213d]">Medium</option>
+                        <option value="low" className="bg-[#14213d]">Low</option>
                       </select>
 
                       <button

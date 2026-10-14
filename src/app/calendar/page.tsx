@@ -59,7 +59,7 @@ const localInput = (d: Date) => {
 };
 
 const glassInput =
-  'w-full rounded-xl bg-[#042438] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
+  'w-full rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
 
 export default function CalendarPage() {
   const { data: session } = useSession();
@@ -176,7 +176,7 @@ export default function CalendarPage() {
   ).length;
 
   return (
-    <div className="min-h-screen bg-[#053048] text-slate-100">
+    <div className="min-h-screen bg-[#14213d] text-slate-100">
       <div className="container-custom py-8 space-y-8">
         {/* Header Bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -216,7 +216,7 @@ export default function CalendarPage() {
           ].map((item, idx) => (
             <div
               key={idx}
-              className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-b from-[#073652]/70 to-[#042438]/80 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl"
+              className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-b from-[#1b2a4a]/70 to-[#0e172a]/80 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent" />
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{item.label}</p>
@@ -229,7 +229,7 @@ export default function CalendarPage() {
         {show && (
           <form
             onSubmit={create}
-            className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-4"
+            className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-4"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
 
@@ -261,7 +261,7 @@ export default function CalendarPage() {
                   className={glassInput}
                 >
                   {types.map((t) => (
-                    <option key={t} value={t} className="bg-[#053048] text-white">
+                    <option key={t} value={t} className="bg-[#14213d] text-white">
                       {t.replace('_', ' ')}
                     </option>
                   ))}
@@ -318,7 +318,7 @@ export default function CalendarPage() {
                 >
                   <option value="">No lead attached</option>
                   {leads.map((l) => (
-                    <option key={l.id} value={l.id} className="bg-[#053048] text-white">
+                    <option key={l.id} value={l.id} className="bg-[#14213d] text-white">
                       {l.contactName} {l.companyName ? ` — ${l.companyName}` : ''}
                     </option>
                   ))}
@@ -335,7 +335,7 @@ export default function CalendarPage() {
                   >
                     <option value="">Assign to me</option>
                     {users.map((u) => (
-                      <option key={u.id} value={u.id} className="bg-[#053048] text-white">
+                      <option key={u.id} value={u.id} className="bg-[#14213d] text-white">
                         {u.name || u.email} · {u.role}
                       </option>
                     ))}
@@ -374,7 +374,7 @@ export default function CalendarPage() {
         )}
 
         {/* Events Container (React Bits Liquid Glass Panel) */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#073652]/75 via-[#062c44]/80 to-[#042438]/90 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
 
           {/* Type Filter Pills */}
@@ -421,7 +421,7 @@ export default function CalendarPage() {
                     type="checkbox"
                     checked={ev.completed}
                     onChange={() => complete(ev)}
-                    className="mt-1 h-4 w-4 rounded border-white/20 bg-[#042438] text-sky-500 focus:ring-0 cursor-pointer"
+                    className="mt-1 h-4 w-4 rounded border-white/20 bg-[#0e172a] text-sky-500 focus:ring-0 cursor-pointer"
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">

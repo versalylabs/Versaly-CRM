@@ -18,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.className} dark`} style={{ colorScheme: 'dark' }}>
-      <body className="flex min-h-screen bg-[#053048] text-[#f3f4f6]">
+      <body className="flex min-h-screen bg-[#14213d] text-[#e5e5e5]">
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>
