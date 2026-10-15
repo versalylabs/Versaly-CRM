@@ -386,7 +386,7 @@ export default function BillingPage() {
 
                   <div className="mt-4 flex items-baseline gap-1 border-b border-gray-100 pb-4 dark:border-gray-800">
                     <span className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-                      ${plan.priceMonthly}
+                      {plan.currency === 'KES' ? `KES ${plan.priceMonthly.toLocaleString()}` : `$${plan.priceMonthly}`}
                     </span>
                     <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">/ month</span>
                   </div>

@@ -56,7 +56,7 @@ export function LandingNav() {
               Versaly<span className="text-sky-400">CRM</span>
             </span>
             <span className="block text-[9px] font-bold uppercase tracking-[0.2em] text-sky-300/70">
-              Sales, with direction
+              By Versaly
             </span>
           </div>
         </Link>

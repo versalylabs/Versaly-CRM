@@ -76,6 +76,27 @@ module.exports = {
           'system-ui',
           'sans-serif'
         ],
+        heading: [
+          'Glorase',
+          'var(--font-glorase)',
+          'Georgia',
+          'Cambria',
+          'serif'
+        ],
+        glorase: [
+          'Glorase',
+          'var(--font-glorase)',
+          'Georgia',
+          'Cambria',
+          'serif'
+        ],
+        serif: [
+          'Glorase',
+          'var(--font-glorase)',
+          'Georgia',
+          'Cambria',
+          'serif'
+        ],
       },
       borderRadius: {
         lg: '0.5rem',

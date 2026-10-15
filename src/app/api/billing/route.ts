@@ -38,12 +38,15 @@ export async function GET(req: NextRequest) {
     const trialEndMs = createdAt + trialDurationMs;
     const daysRemaining = Math.max(0, Math.ceil((trialEndMs - now) / (24 * 60 * 60 * 1000)));
 
+    const currency = org.currency || 'KES';
+    const isKes = currency === 'KES';
+
     const plans = [
       {
         id: 'STARTER',
         name: 'Starter Tier',
-        priceMonthly: 29,
-        currency: org.currency || 'USD',
+        priceMonthly: isKes ? 3900 : 29,
+        currency,
         description: 'Essential CRM tools for boutique agents and solo dealmakers.',
         leadLimit: 150,
         seatLimit: 3,
@@ -59,8 +62,8 @@ export async function GET(req: NextRequest) {
         id: 'GROWTH_PRO',
         name: 'Growth Pro',
         badge: 'Most Popular',
-        priceMonthly: 79,
-        currency: org.currency || 'USD',
+        priceMonthly: isKes ? 9900 : 79,
+        currency,
         description: 'Advanced pipeline intelligence & multi-channel outreach for high-growth teams.',
         leadLimit: 500,
         seatLimit: 10,
@@ -77,8 +80,8 @@ export async function GET(req: NextRequest) {
         id: 'ENTERPRISE',
         name: 'Enterprise Scale',
         badge: 'Maximum Power',
-        priceMonthly: 199,
-        currency: org.currency || 'USD',
+        priceMonthly: isKes ? 24900 : 199,
+        currency,
         description: 'High-volume prospecting, custom webhooks, and team governance.',
         leadLimit: 100000,
         seatLimit: 50,

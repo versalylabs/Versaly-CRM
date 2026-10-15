@@ -2,6 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Font face definitions for Glorase (Regular & Italic) */
+@font-face {
+  font-family: 'Glorase';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Glorase.woff') format('woff'),
+       url('https://fonts.cdnfonts.com/s/143753/Glorase.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Glorase';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Glorase-Italic.woff') format('woff'),
+       url('https://fonts.cdnfonts.com/s/143753/Glorase%20Italic.woff') format('woff');
+}
+
 /* Custom CSS variables for design system */
 :root {
   --background: 0 0% 100%;
@@ -90,15 +109,29 @@ body {
   font-feature-settings: 'rlig' 1, 'calt' 1;
 }
 
-/* Premium typography */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
-  line-height: 1.2;
+/* Premium typography: Glorase (Regular) for all headings across the entire website */
+h1, h2, h3, h4, h5, h6,
+.font-heading,
+.font-glorase {
+  font-family: 'Glorase', var(--font-glorase), Georgia, Cambria, 'Times New Roman', Times, serif !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.015em;
+}
+
+/* Ensure headings with Tailwind weight classes maintain authentic Glorase Regular */
+h1.font-extrabold, h1.font-black, h1.font-bold, h1.font-semibold,
+h2.font-extrabold, h2.font-black, h2.font-bold, h2.font-semibold,
+h3.font-extrabold, h3.font-black, h3.font-bold, h3.font-semibold,
+h4.font-extrabold, h4.font-black, h4.font-bold, h4.font-semibold,
+h5.font-extrabold, h5.font-black, h5.font-bold, h5.font-semibold,
+h6.font-extrabold, h6.font-black, h6.font-bold, h6.font-semibold {
+  font-family: 'Glorase', var(--font-glorase), Georgia, Cambria, 'Times New Roman', Times, serif !important;
+  font-weight: 400 !important;
 }
 
 h1 {
   font-size: 2.25rem;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 h2 {
@@ -113,7 +146,7 @@ h3 {
 
 h4 {
   font-size: 1.25rem;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
 p {

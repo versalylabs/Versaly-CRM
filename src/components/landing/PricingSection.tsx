@@ -23,9 +23,9 @@ const PLANS: PricingPlan[] = [
   {
     id: 'starter',
     name: 'Starter',
-    monthlyPrice: 29,
-    annualPrice: 24,
-    annualSavings: 60,
+    monthlyPrice: 3900,
+    annualPrice: 3200,
+    annualSavings: 8400,
     description: 'A focused, high-precision workspace for boutique agencies and lean sales teams.',
     signupKey: 'STARTER',
     ctaText: 'Start 14-Day Free Trial',
@@ -42,9 +42,9 @@ const PLANS: PricingPlan[] = [
   {
     id: 'growth',
     name: 'Growth Pro',
-    monthlyPrice: 79,
-    annualPrice: 64,
-    annualSavings: 180,
+    monthlyPrice: 9900,
+    annualPrice: 8200,
+    annualSavings: 20400,
     description: 'The complete revenue engine with automated WhatsApp outreach & customer retention analytics.',
     popular: true,
     signupKey: 'GROWTH_PRO',
@@ -64,9 +64,9 @@ const PLANS: PricingPlan[] = [
   {
     id: 'enterprise',
     name: 'Enterprise Scale',
-    monthlyPrice: 199,
-    annualPrice: 159,
-    annualSavings: 480,
+    monthlyPrice: 24900,
+    annualPrice: 19900,
+    annualSavings: 60000,
     description: 'Mission-critical capacity, unlimited automation triggers, and dedicated account onboarding.',
     signupKey: 'ENTERPRISE',
     ctaText: 'Start 14-Day Free Trial',
@@ -75,7 +75,7 @@ const PLANS: PricingPlan[] = [
       '100,000 active customer leads',
       'Up to 50 team members',
       'Custom webhook triggers & integrations',
-      'Multi-currency billing (USD, KES, EUR)',
+      'Multi-currency billing (KES, USD, EUR)',
       'Custom data schemas & field validation',
       'Export audit trails & compliance logs',
       'Dedicated Customer Success Manager',
@@ -178,14 +178,17 @@ function PricingCard({
           {/* Pricing Display */}
           <div className="mt-5 border-y border-white/10 py-4">
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-black tracking-tight text-white">
-                ${price}
-              </span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-xl font-bold text-sky-400">KES</span>
+                <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">
+                  {price.toLocaleString()}
+                </span>
+              </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5">
                   {annual && (
-                    <span className="text-sm font-semibold text-sky-400/60 line-through">
-                      ${originalPrice}
+                    <span className="text-xs font-semibold text-sky-400/60 line-through">
+                      KES {originalPrice.toLocaleString()}
                     </span>
                   )}
                   <span className="text-xs font-semibold text-sky-200/80">
@@ -194,7 +197,7 @@ function PricingCard({
                 </div>
                 {annual && (
                   <span className="text-[11px] font-bold text-emerald-300">
-                    Billed annually (Save ${plan.annualSavings}/yr)
+                    Billed annually (Save KES {plan.annualSavings.toLocaleString()}/yr)
                   </span>
                 )}
               </div>
