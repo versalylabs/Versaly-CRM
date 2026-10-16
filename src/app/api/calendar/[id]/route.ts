@@ -53,6 +53,16 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if (!title) return NextResponse.json({ error: 'Event title is required.' }, { status: 400 });
     data.title = title;
   }
+  if (body.description !== undefined) {
+    data.description = String(body.description || '').trim() || null;
+  }
+  if (body.type !== undefined) {
+    const type = String(body.type || 'MEETING').toUpperCase();
+    data.type = type as any;
+  }
+  if (body.location !== undefined) {
+    data.location = String(body.location || '').trim() || null;
+  }
   if (body.startAt !== undefined) {
     const d = new Date(String(body.startAt));
     if (Number.isNaN(d.getTime())) return NextResponse.json({ error: 'Invalid start date.' }, { status: 400 });
@@ -64,6 +74,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
   if (data.startAt && data.endAt && data.endAt < data.startAt) {
     return NextResponse.json({ error: 'End time must be after start time.' }, { status: 400 });
+  }
+  if (body.leadId !== undefined) {
+    data.leadId = body.leadId ? String(body.leadId).trim() : null;
+  }
+  if (body.assignedToId !== undefined) {
+    data.assignedToId = body.assignedToId ? String(body.assignedToId).trim() : null;
   }
 
   const updated = await prisma.calendarEvent.update({
