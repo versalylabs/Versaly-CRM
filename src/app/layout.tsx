@@ -5,7 +5,10 @@ import localFont from 'next/font/local';
 import Providers from '@/components/providers';
 import AppShell from '@/components/AppShell';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+});
 
 const glorase = localFont({
   src: [
@@ -50,7 +53,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.className} ${glorase.variable} dark`} style={{ colorScheme: 'dark' }}>
+    <html lang="en" className={`${inter.className} ${inter.variable} ${glorase.variable} dark`} style={{ colorScheme: 'dark' }}>
       <head>
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

@@ -17,7 +17,7 @@ import Link from 'next/link';
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-[#14213d] text-white selection:bg-sky-500 selection:text-white relative">
+    <main className="landing-website min-h-screen bg-[#14213d] text-white selection:bg-sky-500 selection:text-white relative">
       {/* Ambient Grid Background */}
       <BackgroundGrid pattern="grid" />
 

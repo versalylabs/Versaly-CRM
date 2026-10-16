@@ -109,48 +109,72 @@ body {
   font-feature-settings: 'rlig' 1, 'calt' 1;
 }
 
-/* Premium typography: Glorase (Regular) for all headings across the entire website */
-h1, h2, h3, h4, h5, h6,
-.font-heading,
-.font-glorase {
+/* ==========================================================================
+   Typography System:
+   - Main Large Headings (Top of the page & Website): Glorase (Regular)
+   - Smaller Headings (In CRM System: cards, widgets, modals, tables, sidebars): Inter Sans
+   ========================================================================== */
+
+/* 1. Main Large Headings (Top of page & Display titles): Glorase Regular */
+h1,
+.font-glorase,
+.page-title {
   font-family: 'Glorase', var(--font-glorase), Georgia, Cambria, 'Times New Roman', Times, serif !important;
   font-weight: 400 !important;
   letter-spacing: -0.015em;
 }
 
-/* Ensure headings with Tailwind weight classes maintain authentic Glorase Regular */
-h1.font-extrabold, h1.font-black, h1.font-bold, h1.font-semibold,
-h2.font-extrabold, h2.font-black, h2.font-bold, h2.font-semibold,
-h3.font-extrabold, h3.font-black, h3.font-bold, h3.font-semibold,
-h4.font-extrabold, h4.font-black, h4.font-bold, h4.font-semibold,
-h5.font-extrabold, h5.font-black, h5.font-bold, h5.font-semibold,
-h6.font-extrabold, h6.font-black, h6.font-bold, h6.font-semibold {
+/* Ensure h1 maintains authentic Glorase Regular */
+h1.font-extrabold, h1.font-black, h1.font-bold, h1.font-semibold {
   font-family: 'Glorase', var(--font-glorase), Georgia, Cambria, 'Times New Roman', Times, serif !important;
   font-weight: 400 !important;
 }
 
-h1 {
-  font-size: 2.25rem;
-  line-height: 1.15;
+/* Website (Landing Page) display headings retain Glorase */
+.landing-website h1,
+.landing-website h2,
+.landing-website h3,
+.landing-website .font-heading {
+  font-family: 'Glorase', var(--font-glorase), Georgia, Cambria, 'Times New Roman', Times, serif;
+  font-weight: 400;
+  letter-spacing: -0.015em;
 }
 
-h2 {
-  font-size: 1.875rem;
-  line-height: 1.2;
+/* 2. Smaller Headings in the System: Clean, high-visibility, crisp Inter Sans */
+.crm-system h2:not(.font-glorase),
+.crm-system h3:not(.font-glorase),
+.crm-system h4:not(.font-glorase),
+.crm-system h5:not(.font-glorase),
+.crm-system h6:not(.font-glorase),
+h2:not(.font-glorase):not(.landing-website *),
+h3:not(.font-glorase):not(.landing-website *),
+h4:not(.font-glorase):not(.landing-website *),
+h5:not(.font-glorase):not(.landing-website *),
+h6:not(.font-glorase):not(.landing-website *) {
+  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  letter-spacing: -0.01em;
 }
 
-h3 {
-  font-size: 1.5rem;
-  line-height: 1.3;
-}
-
-h4 {
-  font-size: 1.25rem;
-  line-height: 1.35;
-}
-
-p {
-  line-height: 1.6;
+@layer base {
+  h1 {
+    font-size: 2.25rem;
+    line-height: 1.15;
+  }
+  h2 {
+    font-size: 1.875rem;
+    line-height: 1.2;
+  }
+  h3 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+  h4 {
+    font-size: 1.25rem;
+    line-height: 1.35;
+  }
+  p {
+    line-height: 1.6;
+  }
 }
 
 /* Premium card style */

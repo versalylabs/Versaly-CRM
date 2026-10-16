@@ -63,7 +63,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <NotificationBell />
       </div>
 
-      <main className="min-w-0 flex-1 p-3 pt-16 sm:p-5 sm:pt-18 lg:ml-64 lg:p-8 lg:pt-14">
+      <main className="crm-system min-w-0 flex-1 p-3 pt-16 sm:p-5 sm:pt-18 lg:ml-64 lg:p-8 lg:pt-14">
         {children}
       </main>
     </>
