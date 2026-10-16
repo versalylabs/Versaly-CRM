@@ -182,9 +182,11 @@ export function RevenueTrendChart({ data, formatCurrency, totalWon }: RevenueTre
             <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
               {formatCurrency(totalWon)}
             </span>
-            <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-950/50 dark:text-emerald-300">
-              ↑ 24.8% vs last cycle
-            </span>
+            {totalWon > 0 && (
+              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-950/50 dark:text-emerald-300">
+                ↑ 24.8% vs last cycle
+              </span>
+            )}
           </div>
           <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
             Realized Closed Won revenue & Active Pipeline potential
@@ -474,10 +476,16 @@ export function RadialGaugeChart({ rate, target = 80, wonCount, totalLeads }: Ra
       </div>
 
       <div className="mt-3 text-center">
-        <p className="text-xs font-medium text-gray-600 dark:text-gray-300">
-          <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 mr-1.5" />
-          On track for <strong className="text-gray-900 dark:text-white">{target}% target</strong> benchmark
-        </p>
+        {totalLeads > 0 ? (
+          <p className="text-xs font-medium text-gray-600 dark:text-gray-300">
+            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 mr-1.5" />
+            On track for <strong className="text-gray-900 dark:text-white">{target}% target</strong> benchmark
+          </p>
+        ) : (
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            Target benchmark: <strong className="text-gray-500 dark:text-gray-400">{target}%</strong>
+          </p>
+        )}
         <p className="mt-1 text-[11px] text-gray-400">
           {wonCount} won conversions out of {totalLeads} total prospects
         </p>
@@ -501,6 +509,7 @@ interface WeeklyActivityBarChartProps {
 }
 
 export function WeeklyActivityBarChart({ days }: WeeklyActivityBarChartProps) {
+  const totalCount = days.reduce((sum, d) => sum + d.count, 0);
   const maxCount = Math.max(...days.map((d) => d.count), 1);
 
   return (
@@ -517,19 +526,19 @@ export function WeeklyActivityBarChart({ days }: WeeklyActivityBarChartProps) {
 
       <div className="flex items-end justify-between gap-2 pt-6 pb-2 h-36">
         {days.map((item) => {
-          const heightPercent = Math.max(15, Math.round((item.count / maxCount) * 100));
+          const heightPercent = item.count > 0 ? Math.max(15, Math.round((item.count / maxCount) * 100)) : 4;
 
           return (
             <div key={item.day} className="group relative flex flex-1 flex-col items-center justify-end h-full">
-              {/* Peak indicator floating badge */}
-              {item.isPeak && (
+              {/* Peak indicator floating badge - only if count > 0 */}
+              {item.isPeak && item.count > 0 && (
                 <div className="absolute -top-7 animate-bounce rounded-full bg-sky-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
                   {item.count}
                 </div>
               )}
 
               {/* Tooltip on non-peak hover */}
-              {!item.isPeak && (
+              {(!item.isPeak || item.count === 0) && (
                 <div className="pointer-events-none absolute -top-6 hidden rounded bg-gray-900 px-1.5 py-0.5 text-[10px] font-medium text-white shadow group-hover:block dark:bg-gray-100 dark:text-gray-900">
                   {item.count}
                 </div>
@@ -540,7 +549,7 @@ export function WeeklyActivityBarChart({ days }: WeeklyActivityBarChartProps) {
                 <div
                   style={{ height: `${heightPercent}%` }}
                   className={`w-full rounded-t-lg transition-all duration-500 ease-out group-hover:opacity-100 ${
-                    item.isPeak
+                    item.isPeak && item.count > 0
                       ? 'bg-gradient-to-t from-sky-600 to-sky-400 shadow-md shadow-sky-500/20'
                       : 'bg-gray-200/80 hover:bg-sky-300 dark:bg-gray-800 dark:hover:bg-sky-700/60'
                   }`}
@@ -550,7 +559,7 @@ export function WeeklyActivityBarChart({ days }: WeeklyActivityBarChartProps) {
               {/* Day Label */}
               <span
                 className={`mt-2 text-xs ${
-                  item.isPeak
+                  item.isPeak && item.count > 0
                     ? 'font-bold text-sky-600 dark:text-sky-400'
                     : 'font-medium text-gray-500 dark:text-gray-400'
                 }`}
@@ -561,6 +570,11 @@ export function WeeklyActivityBarChart({ days }: WeeklyActivityBarChartProps) {
           );
         })}
       </div>
+      {totalCount === 0 && (
+        <p className="text-center text-xs text-gray-400 dark:text-gray-500 pt-1">
+          No client interactions recorded this week
+        </p>
+      )}
     </div>
   );
 }

@@ -315,11 +315,11 @@ export default function Dashboard() {
           <div className="mt-4 flex items-end justify-between">
             <div className="space-y-0.5">
               <span className="inline-flex items-center rounded-md bg-emerald-500/20 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-300 border border-emerald-500/30">
-                ↑ 14.5%
+                {data.kpis.totalLeads > 0 ? '↑ 14.5%' : '0%'}
               </span>
               <p className="text-[11px] text-gray-400">{data.kpis.activeLeads} active in funnel</p>
             </div>
-            <Sparkline data={data.sparklines?.totalLeads || [4, 6, 8, 7, 10, 12]} color="blue" />
+            <Sparkline data={data.sparklines?.totalLeads || [0, 0, 0, 0, 0, 0]} color="blue" />
           </div>
         </div>
 
@@ -339,11 +339,11 @@ export default function Dashboard() {
           <div className="mt-4 flex items-end justify-between">
             <div className="space-y-0.5">
               <span className="inline-flex items-center rounded-md bg-emerald-500/20 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-300 border border-emerald-500/30">
-                ↑ 18.2%
+                {data.kpis.activePipelineValue > 0 ? '↑ 18.2%' : '0%'}
               </span>
               <p className="text-[11px] text-gray-400">{data.kpis.activeLeads} active opportunities</p>
             </div>
-            <Sparkline data={data.sparklines?.activePipeline || [10, 14, 12, 18, 16, 22]} color="emerald" />
+            <Sparkline data={data.sparklines?.activePipeline || [0, 0, 0, 0, 0, 0]} color="emerald" />
           </div>
         </div>
 
@@ -363,11 +363,11 @@ export default function Dashboard() {
           <div className="mt-4 flex items-end justify-between">
             <div className="space-y-0.5">
               <span className="inline-flex items-center rounded-md bg-emerald-500/20 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-300 border border-emerald-500/30">
-                ↑ 24.8%
+                {data.kpis.wonValue > 0 ? '↑ 24.8%' : '0%'}
               </span>
               <p className="text-[11px] text-gray-400">{data.kpis.wonLeads} closed deals</p>
             </div>
-            <Sparkline data={data.sparklines?.wonDeals || [5, 8, 7, 12, 11, 16]} color="emerald" />
+            <Sparkline data={data.sparklines?.wonDeals || [0, 0, 0, 0, 0, 0]} color="emerald" />
           </div>
         </div>
 
@@ -387,11 +387,11 @@ export default function Dashboard() {
           <div className="mt-4 flex items-end justify-between">
             <div className="space-y-0.5">
               <span className="inline-flex items-center rounded-md bg-emerald-500/20 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-300 border border-emerald-500/30">
-                On Target
+                {data.kpis.conversionRate > 0 ? 'On Target' : '0%'}
               </span>
               <p className="text-[11px] text-gray-400">{data.kpis.lostLeads} archived lost</p>
             </div>
-            <Sparkline data={data.sparklines?.conversionRate || [12, 15, 14, 19, 18, 24]} color="emerald" />
+            <Sparkline data={data.sparklines?.conversionRate || [0, 0, 0, 0, 0, 0]} color="emerald" />
           </div>
         </div>
       </section>

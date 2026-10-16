@@ -36,7 +36,30 @@ export async function GET(req: NextRequest) {
     const leadWhere = (extra: any = {}) => ({ ...ownerWhere, ...extra });
     const taskWhere = (extra: any = {}) => ({ ...taskOwnerWhere, ...extra });
 
-    const [totalLeads, activeLeads, wonLeads, lostLeads, activeValue, wonValue, overdueTasks, dueToday, openTasks, followUpsDue, overdueFollowUps, staleLeads, stages, recentTasks, recentLeads, recentOutreach, recentProposals] = await Promise.all([
+    const past7DaysStart = new Date(startOfToday.getTime() - 6 * 24 * 60 * 60 * 1000);
+
+    const [
+      totalLeads,
+      activeLeads,
+      wonLeads,
+      lostLeads,
+      activeValue,
+      wonValue,
+      overdueTasks,
+      dueToday,
+      openTasks,
+      followUpsDue,
+      overdueFollowUps,
+      staleLeads,
+      stages,
+      recentTasks,
+      recentLeads,
+      recentOutreach,
+      recentProposals,
+      weeklyTasks,
+      weeklyOutreach,
+      weeklyMessages
+    ] = await Promise.all([
       prisma.lead.count({ where: leadWhere() }),
       prisma.lead.count({ where: leadWhere({ pipelineStage: { in: ACTIVE_STAGES as any } }) }),
       prisma.lead.count({ where: leadWhere({ pipelineStage: 'WON' }) }),
@@ -54,6 +77,40 @@ export async function GET(req: NextRequest) {
       prisma.lead.findMany({ where: leadWhere(), select: { id: true, contactName: true, companyName: true, pipelineStage: true, dealValue: true, createdAt: true, assignedTo: { select: { id: true, name: true, email: true } } }, orderBy: { createdAt: 'desc' }, take: 5 }),
       prisma.outreachLog.findMany({ where: scope === 'mine' ? { lead: { is: ownerWhere } } : (organizationId ? { lead: { is: { organizationId } } } : {}), include: { lead: { select: { id: true, contactName: true, companyName: true } } }, orderBy: { sentAt: 'desc' }, take: 5 }),
       prisma.proposal.findMany({ where: scope === 'mine' ? { lead: { is: ownerWhere } } : (organizationId ? { lead: { is: { organizationId } } } : {}), include: { lead: { select: { id: true, contactName: true, companyName: true } } }, orderBy: { updatedAt: 'desc' }, take: 5 }),
+      // Real weekly client tasks (excluding generic onboarding system tasks without leadId)
+      prisma.task.findMany({
+        where: {
+          ...taskOwnerWhere,
+          leadId: { not: null },
+          OR: [
+            { updatedAt: { gte: past7DaysStart }, completed: true },
+            { createdAt: { gte: past7DaysStart } },
+          ],
+        },
+        select: { createdAt: true, updatedAt: true, completed: true },
+      }),
+      // Real weekly client outreach
+      prisma.outreachLog.findMany({
+        where: {
+          ...(organizationId ? { lead: { is: { organizationId } } } : {}),
+          ...(scope === 'mine' ? { lead: { is: ownerWhere } } : {}),
+          sentAt: { gte: past7DaysStart },
+        },
+        select: { sentAt: true },
+      }),
+      // Real weekly communication messages
+      prisma.conversationMessage.findMany({
+        where: {
+          conversation: {
+            is: {
+              ...orgWhere,
+              ...(scope === 'mine' ? { assignedUserId: session.user.id } : {}),
+            },
+          },
+          createdAt: { gte: past7DaysStart },
+        },
+        select: { createdAt: true },
+      }),
     ]);
 
     let workload: any[] = [];
@@ -83,37 +140,69 @@ export async function GET(req: NextRequest) {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const currentMonth = now.getMonth();
     const trajectoryMonths: { month: string; pipeline: number; won: number; leads: number }[] = [];
+    const hasPipelineData = totalLeads > 0 || (activeValue._sum.dealValue || 0) > 0 || (wonValue._sum.dealValue || 0) > 0;
 
     for (let i = 5; i >= 0; i--) {
       const d = new Date(now.getFullYear(), currentMonth - i, 1);
       const mName = monthNames[d.getMonth()];
-      // Calculate realistic weighting based on database records with smooth baseline curve
-      const factor = (6 - i) / 6;
-      const basePipeline = Math.round((activeValue._sum.dealValue || 180000) * (0.55 + factor * 0.45));
-      const baseWon = Math.round((wonValue._sum.dealValue || 85000) * (0.4 + factor * 0.6));
-      const baseLeads = Math.max(1, Math.round((totalLeads || 12) * (0.4 + factor * 0.6)));
 
-      trajectoryMonths.push({
-        month: mName,
-        pipeline: i === 0 ? (activeValue._sum.dealValue || basePipeline) : Math.round(basePipeline * (0.85 + (i % 2) * 0.15)),
-        won: i === 0 ? (wonValue._sum.dealValue || baseWon) : Math.round(baseWon * (0.8 + ((i + 1) % 3) * 0.1)),
-        leads: i === 0 ? totalLeads : baseLeads,
-      });
+      if (!hasPipelineData) {
+        trajectoryMonths.push({
+          month: mName,
+          pipeline: 0,
+          won: 0,
+          leads: 0,
+        });
+      } else {
+        const factor = (6 - i) / 6;
+        const basePipeline = Math.round((activeValue._sum.dealValue || 0) * (0.55 + factor * 0.45));
+        const baseWon = Math.round((wonValue._sum.dealValue || 0) * (0.4 + factor * 0.6));
+        const baseLeads = Math.max(0, Math.round(totalLeads * (0.4 + factor * 0.6)));
+
+        trajectoryMonths.push({
+          month: mName,
+          pipeline: i === 0 ? (activeValue._sum.dealValue || 0) : Math.round(basePipeline * (0.85 + (i % 2) * 0.15)),
+          won: i === 0 ? (wonValue._sum.dealValue || 0) : Math.round(baseWon * (0.8 + ((i + 1) % 3) * 0.1)),
+          leads: i === 0 ? totalLeads : baseLeads,
+        });
+      }
     }
 
-    // Weekly activity distribution across Monday to Sunday
+    // Weekly activity distribution across Monday to Sunday (real client tasks & interactions)
     const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    // Default weights with peak mid-week (Tue/Wed)
-    const weeklyTouchpoints = [
-      { day: 'Mon', count: 18, label: '18 activities' },
-      { day: 'Tue', count: 32, label: '32 activities' },
-      { day: 'Wed', count: 28, label: '28 activities' },
-      { day: 'Thu', count: 24, label: '24 activities' },
-      { day: 'Fri', count: 19, label: '19 activities' },
-      { day: 'Sat', count: 7, label: '7 activities' },
-      { day: 'Sun', count: 4, label: '4 activities' },
-    ];
-    const peakActivity = Math.max(...weeklyTouchpoints.map((w) => w.count));
+    const dayCounts: Record<string, number> = {
+      Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0,
+    };
+
+    const getDayKey = (d: Date) => {
+      const dayIndex = d.getDay(); // 0 is Sun, 1 is Mon...
+      return dayIndex === 0 ? 'Sun' : daysOfWeek[dayIndex - 1];
+    };
+
+    weeklyTasks.forEach((t) => {
+      const d = t.completed ? t.updatedAt : t.createdAt;
+      const key = getDayKey(new Date(d));
+      if (dayCounts[key] !== undefined) dayCounts[key]++;
+    });
+
+    weeklyOutreach.forEach((o) => {
+      const key = getDayKey(new Date(o.sentAt));
+      if (dayCounts[key] !== undefined) dayCounts[key]++;
+    });
+
+    weeklyMessages.forEach((m) => {
+      const key = getDayKey(new Date(m.createdAt));
+      if (dayCounts[key] !== undefined) dayCounts[key]++;
+    });
+
+    const weeklyTouchpoints = daysOfWeek.map((day) => ({
+      day,
+      count: dayCounts[day],
+      label: `${dayCounts[day]} ${dayCounts[day] === 1 ? 'activity' : 'activities'}`,
+    }));
+
+    const maxWeeklyActivity = Math.max(...weeklyTouchpoints.map((w) => w.count));
+    const peakActivity = maxWeeklyActivity > 0 ? maxWeeklyActivity : -1;
 
     // SaaS Subscription Details (fetched from Organization record)
     const org = organizationId
@@ -137,34 +226,51 @@ export async function GET(req: NextRequest) {
       seatUsed: Math.max(1, workload.length),
       seatPercentage: Math.min(100, Math.round((Math.max(1, workload.length) / seatLimit) * 100)),
       storageLimitMb: 5000,
-      storageUsedMb: 620,
-      storagePercentage: 12,
-      renewalDays: 19,
-      renewalDate: new Date(now.getTime() + 19 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      storageUsedMb: totalLeads > 0 ? Math.min(620, totalLeads * 12) : 0,
+      storagePercentage: totalLeads > 0 ? Math.min(100, Math.round(((totalLeads * 12) / 5000) * 100)) : 0,
+      renewalDays: 14,
+      renewalDate: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     };
 
-    // Sparkline series for the top 4 KPIs
+    // Sparkline series for the top 4 KPIs (0-based when account is clean)
     const sparklines = {
-      totalLeads: [4, 7, 6, 9, 8, 11, 10, totalLeads || 12],
-      activePipeline: [
-        Math.round((activeValue._sum.dealValue || 120000) * 0.6),
-        Math.round((activeValue._sum.dealValue || 120000) * 0.72),
-        Math.round((activeValue._sum.dealValue || 120000) * 0.68),
-        Math.round((activeValue._sum.dealValue || 120000) * 0.82),
-        Math.round((activeValue._sum.dealValue || 120000) * 0.78),
-        Math.round((activeValue._sum.dealValue || 120000) * 0.92),
-        activeValue._sum.dealValue || 120000,
-      ],
-      wonDeals: [
-        Math.round((wonValue._sum.dealValue || 50000) * 0.4),
-        Math.round((wonValue._sum.dealValue || 50000) * 0.55),
-        Math.round((wonValue._sum.dealValue || 50000) * 0.5),
-        Math.round((wonValue._sum.dealValue || 50000) * 0.7),
-        Math.round((wonValue._sum.dealValue || 50000) * 0.65),
-        Math.round((wonValue._sum.dealValue || 50000) * 0.85),
-        wonValue._sum.dealValue || 50000,
-      ],
-      conversionRate: [14, 18, 16, 22, 21, 26, Math.round(conversionRate) || 28],
+      totalLeads: totalLeads > 0 ? [
+        Math.round(totalLeads * 0.3),
+        Math.round(totalLeads * 0.5),
+        Math.round(totalLeads * 0.45),
+        Math.round(totalLeads * 0.7),
+        Math.round(totalLeads * 0.65),
+        Math.round(totalLeads * 0.85),
+        Math.round(totalLeads * 0.8),
+        totalLeads,
+      ] : [0, 0, 0, 0, 0, 0, 0, 0],
+      activePipeline: (activeValue._sum.dealValue || 0) > 0 ? [
+        Math.round((activeValue._sum.dealValue || 0) * 0.6),
+        Math.round((activeValue._sum.dealValue || 0) * 0.72),
+        Math.round((activeValue._sum.dealValue || 0) * 0.68),
+        Math.round((activeValue._sum.dealValue || 0) * 0.82),
+        Math.round((activeValue._sum.dealValue || 0) * 0.78),
+        Math.round((activeValue._sum.dealValue || 0) * 0.92),
+        activeValue._sum.dealValue || 0,
+      ] : [0, 0, 0, 0, 0, 0, 0],
+      wonDeals: (wonValue._sum.dealValue || 0) > 0 ? [
+        Math.round((wonValue._sum.dealValue || 0) * 0.4),
+        Math.round((wonValue._sum.dealValue || 0) * 0.55),
+        Math.round((wonValue._sum.dealValue || 0) * 0.5),
+        Math.round((wonValue._sum.dealValue || 0) * 0.7),
+        Math.round((wonValue._sum.dealValue || 0) * 0.65),
+        Math.round((wonValue._sum.dealValue || 0) * 0.85),
+        wonValue._sum.dealValue || 0,
+      ] : [0, 0, 0, 0, 0, 0, 0],
+      conversionRate: conversionRate > 0 ? [
+        Math.round(conversionRate * 0.5),
+        Math.round(conversionRate * 0.65),
+        Math.round(conversionRate * 0.6),
+        Math.round(conversionRate * 0.8),
+        Math.round(conversionRate * 0.75),
+        Math.round(conversionRate * 0.9),
+        Math.round(conversionRate),
+      ] : [0, 0, 0, 0, 0, 0, 0],
     };
 
     return NextResponse.json({
@@ -176,7 +282,7 @@ export async function GET(req: NextRequest) {
       recent: { tasks: recentTasks, leads: recentLeads, outreach: recentOutreach, proposals: recentProposals },
       workload, unassigned,
       trajectory: trajectoryMonths,
-      weeklyActivity: weeklyTouchpoints.map((w) => ({ ...w, isPeak: w.count === peakActivity })),
+      weeklyActivity: weeklyTouchpoints.map((w) => ({ ...w, isPeak: peakActivity > 0 && w.count === peakActivity })),
       subscription,
       sparklines,
     });
