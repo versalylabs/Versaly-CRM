@@ -25,15 +25,22 @@ const glorase = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Versaly CRM — Modern Subscription Platform',
+  title: {
+    default: 'Versaly CRM — Modern Revenue & Subscription Platform',
+    template: '%s | Versaly CRM',
+  },
   description: 'High-velocity cloud CRM with visual pipeline, automated outreach, and multi-tenant workspaces.',
   icons: {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
       { url: '/favicon.ico', sizes: '32x32' },
     ],
     shortcut: '/favicon.ico',
-    apple: '/icon.svg',
+    apple: [
+      { url: '/apple-icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
   },
 };
 
@@ -44,6 +51,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.className} ${glorase.variable} dark`} style={{ colorScheme: 'dark' }}>
+      <head>
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="alternate icon" href="/favicon.ico" type="image/x-icon" sizes="32x32" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
+      </head>
       <body className="flex min-h-screen bg-[#14213d] text-[#e5e5e5]">
         <Providers>
           <AppShell>{children}</AppShell>

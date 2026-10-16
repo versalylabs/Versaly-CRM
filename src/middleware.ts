@@ -44,7 +44,11 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/auth/') ||
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
-    pathname.startsWith('/favicon.ico')
+    pathname.startsWith('/favicon') ||
+    pathname.startsWith('/icon') ||
+    pathname.startsWith('/apple-icon') ||
+    pathname.startsWith('/fonts/') ||
+    /\.(svg|ico|png|jpg|jpeg|webp|woff|woff2|ttf|txt)$/i.test(pathname)
   ) {
     return withRequestHeaders(NextResponse.next(), requestId)
   }
