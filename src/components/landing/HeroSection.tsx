@@ -24,33 +24,33 @@ export function HeroSection() {
 
   return (
     <section id="hero" className="relative overflow-hidden pt-24 pb-10 sm:pt-28 lg:pt-32 lg:pb-12">
-      {/* Relatable Team / Business Operator Background with Color-Matching Gradient */}
+      {/* Relatable Team / Business Operator Background with Darker Contrast */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         {/* Modern business/tech team collaborating in workspace */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30 mix-blend-luminosity filter contrast-110 brightness-90 scale-105"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-15 mix-blend-luminosity filter contrast-125 brightness-75 scale-105"
           style={{
             backgroundImage: "url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=2000&q=80')",
           }}
         />
         {/* Second visual layer: modern CRM / analytics screens and professionals */}
         <div 
-          className="absolute inset-0 bg-cover bg-top bg-no-repeat opacity-20 mix-blend-overlay"
+          className="absolute inset-0 bg-cover bg-top bg-no-repeat opacity-10 mix-blend-overlay"
           style={{
             backgroundImage: "url('https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=2000&q=80')",
           }}
         />
-        {/* Brand gradient overlay ensuring exact color alignment with #14213d */}
+        {/* Darker brand gradient overlay creating deep, sleek aesthetic */}
         <div 
-          className="absolute inset-0 bg-gradient-to-b from-[#14213d]/60 via-[#14213d]/85 to-[#14213d]"
+          className="absolute inset-0 bg-gradient-to-b from-[#080d1a]/92 via-[#0e172a]/95 to-[#14213d]"
         />
-        {/* Ambient atmospheric cyan/sky radiant aura */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[500px] w-[1000px] rounded-full bg-sky-500/15 blur-[140px]" />
+        {/* Subtle atmospheric ambient glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[500px] w-[1000px] rounded-full bg-sky-500/10 blur-[150px]" />
       </div>
 
-      {/* Aceternity Spotlight Effects */}
-      <Spotlight className="-top-40 left-0 md:left-40 md:-top-20" fill="#fca311" />
-      <Spotlight className="top-1/3 right-0 md:right-20" fill="#fbbf24" />
+      {/* Aceternity Spotlight Effects - subtle warm accents without overpowering orange glare */}
+      <Spotlight className="-top-40 left-0 md:left-40 md:-top-20" fill="#fca311" fillOpacity={0.05} />
+      <Spotlight className="top-1/3 right-0 md:right-20" fill="#fca311" fillOpacity={0.03} />
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 lg:px-8">
         {/* Top Announcement Badge */}

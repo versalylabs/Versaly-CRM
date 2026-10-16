@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils';
 type SpotlightProps = {
   className?: string;
   fill?: string;
+  fillOpacity?: number | string;
 };
 
-export function Spotlight({ className, fill = '#38bdf8' }: SpotlightProps) {
+export function Spotlight({ className, fill = '#38bdf8', fillOpacity = '0.06' }: SpotlightProps) {
   return (
     <svg
       className={cn(
@@ -27,7 +28,7 @@ export function Spotlight({ className, fill = '#38bdf8' }: SpotlightProps) {
           ry="273.501"
           transform="matrix(-0.822377 -0.568943 -0.568943 0.822377 3631.88 2291.09)"
           fill={fill}
-          fillOpacity="0.18"
+          fillOpacity={fillOpacity}
         />
       </g>
       <defs>
