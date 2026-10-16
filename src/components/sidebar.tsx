@@ -6,6 +6,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut } from 'lucide-react';
+import VersalyLogoIcon from '@/components/VersalyLogoIcon';
 
 // Clean, monochrome SVG outline icons (stroke="currentColor", fill="none")
 const Icons = {
@@ -237,9 +238,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
           onClick={() => { if (isMobile) onCloseMobile?.(); }}
           className="flex items-center space-x-3 group min-w-0"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-600 to-[#fca311] text-slate-950 font-black shadow-md shadow-[#fca311]/25 group-hover:scale-105 transition-transform">
-            V
-          </span>
+          <VersalyLogoIcon size={36} className="shrink-0 shadow-md shadow-[#fca311]/25 group-hover:scale-105 transition-transform rounded-xl" />
           <div className="min-w-0">
             <span className="block truncate text-sm font-bold text-white leading-tight">
               {session?.user?.organizationName || 'Versaly CRM'}

@@ -27,6 +27,14 @@ const glorase = localFont({
 export const metadata: Metadata = {
   title: 'Versaly CRM — Modern Subscription Platform',
   description: 'High-velocity cloud CRM with visual pipeline, automated outreach, and multi-tenant workspaces.',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '32x32' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({

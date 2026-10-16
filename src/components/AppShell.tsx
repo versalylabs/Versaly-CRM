@@ -8,6 +8,7 @@ import Sidebar from '@/components/sidebar';
 import CommandPalette from '@/components/CommandPalette';
 import NotificationBell from '@/components/NotificationBell';
 import SubscriptionStatusBanner from '@/components/SubscriptionStatusBanner';
+import VersalyLogoIcon from '@/components/VersalyLogoIcon';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
@@ -41,9 +42,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </svg>
           </button>
           <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-600 to-[#fca311] text-xs font-black text-slate-950 shadow-sm shadow-[#fca311]/25">
-              V
-            </span>
+            <VersalyLogoIcon size={30} className="shrink-0 shadow-sm shadow-[#fca311]/25 rounded-lg" />
             <span className="text-xs font-bold text-white truncate max-w-[140px]">
               {session?.user?.organizationName || 'Versaly CRM'}
             </span>

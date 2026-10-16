@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { ShieldCheck, Heart, Phone, Mail } from 'lucide-react';
+import VersalyLogoIcon from '@/components/VersalyLogoIcon';
 
 export function LandingFooter() {
   return (
@@ -12,9 +13,7 @@ export function LandingFooter() {
           {/* Brand Col */}
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-sky-600 font-black text-white shadow-md shadow-sky-500/30">
-                V
-              </div>
+              <VersalyLogoIcon size={36} className="shadow-md shadow-[#fca311]/25 rounded-xl" />
               <span className="text-lg font-black tracking-tight text-white">
                 Versaly<span className="text-sky-400">CRM</span>
               </span>

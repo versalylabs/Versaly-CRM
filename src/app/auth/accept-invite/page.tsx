@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
+import VersalyLogoIcon from '@/components/VersalyLogoIcon';
 
 type InviteData = {
   email: string;
@@ -101,9 +102,9 @@ function AcceptInviteForm() {
         
         {/* Top Logo & Branding */}
         <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 text-xl font-black text-white shadow-lg shadow-sky-500/25">
-            V
-          </div>
+          <Link href="/" className="inline-block transition-transform hover:scale-105">
+            <VersalyLogoIcon size={52} className="mx-auto shadow-xl shadow-[#fca311]/25 rounded-2xl" />
+          </Link>
           <h1 className="mt-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white">
             Versaly CRM
           </h1>

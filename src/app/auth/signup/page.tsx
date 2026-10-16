@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import VersalyLogoIcon from '@/components/VersalyLogoIcon';
 
 function SignUpForm() {
   const router = useRouter();
@@ -80,8 +81,8 @@ function SignUpForm() {
       <div className="w-full max-w-lg space-y-6">
         {/* Header Branding */}
         <div className="text-center space-y-2">
-          <Link href="/" className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 text-white font-black text-xl shadow-lg shadow-sky-500/20 hover:scale-105 transition-transform">
-            V
+          <Link href="/" className="inline-block transition-transform hover:scale-105">
+            <VersalyLogoIcon size={52} className="mx-auto shadow-xl shadow-[#fca311]/25 rounded-2xl" />
           </Link>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
             Start your 14-day free trial

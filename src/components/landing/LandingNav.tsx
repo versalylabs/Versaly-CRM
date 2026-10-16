@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 
 import { useSession } from 'next-auth/react';
+import VersalyLogoIcon from '@/components/VersalyLogoIcon';
 
 export function LandingNav() {
   const { data: session } = useSession();
@@ -48,9 +49,7 @@ export function LandingNav() {
       <div className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-5 lg:px-8">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-sky-600 font-black text-white shadow-lg shadow-sky-500/30 transition-transform group-hover:scale-105">
-            V
-          </div>
+          <VersalyLogoIcon size={40} className="shrink-0 shadow-lg shadow-[#fca311]/25 transition-transform group-hover:scale-105 rounded-2xl" />
           <div>
             <span className="block text-lg font-black tracking-tight text-white">
               Versaly<span className="text-sky-400">CRM</span>

@@ -1,0 +1,71 @@
+import React from 'react';
+
+interface VersalyLogoIconProps {
+  className?: string;
+  size?: number;
+}
+
+export default function VersalyLogoIcon({ className = '', size = 36 }: VersalyLogoIconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 64 64"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-label="Versaly Logo"
+    >
+      <defs>
+        <linearGradient id="v-comp-bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#1e3054" />
+          <stop offset="50%" stopColor="#14213d" />
+          <stop offset="100%" stopColor="#0b1322" />
+        </linearGradient>
+        <linearGradient id="v-comp-border" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#fca311" stopOpacity="0.8" />
+          <stop offset="50%" stopColor="#fca311" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="#e5e5e5" stopOpacity="0.4" />
+        </linearGradient>
+        <linearGradient id="v-comp-left-wing" x1="15" y1="17" x2="32" y2="47" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#fca311" />
+          <stop offset="100%" stopColor="#d97706" />
+        </linearGradient>
+        <linearGradient id="v-comp-right-wing" x1="32" y1="47" x2="50" y2="15" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#fca311" />
+          <stop offset="60%" stopColor="#fbbf24" />
+          <stop offset="100%" stopColor="#fef08a" />
+        </linearGradient>
+        <linearGradient id="v-comp-sheen" x1="0" y1="0" x2="64" y2="30" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+
+      {/* Squircle Tile Canvas */}
+      <rect width="64" height="64" rx="16" fill="url(#v-comp-bg)" />
+      <rect x="0.75" y="0.75" width="62.5" height="62.5" rx="15.25" stroke="url(#v-comp-border)" strokeWidth="1.5" />
+
+      {/* Top Gloss Sheen */}
+      <path d="M 1 16 C 1 7.7 7.7 1 16 1 L 48 1 C 56.3 1 63 7.7 63 16 L 63 26 L 1 34 Z" fill="url(#v-comp-sheen)" />
+
+      {/* Ambient Warm Gold Center Glow */}
+      <circle cx="32" cy="33" r="14" fill="#fca311" opacity="0.22" />
+
+      {/* Versaly Monogram Left Wing */}
+      <path
+        d="M 15 17.5 C 15 16.7 15.6 16 16.5 16 L 23 16 C 23.7 16 24.3 16.4 24.6 17 L 31.2 33 L 31.2 46.2 C 31.2 47.1 30.1 47.6 29.5 46.8 L 15.3 18.9 C 15.1 18.5 15 18 15 17.5 Z"
+        fill="url(#v-comp-left-wing)"
+      />
+
+      {/* Versaly Monogram Right Wing */}
+      <path
+        d="M 49 17.5 C 49 16.7 48.4 16 47.5 16 L 41 16 C 40.3 16 39.7 16.4 39.4 17 L 32.8 33 L 32.8 46.2 C 32.8 47.1 33.9 47.6 34.5 46.8 L 48.7 18.9 C 48.9 18.5 49 18 49 17.5 Z"
+        fill="url(#v-comp-right-wing)"
+      />
+
+      {/* Apex Sparkle Refraction */}
+      <circle cx="32" cy="33" r="1.8" fill="#ffffff" opacity="0.95" />
+    </svg>
+  );
+}
