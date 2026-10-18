@@ -223,6 +223,12 @@ export default function CommunicationChannelsSettingsPage() {
             👤 Profile & Security
           </Link>
           <Link
+            href="/settings/pipeline"
+            className="px-4 py-2.5 text-xs font-medium text-slate-400 hover:text-white transition"
+          >
+            🎯 Pipeline Stages
+          </Link>
+          <Link
             href="/settings/billing"
             className="px-4 py-2.5 text-xs font-medium text-slate-400 hover:text-white transition"
           >

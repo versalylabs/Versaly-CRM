@@ -123,6 +123,12 @@ export default function SettingsPage() {
             👤 Profile & Security
           </Link>
           <Link
+            href="/settings/pipeline"
+            className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 border border-transparent transition"
+          >
+            🎯 Pipeline Stages
+          </Link>
+          <Link
             href="/settings/billing"
             className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 border border-transparent transition"
           >
@@ -312,6 +318,84 @@ export default function SettingsPage() {
             </form>
           </div>
         )}
+
+        {/* Quick Settings Modules */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pt-2">
+          <Link
+            href="/settings/pipeline"
+            className="group relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-5 shadow-lg backdrop-blur-xl hover:border-cyan-400/40 transition duration-300"
+          >
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
+            <div className="flex items-center gap-3 mb-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-base group-hover:scale-105 transition-transform">
+                🎯
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">
+                  Pipeline & Deal Stages
+                </h3>
+                <span className="text-[10px] text-cyan-400/90 font-medium">Custom Sales Workflow</span>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Add, rename, reorder, recolor, and delete pipeline stages specifically tailored to your company's sales methodology.
+            </p>
+            <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-cyan-400 group-hover:translate-x-0.5 transition-transform">
+              <span>Configure stages</span>
+              <span>→</span>
+            </div>
+          </Link>
+
+          <Link
+            href="/settings/billing"
+            className="group relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-5 shadow-lg backdrop-blur-xl hover:border-sky-400/40 transition duration-300"
+          >
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
+            <div className="flex items-center gap-3 mb-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 text-base group-hover:scale-105 transition-transform">
+                ⚡
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-white group-hover:text-sky-300 transition-colors">
+                  Subscription & Billing
+                </h3>
+                <span className="text-[10px] text-sky-400/90 font-medium">Quotas & Invoicing</span>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Upgrade your company tier, manage seats and lead quotas, and download your KES invoice receipts.
+            </p>
+            <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-sky-400 group-hover:translate-x-0.5 transition-transform">
+              <span>View subscription</span>
+              <span>→</span>
+            </div>
+          </Link>
+
+          <Link
+            href="/settings/integrations"
+            className="group relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-5 shadow-lg backdrop-blur-xl hover:border-indigo-400/40 transition duration-300"
+          >
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-300/40 to-transparent" />
+            <div className="flex items-center gap-3 mb-2">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-base group-hover:scale-105 transition-transform">
+                💬
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">
+                  Communication Channels
+                </h3>
+                <span className="text-[10px] text-indigo-400/90 font-medium">Omnichannel Setup</span>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Connect WhatsApp, Instagram, Facebook Messenger, Email, X, and TikTok for real-time customer messaging.
+            </p>
+            <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-indigo-400 group-hover:translate-x-0.5 transition-transform">
+              <span>Manage channels</span>
+              <span>→</span>
+            </div>
+          </Link>
+        </div>
       </div>
     </div>
   );

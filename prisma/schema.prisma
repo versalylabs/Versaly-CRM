@@ -76,7 +76,7 @@ model Lead {
   tiktok             String?
   xHandle            String?
   leadSource         LeadSource
-  pipelineStage      PipelineStage @default(NEW_LEAD)
+  pipelineStage      String      @default("NEW_LEAD")
   outreachStatus     OutreachStatus @default(PENDING)
   dealValue          Float?
   dateAdded          DateTime    @default(now())
@@ -363,9 +363,27 @@ model Organization {
   conversations         Conversation[]
   connectedChannels     ConnectedChannelAccount[]
   channelIdentities     ContactChannelIdentity[]
+  pipelineStages        PipelineStageConfig[]
 
   @@index([slug])
   @@index([suspendedAt])
+}
+
+model PipelineStageConfig {
+  id             String        @id @default(uuid())
+  key            String
+  label          String
+  order          Int           @default(0)
+  probability    Int           @default(50)
+  color          String        @default("blue")
+  category       String        @default("ACTIVE") // ACTIVE, WON, LOST
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([organizationId, key])
+  @@index([organizationId, order])
 }
 
 model SupportTicket {

@@ -176,6 +176,12 @@ export default function BillingPage() {
             👤 Profile & Security
           </Link>
           <Link
+            href="/settings/pipeline"
+            className="border-b-2 border-transparent px-4 py-2.5 text-xs font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition"
+          >
+            🎯 Pipeline Stages
+          </Link>
+          <Link
             href="/settings/billing"
             className="border-b-2 border-sky-600 px-4 py-2.5 text-xs font-bold text-sky-600 dark:border-sky-400 dark:text-sky-400"
           >

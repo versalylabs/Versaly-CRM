@@ -3,6 +3,11 @@
 import { formatCurrency } from '../../../lib/currency';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import {
+  PipelineStageItem,
+  DEFAULT_PIPELINE_STAGES,
+  getStageColorStyles,
+} from '../../lib/pipelineStages';
 
 type Lead = {
   id: string;
@@ -101,6 +106,7 @@ const glassInput =
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [pipelineStages, setPipelineStages] = useState<PipelineStageItem[]>(DEFAULT_PIPELINE_STAGES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -141,7 +147,25 @@ export default function LeadsPage() {
       .then((r) => (r.ok ? r.json() : []))
       .then(setUsers)
       .catch(() => setUsers([]));
+
+    fetch('/api/pipeline/stages')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.stages) && data.stages.length > 0) {
+          setPipelineStages(data.stages);
+        }
+      })
+      .catch(() => {});
   }, []);
+
+  const stageMap = useMemo(() => {
+    const map = new Map<string, { label: string; colorStyle: string }>();
+    pipelineStages.forEach((s) => {
+      const styles = getStageColorStyles(s.color);
+      map.set(s.key, { label: s.label, colorStyle: styles.badgeColor });
+    });
+    return map;
+  }, [pipelineStages]);
 
   useEffect(() => {
     const timeout = setTimeout(fetchLeads, 250);
@@ -440,9 +464,9 @@ export default function LeadsPage() {
                 onChange={(e) => setStageFilter(e.target.value)}
               >
                 <option value="" className="bg-[#14213d]">All stages</option>
-                {PIPELINE_STAGES.map((stage) => (
-                  <option key={stage} value={stage} className="bg-[#14213d]">
-                    {STAGE_LABELS[stage]}
+                {pipelineStages.map((stage) => (
+                  <option key={stage.key} value={stage.key} className="bg-[#14213d]">
+                    {stage.label}
                   </option>
                 ))}
               </select>
@@ -546,11 +570,15 @@ export default function LeadsPage() {
                       <td className="py-3.5 pr-4">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`px-2.5 py-1 rounded-md text-[10px] font-semibold whitespace-nowrap ${
-                              STAGE_COLORS[lead.pipelineStage] || 'bg-white/10 text-slate-300 border border-white/15'
+                            className={`px-2.5 py-1 rounded-md text-[10px] font-semibold whitespace-nowrap border ${
+                              stageMap.get(lead.pipelineStage)?.colorStyle ||
+                              STAGE_COLORS[lead.pipelineStage] ||
+                              'bg-white/10 text-slate-300 border-white/15'
                             }`}
                           >
-                            {STAGE_LABELS[lead.pipelineStage] || lead.pipelineStage}
+                            {stageMap.get(lead.pipelineStage)?.label ||
+                              STAGE_LABELS[lead.pipelineStage] ||
+                              lead.pipelineStage}
                           </span>
                           <select
                             aria-label={`Change stage for ${lead.contactName}`}
@@ -559,9 +587,9 @@ export default function LeadsPage() {
                             onChange={(e) => updateStage(lead.id, e.target.value)}
                             className="rounded-lg border border-white/10 bg-[#0e172a] px-2 py-1 text-[11px] text-white focus:outline-none focus:border-sky-400 transition cursor-pointer disabled:opacity-50"
                           >
-                            {PIPELINE_STAGES.map((stage) => (
-                              <option key={stage} value={stage} className="bg-[#14213d]">
-                                {STAGE_LABELS[stage]}
+                            {pipelineStages.map((stage) => (
+                              <option key={stage.key} value={stage.key} className="bg-[#14213d]">
+                                {stage.label}
                               </option>
                             ))}
                           </select>

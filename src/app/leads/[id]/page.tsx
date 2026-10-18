@@ -17,7 +17,16 @@ type Lead = {
   assignedToId?: string | null; assignedTo?: User | null; tasks: Task[]; proposals: Proposal[]; outreachLogs: Outreach[];
 };
 
-const PIPELINE_STAGES = ['NEW_LEAD','RESEARCHING','CONTACTED','FOLLOW_UP','INTERESTED','PROPOSAL','WON','LOST'];
+const DEFAULT_PIPELINE_STAGES = [
+  { key: 'NEW_LEAD', label: 'New Lead' },
+  { key: 'RESEARCHING', label: 'Researching' },
+  { key: 'CONTACTED', label: 'Contacted' },
+  { key: 'FOLLOW_UP', label: 'Follow Up' },
+  { key: 'INTERESTED', label: 'Interested' },
+  { key: 'PROPOSAL', label: 'Proposal' },
+  { key: 'WON', label: 'Closed Won' },
+  { key: 'LOST', label: 'Closed Lost' },
+];
 const OUTREACH_TYPES = ['EMAIL','PHONE_CALL','WHATSAPP','LINKEDIN','INSTAGRAM','SMS','OTHER'];
 const OUTREACH_STATUSES = ['PENDING','SENT','OPENED','CLICKED','REPLIED','BOUNCED'];
 const LEAD_SOURCES = ['REFERRAL','COLD_OUTREACH','SOCIAL_MEDIA','WEBSITE_FORM','EVENT','OTHER'];
@@ -33,6 +42,7 @@ const money = (v?: number | null) => v == null ? '—' : formatCurrency(v);
 export default function LeadDetailPage() {
   const params = useParams(); const router = useRouter(); const id = params.id as string;
   const [lead, setLead] = useState<Lead | null>(null); const [form, setForm] = useState<Partial<Lead>>({}); const [users, setUsers] = useState<User[]>([]);
+  const [pipelineStages, setPipelineStages] = useState(DEFAULT_PIPELINE_STAGES);
   const [activity, setActivity] = useState<Activity[]>([]); const [tab, setTab] = useState<Tab>('Overview'); const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [error, setError] = useState(''); const [saved, setSaved] = useState('');
   const [copilotInsight, setCopilotInsight] = useState<any | null>(null); const [copilotLoading, setCopilotLoading] = useState(false);
   const [showOutreach, setShowOutreach] = useState(false); const [showTask, setShowTask] = useState(false); const [showProposal, setShowProposal] = useState(false);
@@ -62,10 +72,21 @@ export default function LeadDetailPage() {
   const load = useCallback(async () => {
     setLoading(true); setError('');
     try {
-      const [leadRes, activityRes, usersRes] = await Promise.all([fetch(`/api/leads/${id}`, { cache: 'no-store' }), fetch(`/api/activity?leadId=${id}&limit=100`, { cache: 'no-store' }), fetch('/api/users', { cache: 'no-store' })]);
+      const [leadRes, activityRes, usersRes, stagesRes] = await Promise.all([
+        fetch(`/api/leads/${id}`, { cache: 'no-store' }),
+        fetch(`/api/activity?leadId=${id}&limit=100`, { cache: 'no-store' }),
+        fetch('/api/users', { cache: 'no-store' }),
+        fetch('/api/pipeline/stages', { cache: 'no-store' }),
+      ]);
       if (leadRes.status === 404) { setError('Lead not found.'); return; }
       const leadData = await leadRes.json(); if (!leadRes.ok) throw new Error(leadData.error || 'Could not load lead');
       setLead(leadData); setForm(leadData); setActivity(activityRes.ok ? await activityRes.json() : []); setUsers(usersRes.ok ? await usersRes.json() : []);
+      if (stagesRes.ok) {
+        const sData = await stagesRes.json();
+        if (Array.isArray(sData.stages) && sData.stages.length > 0) {
+          setPipelineStages(sData.stages);
+        }
+      }
       setTaskForm((x) => ({ ...x, assignedToId: x.assignedToId || leadData.assignedToId || '' }));
       loadCopilot();
     } catch { setError('Could not load this lead. Please try again.'); } finally { setLoading(false); }
@@ -97,7 +118,7 @@ export default function LeadDetailPage() {
 
   return <div className="min-h-screen bg-gray-50"><div className="container-custom py-8 !max-w-none">
     <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-      <div><Link href="/leads" className="text-sm text-accent-600">← Back to Leads</Link><div className="mt-2 flex flex-wrap items-center gap-3"><h1 className="text-3xl font-bold text-gray-900">{lead?.contactName}</h1><span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">{pretty(lead?.pipelineStage)}</span><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">{pretty(lead?.outreachStatus)}</span>{copilotInsight && <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-800 border border-cyan-200">AI Win: {copilotInsight.winProbability}% ({copilotInsight.sentimentLabel})</span>}</div><p className="mt-1 text-sm text-gray-500">{lead?.companyName || 'Independent contact'}{lead?.jobTitle ? ` · ${lead.jobTitle}` : ''}</p></div>
+      <div><Link href="/leads" className="text-sm text-accent-600">← Back to Leads</Link><div className="mt-2 flex flex-wrap items-center gap-3"><h1 className="text-3xl font-bold text-gray-900">{lead?.contactName}</h1><span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">{pipelineStages.find(s => s.key === lead?.pipelineStage)?.label || pretty(lead?.pipelineStage)}</span><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">{pretty(lead?.outreachStatus)}</span>{copilotInsight && <span className="rounded-full bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-800 border border-cyan-200">AI Win: {copilotInsight.winProbability}% ({copilotInsight.sentimentLabel})</span>}</div><p className="mt-1 text-sm text-gray-500">{lead?.companyName || 'Independent contact'}{lead?.jobTitle ? ` · ${lead.jobTitle}` : ''}</p></div>
       <div className="flex flex-wrap gap-2"><Link href="/inbox" className="rounded-lg border border-sky-300 bg-sky-50 px-3 py-2 text-sm font-semibold text-sky-700 hover:bg-sky-100">💬 Unified Inbox</Link><button onClick={() => setShowOutreach(true)} className="rounded-lg border px-3 py-2 text-sm font-medium">Log Outreach</button><button onClick={() => setShowTask(true)} className="rounded-lg border px-3 py-2 text-sm font-medium">+ Task</button><button onClick={() => setShowProposal(true)} className="btn-primary">+ Proposal</button><button onClick={handleDelete} className="rounded-lg border border-red-200 px-3 py-2 text-sm text-red-600">Delete</button></div>
     </div>
     {(error || saved) && <div className={`mb-5 rounded-lg border px-4 py-3 text-sm ${error ? 'border-red-200 bg-red-50 text-red-700' : 'border-green-200 bg-green-50 text-green-700'}`}>{error || saved}</div>}
@@ -109,7 +130,7 @@ export default function LeadDetailPage() {
       <form onSubmit={saveLead} className="space-y-6 xl:col-span-2">
         <section className="rounded-xl bg-white p-6 shadow-soft"><div className="mb-5 flex items-center justify-between"><div><h2 className="font-semibold text-gray-900">Lead Information</h2><p className="text-sm text-gray-500">Manage the core contact and business details.</p></div><button disabled={saving} className="btn-primary disabled:opacity-50">{saving ? 'Saving...' : 'Save Changes'}</button></div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2"><Field label="Contact Name"><input required className={input} value={form.contactName || ''} onChange={(e) => update('contactName', e.target.value)} /></Field><Field label="Email"><input required type="email" className={input} value={form.email || ''} onChange={(e) => update('email', e.target.value)} /></Field><Field label="Company Name"><input className={input} value={form.companyName || ''} onChange={(e) => update('companyName', e.target.value)} /></Field><Field label="Job Title"><input className={input} value={form.jobTitle || ''} onChange={(e) => update('jobTitle', e.target.value)} /></Field><Field label="Phone"><input className={input} value={form.phone || ''} onChange={(e) => update('phone', e.target.value)} /></Field><Field label="Location"><input className={input} value={form.location || ''} onChange={(e) => update('location', e.target.value)} /></Field><Field label="Website"><input className={input} value={form.website || ''} onChange={(e) => update('website', e.target.value)} /></Field><Field label="Deal Value"><input type="number" min="0" step="0.01" className={input} value={form.dealValue ?? ''} onChange={(e) => update('dealValue', e.target.value)} /></Field>
-          <Field label="Pipeline Stage"><select className={input} value={form.pipelineStage || 'NEW_LEAD'} onChange={(e) => update('pipelineStage', e.target.value)}>{PIPELINE_STAGES.map((s) => <option key={s}>{s}</option>)}</select></Field><Field label="Outreach Status"><select className={input} value={form.outreachStatus || 'PENDING'} onChange={(e) => update('outreachStatus', e.target.value)}>{OUTREACH_STATUSES.map((s) => <option key={s}>{s}</option>)}</select></Field><Field label="Lead Source"><select className={input} value={form.leadSource || 'REFERRAL'} onChange={(e) => update('leadSource', e.target.value)}>{LEAD_SOURCES.map((s) => <option key={s}>{s}</option>)}</select></Field><Field label="Assigned To"><select className={input} value={form.assignedToId || ''} onChange={(e) => update('assignedToId', e.target.value)}><option value="">Unassigned</option>{users.map((u) => <option key={u.id} value={u.id}>{u.name || u.email}</option>)}</select></Field><Field label="Next Follow-up"><input type="date" className={input} value={form.nextFollowUp ? String(form.nextFollowUp).slice(0,10) : ''} onChange={(e) => update('nextFollowUp', e.target.value)} /></Field><Field label="Last Contact"><input type="date" className={input} value={form.lastContact ? String(form.lastContact).slice(0,10) : ''} onChange={(e) => update('lastContact', e.target.value)} /></Field></div>
+          <Field label="Pipeline Stage"><select className={input} value={form.pipelineStage || 'NEW_LEAD'} onChange={(e) => update('pipelineStage', e.target.value)}>{pipelineStages.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}</select></Field><Field label="Outreach Status"><select className={input} value={form.outreachStatus || 'PENDING'} onChange={(e) => update('outreachStatus', e.target.value)}>{OUTREACH_STATUSES.map((s) => <option key={s}>{s}</option>)}</select></Field><Field label="Lead Source"><select className={input} value={form.leadSource || 'REFERRAL'} onChange={(e) => update('leadSource', e.target.value)}>{LEAD_SOURCES.map((s) => <option key={s}>{s}</option>)}</select></Field><Field label="Assigned To"><select className={input} value={form.assignedToId || ''} onChange={(e) => update('assignedToId', e.target.value)}><option value="">Unassigned</option>{users.map((u) => <option key={u.id} value={u.id}>{u.name || u.email}</option>)}</select></Field><Field label="Next Follow-up"><input type="date" className={input} value={form.nextFollowUp ? String(form.nextFollowUp).slice(0,10) : ''} onChange={(e) => update('nextFollowUp', e.target.value)} /></Field><Field label="Last Contact"><input type="date" className={input} value={form.lastContact ? String(form.lastContact).slice(0,10) : ''} onChange={(e) => update('lastContact', e.target.value)} /></Field></div>
         </section>
         <section className="rounded-xl bg-white p-6 shadow-soft"><h2 className="mb-4 font-semibold text-gray-900">Online Presence</h2><div className="grid gap-4 md:grid-cols-3"><Field label="Instagram"><input className={input} value={form.instagram || ''} onChange={(e) => update('instagram', e.target.value)} /></Field><Field label="LinkedIn"><input className={input} value={form.linkedin || ''} onChange={(e) => update('linkedin', e.target.value)} /></Field><Field label="Facebook"><input className={input} value={form.facebook || ''} onChange={(e) => update('facebook', e.target.value)} /></Field></div></section>
       </form>

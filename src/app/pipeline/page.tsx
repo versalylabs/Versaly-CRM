@@ -18,8 +18,14 @@ import {
   Plus,
   ArrowRight,
   TrendingUp,
+  Settings,
 } from 'lucide-react';
 import { formatCurrency } from '../../../lib/currency';
+import {
+  PipelineStageItem,
+  DEFAULT_PIPELINE_STAGES,
+  getStageColorStyles,
+} from '../../lib/pipelineStages';
 
 type Lead = {
   id: string;
@@ -41,91 +47,6 @@ type Lead = {
     role: string;
   } | null;
 };
-
-type Stage = {
-  id: string;
-  label: string;
-  probability: number;
-  badgeColor: string;
-  dotColor: string;
-  accentBorder: string;
-  columnBg: string;
-};
-
-const STAGES: Stage[] = [
-  {
-    id: 'NEW_LEAD',
-    label: 'New Lead',
-    probability: 10,
-    badgeColor: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-    dotColor: 'bg-slate-500',
-    accentBorder: 'border-t-slate-500',
-    columnBg: 'bg-slate-50/50 dark:bg-slate-900/30',
-  },
-  {
-    id: 'RESEARCHING',
-    label: 'Researching',
-    probability: 20,
-    badgeColor: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
-    dotColor: 'bg-blue-500',
-    accentBorder: 'border-t-blue-500',
-    columnBg: 'bg-blue-50/40 dark:bg-blue-950/20',
-  },
-  {
-    id: 'CONTACTED',
-    label: 'Contacted',
-    probability: 35,
-    badgeColor: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300',
-    dotColor: 'bg-cyan-500',
-    accentBorder: 'border-t-cyan-500',
-    columnBg: 'bg-cyan-50/40 dark:bg-cyan-950/20',
-  },
-  {
-    id: 'FOLLOW_UP',
-    label: 'Follow Up',
-    probability: 50,
-    badgeColor: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
-    dotColor: 'bg-amber-500',
-    accentBorder: 'border-t-amber-500',
-    columnBg: 'bg-amber-50/40 dark:bg-amber-950/20',
-  },
-  {
-    id: 'INTERESTED',
-    label: 'Interested',
-    probability: 65,
-    badgeColor: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300',
-    dotColor: 'bg-emerald-500',
-    accentBorder: 'border-t-emerald-500',
-    columnBg: 'bg-emerald-50/40 dark:bg-emerald-950/20',
-  },
-  {
-    id: 'PROPOSAL',
-    label: 'Proposal',
-    probability: 80,
-    badgeColor: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300',
-    dotColor: 'bg-cyan-500',
-    accentBorder: 'border-t-cyan-500',
-    columnBg: 'bg-cyan-50/40 dark:bg-cyan-950/20',
-  },
-  {
-    id: 'WON',
-    label: 'Won',
-    probability: 100,
-    badgeColor: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300',
-    dotColor: 'bg-emerald-500',
-    accentBorder: 'border-t-emerald-500',
-    columnBg: 'bg-emerald-50/40 dark:bg-emerald-950/20',
-  },
-  {
-    id: 'LOST',
-    label: 'Lost',
-    probability: 0,
-    badgeColor: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
-    dotColor: 'bg-rose-500',
-    accentBorder: 'border-t-rose-500',
-    columnBg: 'bg-rose-50/40 dark:bg-rose-950/20',
-  },
-];
 
 function formatSource(source: string) {
   if (!source) return 'Direct';
@@ -151,6 +72,7 @@ function getDaysAgo(dateStr: string): string {
 export default function PipelinePage() {
   const { data: session } = useSession();
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [stages, setStages] = useState<PipelineStageItem[]>(DEFAULT_PIPELINE_STAGES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -160,20 +82,35 @@ export default function PipelinePage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [activeDropStage, setActiveDropStage] = useState<string | null>(null);
 
+  const fetchStages = useCallback(async () => {
+    try {
+      const res = await fetch('/api/pipeline/stages', { cache: 'no-store' });
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.stages) && data.stages.length > 0) {
+        setStages(data.stages);
+      }
+    } catch {
+      // Keep default stages on error
+    }
+  }, []);
+
   const fetchLeads = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('/api/leads', { cache: 'no-store' });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Failed to load pipeline');
+      const [leadsRes] = await Promise.all([
+        fetch('/api/leads', { cache: 'no-store' }),
+        fetchStages(),
+      ]);
+      const data = await leadsRes.json();
+      if (!leadsRes.ok) throw new Error(data.error || 'Failed to load pipeline');
       setLeads(Array.isArray(data) ? data : []);
     } catch {
       setError('Could not load your pipeline. Please try refreshing the page.');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchStages]);
 
   useEffect(() => {
     fetchLeads();
@@ -181,6 +118,9 @@ export default function PipelinePage() {
 
   // Filter & Sort leads
   const filteredLeads = useMemo(() => {
+    const activeStageKeys = new Set(stages.filter((s) => s.category === 'ACTIVE').map((s) => s.key));
+    const wonStageKeys = new Set(stages.filter((s) => s.category === 'WON').map((s) => s.key));
+
     return leads.filter((lead) => {
       // Search match
       if (search.trim()) {
@@ -196,9 +136,11 @@ export default function PipelinePage() {
 
       // Quick filter
       if (activeFilter === 'active') {
+        if (activeStageKeys.size > 0) return activeStageKeys.has(lead.pipelineStage);
         return !['WON', 'LOST'].includes(lead.pipelineStage);
       }
       if (activeFilter === 'won') {
+        if (wonStageKeys.size > 0) return wonStageKeys.has(lead.pipelineStage);
         return lead.pipelineStage === 'WON';
       }
       if (activeFilter === 'high_value') {
@@ -206,39 +148,64 @@ export default function PipelinePage() {
       }
       return true;
     });
-  }, [leads, search, activeFilter]);
+  }, [leads, search, activeFilter, stages]);
 
   // Group by stage and apply sorting within each stage
   const groupedLeads = useMemo(() => {
-    return STAGES.reduce<Record<string, Lead[]>>((groups, stage) => {
-      const stageList = filteredLeads.filter((lead) => lead.pipelineStage === stage.id);
-      
-      stageList.sort((a, b) => {
+    const groups: Record<string, Lead[]> = {};
+    stages.forEach((stage) => {
+      groups[stage.key] = [];
+    });
+
+    filteredLeads.forEach((lead) => {
+      if (groups[lead.pipelineStage]) {
+        groups[lead.pipelineStage].push(lead);
+      } else if (stages.length > 0) {
+        // Fallback into first stage if stage key doesn't match
+        groups[stages[0].key]?.push(lead);
+      }
+    });
+
+    stages.forEach((stage) => {
+      const list = groups[stage.key] || [];
+      list.sort((a, b) => {
         if (sortBy === 'value_desc') return (b.dealValue || 0) - (a.dealValue || 0);
         if (sortBy === 'value_asc') return (a.dealValue || 0) - (b.dealValue || 0);
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
+    });
 
-      groups[stage.id] = stageList;
-      return groups;
-    }, {});
-  }, [filteredLeads, sortBy]);
+    return groups;
+  }, [filteredLeads, stages, sortBy]);
 
   // Executive pipeline KPI metrics
   const totals = useMemo(() => {
-    const activeLeads = leads.filter((lead) => !['WON', 'LOST'].includes(lead.pipelineStage));
-    const wonLeads = leads.filter((lead) => lead.pipelineStage === 'WON');
-    const lostLeads = leads.filter((lead) => lead.pipelineStage === 'LOST');
+    const activeStageKeys = new Set(stages.filter((s) => s.category === 'ACTIVE').map((s) => s.key));
+    const wonStageKeys = new Set(stages.filter((s) => s.category === 'WON').map((s) => s.key));
+    const lostStageKeys = new Set(stages.filter((s) => s.category === 'LOST').map((s) => s.key));
+
+    const activeLeads = leads.filter((lead) =>
+      activeStageKeys.size > 0 ? activeStageKeys.has(lead.pipelineStage) : !['WON', 'LOST'].includes(lead.pipelineStage)
+    );
+    const wonLeads = leads.filter((lead) =>
+      wonStageKeys.size > 0 ? wonStageKeys.has(lead.pipelineStage) : lead.pipelineStage === 'WON'
+    );
+    const lostLeads = leads.filter((lead) =>
+      lostStageKeys.size > 0 ? lostStageKeys.has(lead.pipelineStage) : lead.pipelineStage === 'LOST'
+    );
     const closedCount = wonLeads.length + lostLeads.length;
     const winRate = closedCount > 0 ? Math.round((wonLeads.length / closedCount) * 100) : 0;
 
     const totalActiveValue = activeLeads.reduce((sum, lead) => sum + (lead.dealValue || 0), 0);
     const wonValue = wonLeads.reduce((sum, lead) => sum + (lead.dealValue || 0), 0);
 
+    // Probability map
+    const probMap = new Map<string, number>();
+    stages.forEach((s) => probMap.set(s.key, s.probability));
+
     // Weighted Expected Revenue based on stage probability
     const weightedPipelineValue = activeLeads.reduce((sum, lead) => {
-      const stageObj = STAGES.find((s) => s.id === lead.pipelineStage);
-      const prob = (stageObj?.probability || 10) / 100;
+      const prob = (probMap.get(lead.pipelineStage) ?? 10) / 100;
       return sum + (lead.dealValue || 0) * prob;
     }, 0);
 
@@ -251,7 +218,7 @@ export default function PipelinePage() {
       weightedValue: Math.round(weightedPipelineValue),
       wonValue,
     };
-  }, [leads]);
+  }, [leads, stages]);
 
   // Optimistic Move Handler
   async function moveLead(leadId: string, stage: string) {
@@ -313,8 +280,8 @@ export default function PipelinePage() {
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-2 w-2 rounded-full bg-sky-500 animate-pulse" />
-              <span className="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
+              <span className="inline-flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="text-xs font-bold uppercase tracking-wider text-cyan-500 dark:text-cyan-400">
                 {session?.user?.organizationName || 'Workspace'} Pipeline
               </span>
             </div>
@@ -325,10 +292,18 @@ export default function PipelinePage() {
               Drag and drop prospects across deal stages to track conversion velocity.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            <Link
+              href="/settings/pipeline"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-[#16233f] px-3.5 py-2.5 text-xs font-semibold text-slate-200 hover:text-white hover:bg-white/10 transition shadow-sm"
+              title="Add, rename, recolor, or reorder pipeline stages"
+            >
+              <Settings className="h-4 w-4 text-cyan-400" />
+              <span>Customize Stages</span>
+            </Link>
             <Link
               href="/leads"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 px-4 py-2.5 text-xs font-semibold text-white shadow-md hover:from-sky-500 hover:to-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 transition"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md hover:from-sky-500 hover:to-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition"
             >
               <Plus className="h-4 w-4" />
               <span>Add New Lead</span>
@@ -522,49 +497,50 @@ export default function PipelinePage() {
           </div>
         ) : (
           <div className="overflow-x-auto pb-6 custom-scrollbar">
-            <div className="grid min-w-[2100px] grid-cols-8 gap-4">
-              {STAGES.map((stage) => {
-                const stageLeads = groupedLeads[stage.id] || [];
+            <div className="flex gap-4 min-w-max">
+              {stages.map((stage) => {
+                const styles = getStageColorStyles(stage.color);
+                const stageLeads = groupedLeads[stage.key] || [];
                 const stageValue = stageLeads.reduce((sum, lead) => sum + (lead.dealValue || 0), 0);
-                const isDropTarget = activeDropStage === stage.id;
+                const isDropTarget = activeDropStage === stage.key;
 
                 return (
                   <div
-                    key={stage.id}
+                    key={stage.key}
                     onDragOver={(e) => {
                       e.preventDefault();
-                      if (activeDropStage !== stage.id) setActiveDropStage(stage.id);
+                      if (activeDropStage !== stage.key) setActiveDropStage(stage.key);
                     }}
                     onDragLeave={(e) => {
                       if (e.currentTarget === e.target) setActiveDropStage(null);
                     }}
-                    onDrop={() => handleDrop(stage.id)}
-                    className={`flex flex-col rounded-2xl border-t-4 border border-gray-200/80 p-3.5 backdrop-blur-xl transition-all duration-150 ${stage.accentBorder} ${stage.columnBg} dark:border-white/10 dark:bg-[#1b2a4a]/60 ${
+                    onDrop={() => handleDrop(stage.key)}
+                    className={`w-[285px] shrink-0 flex flex-col rounded-2xl border-t-4 border border-white/10 p-3.5 backdrop-blur-xl transition-all duration-150 ${styles.accentBorder} ${styles.columnBg} bg-[#1b2a4a]/70 shadow-lg ${
                       isDropTarget
-                        ? 'ring-2 ring-sky-500 bg-sky-50/80 dark:bg-sky-950/60 border-sky-400 dark:border-sky-500 scale-[1.01]'
+                        ? 'ring-2 ring-cyan-400 bg-sky-950/70 border-cyan-400 scale-[1.01]'
                         : ''
                     }`}
                   >
                     {/* Stage Header */}
-                    <div className="mb-3.5 pb-3 border-b border-gray-200/60 dark:border-white/10">
+                    <div className="mb-3.5 pb-3 border-b border-white/10">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${stage.dotColor}`} />
-                          <h3 className="truncate text-xs font-bold text-gray-900 dark:text-white">
+                          <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${styles.dotColor}`} />
+                          <h3 className="truncate text-xs font-bold text-white">
                             {stage.label}
                           </h3>
                         </div>
-                        <span className="rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold text-gray-700 shadow-2xs dark:bg-[#16233f] dark:text-gray-200 dark:border dark:border-white/10">
+                        <span className="rounded-full bg-[#16233f] px-2 py-0.5 text-[10px] font-bold text-slate-200 border border-white/10">
                           {stageLeads.length}
                         </span>
                       </div>
 
                       <div className="mt-2 flex items-center justify-between text-[11px]">
-                        <span className="font-bold text-gray-700 dark:text-gray-300">
+                        <span className="font-bold text-slate-200">
                           {formatCurrency(stageValue)}
                         </span>
-                        <span className="text-[10px] font-medium text-gray-400">
-                          {stage.probability}% prob
+                        <span className="text-[10px] font-medium text-slate-400">
+                          {stage.probability}% win prob
                         </span>
                       </div>
                     </div>
@@ -587,9 +563,9 @@ export default function PipelinePage() {
                               setDraggedId(null);
                               setActiveDropStage(null);
                             }}
-                            className={`group relative rounded-xl border border-gray-200/80 bg-white/90 p-3.5 shadow-xs backdrop-blur-md transition hover:border-sky-400 hover:shadow-md dark:border-white/10 dark:bg-[#16233f]/90 dark:hover:border-sky-500/50 ${
+                            className={`group relative rounded-xl border border-white/10 bg-[#16233f]/90 p-3.5 shadow-sm backdrop-blur-md transition hover:border-cyan-400/50 hover:shadow-md ${
                               isDragging
-                                ? 'opacity-40 scale-[0.98] border-dashed border-sky-400 rotate-1'
+                                ? 'opacity-40 scale-[0.98] border-dashed border-cyan-400 rotate-1'
                                 : ''
                             } ${
                               isUpdating
@@ -599,10 +575,10 @@ export default function PipelinePage() {
                           >
                             {/* Card Top: Deal Value & Recency */}
                             <div className="flex items-center justify-between gap-2">
-                              <span className="inline-flex items-center rounded-lg bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border dark:border-emerald-500/20">
+                              <span className="inline-flex items-center rounded-lg bg-emerald-950/60 px-2 py-0.5 text-xs font-bold text-emerald-300 border border-emerald-500/30">
                                 {lead.dealValue ? formatCurrency(lead.dealValue) : 'No Value'}
                               </span>
-                              <span className="text-[10px] font-medium text-gray-400">
+                              <span className="text-[10px] font-medium text-slate-400">
                                 {getDaysAgo(lead.createdAt)}
                               </span>
                             </div>
@@ -611,40 +587,40 @@ export default function PipelinePage() {
                             <div className="mt-2.5">
                               <Link
                                 href={`/leads/${lead.id}`}
-                                className="block font-bold text-xs text-gray-900 hover:text-sky-600 dark:text-white dark:hover:text-sky-400 truncate"
+                                className="block font-bold text-xs text-white hover:text-cyan-300 truncate"
                               >
                                 {lead.contactName}
                               </Link>
-                              <p className="mt-0.5 truncate text-[11px] text-gray-500 dark:text-gray-400">
+                              <p className="mt-0.5 truncate text-[11px] text-slate-400">
                                 {lead.companyName || 'Independent Client'}
                               </p>
                             </div>
 
                             {/* Contact Details Snippets */}
-                            <div className="mt-3 space-y-1.5 text-[11px] text-gray-500 dark:text-gray-400">
+                            <div className="mt-3 space-y-1.5 text-[11px] text-slate-400">
                               {lead.location && (
                                 <div className="flex items-center gap-1.5 truncate">
-                                  <MapPin className="h-3 w-3 shrink-0 text-sky-400" />
+                                  <MapPin className="h-3 w-3 shrink-0 text-cyan-400" />
                                   <span className="truncate">{lead.location}</span>
                                 </div>
                               )}
                               <div className="flex items-center gap-1.5 truncate">
-                                <Mail className="h-3 w-3 shrink-0 text-sky-400" />
+                                <Mail className="h-3 w-3 shrink-0 text-cyan-400" />
                                 <span className="truncate">{lead.email}</span>
                               </div>
                             </div>
 
                             {/* Footer: Source, Owner, and Stage Select */}
-                            <div className="mt-3 pt-2.5 border-t border-gray-100 dark:border-white/10">
+                            <div className="mt-3 pt-2.5 border-t border-white/10">
                               <div className="flex items-center justify-between gap-2">
-                                <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-[#1b2a4a] dark:text-gray-300 dark:border dark:border-white/10">
+                                <span className="rounded-md bg-[#1b2a4a] px-1.5 py-0.5 text-[10px] font-medium text-slate-300 border border-white/10">
                                   {formatSource(lead.leadSource)}
                                 </span>
 
                                 {lead.assignedTo && (
                                   <div
                                     title={`Assigned to ${lead.assignedTo.name || lead.assignedTo.email}`}
-                                    className="flex h-5 w-5 items-center justify-center rounded-full bg-sky-100 text-[10px] font-bold text-sky-700 dark:bg-sky-950 dark:text-sky-300 border border-sky-500/20"
+                                    className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-950 text-[10px] font-bold text-cyan-300 border border-cyan-500/30"
                                   >
                                     {lead.assignedTo.name?.[0]?.toUpperCase() || 'U'}
                                   </div>
@@ -658,10 +634,10 @@ export default function PipelinePage() {
                                   disabled={isUpdating}
                                   onChange={(e) => moveLead(lead.id, e.target.value)}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="w-full rounded-lg border border-gray-200 bg-gray-50/70 px-2 py-1 text-[10px] font-medium text-gray-600 dark:border-white/10 dark:bg-[#1b2a4a] dark:text-gray-300 outline-none"
+                                  className="w-full rounded-lg border border-white/10 bg-[#14213d] px-2 py-1 text-[10px] font-medium text-slate-200 outline-none focus:border-cyan-400"
                                 >
-                                  {STAGES.map((s) => (
-                                    <option key={s.id} value={s.id}>
+                                  {stages.map((s) => (
+                                    <option key={s.key} value={s.key}>
                                       → {s.label} ({s.probability}%)
                                     </option>
                                   ))}
@@ -670,8 +646,8 @@ export default function PipelinePage() {
                             </div>
 
                             {isUpdating && (
-                              <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-white/70 backdrop-blur-xs dark:bg-gray-900/70">
-                                <span className="text-[11px] font-semibold text-sky-600 dark:text-sky-400 animate-pulse">
+                              <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/60 backdrop-blur-xs">
+                                <span className="text-[11px] font-semibold text-cyan-400 animate-pulse">
                                   Moving...
                                 </span>
                               </div>
@@ -682,13 +658,13 @@ export default function PipelinePage() {
 
                       {/* Drop Target Placeholder */}
                       {isDropTarget && (
-                        <div className="rounded-xl border-2 border-dashed border-sky-400 bg-sky-100/50 py-8 text-center text-xs font-bold text-sky-700 dark:border-sky-500 dark:bg-sky-950/40 dark:text-sky-300 animate-pulse">
+                        <div className="rounded-xl border-2 border-dashed border-cyan-400 bg-cyan-950/40 py-8 text-center text-xs font-bold text-cyan-300 animate-pulse">
                           Drop to move to {stage.label}
                         </div>
                       )}
 
                       {stageLeads.length === 0 && !isDropTarget && (
-                        <div className="rounded-xl border border-dashed border-gray-200/80 bg-white/30 py-8 text-center text-xs text-gray-400 dark:border-white/10 dark:bg-white/5">
+                        <div className="rounded-xl border border-dashed border-white/10 bg-white/5 py-8 text-center text-xs text-slate-500">
                           No deals in this stage
                         </div>
                       )}
@@ -696,6 +672,25 @@ export default function PipelinePage() {
                   </div>
                 );
               })}
+
+              {/* Add Custom Stage Column */}
+              <Link
+                href="/settings/pipeline"
+                className="w-[200px] shrink-0 min-h-[460px] rounded-2xl border-2 border-dashed border-white/10 bg-[#16233f]/30 hover:bg-[#16233f]/60 hover:border-cyan-400/40 p-5 flex flex-col items-center justify-center text-center transition group cursor-pointer"
+              >
+                <div className="h-10 w-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
+                  +
+                </div>
+                <span className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">
+                  Add Custom Stage
+                </span>
+                <p className="text-[11px] text-slate-400 mt-1 max-w-[150px] leading-relaxed">
+                  Tailor pipeline stages specifically to your company
+                </p>
+                <span className="mt-3 text-[10px] font-semibold text-cyan-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                  Configure Settings →
+                </span>
+              </Link>
             </div>
           </div>
         )}
