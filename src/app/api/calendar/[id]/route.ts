@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { getToken } from 'next-auth/jwt';
-import { authOptions } from '../../../../../lib/auth';
+import { getOrgContext } from '../../../../../lib/tenant';
 import { assertSubscriptionWriteAccess } from '../../../../../lib/subscription';
 import prisma from '../../../../../lib/prisma';
 
-async function getAuthenticatedPrincipal(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (session?.user) return { user: session.user };
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  if (!token) return null;
-  return { user: { id: typeof token.id === 'string' ? token.id : undefined, email: typeof token.email === 'string' ? token.email : undefined, role: typeof token.role === 'string' ? token.role : undefined } };
+async function getAuthenticatedPrincipal(_req: NextRequest) {
+  const ctx = await getOrgContext();
+  if (!ctx) return null;
+  return { user: { id: ctx.userId, email: ctx.email || undefined, role: ctx.role }, orgId: ctx.orgId };
 }
 
 async function resolveUser(user: any) {
@@ -27,6 +23,12 @@ async function resolveUser(user: any) {
 }
 
 
+async function findOwnedEvent(id: string, orgId: string) {
+  return prisma.calendarEvent.findFirst({
+    where: { id, OR: [{ organizationId: orgId }, { organizationId: null, assignedTo: { organizationId: orgId } }] },
+  });
+}
+
 function isManager(role?: string) {
   return role === 'ADMIN' || role === 'MANAGER';
 }
@@ -40,7 +42,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const principal = await getAuthenticatedPrincipal(req);
   if (!principal?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const event = await prisma.calendarEvent.findUnique({ where: { id: params.id } });
+  const event = await findOwnedEvent(params.id, principal.orgId);
   if (!event) return NextResponse.json({ error: 'Event not found.' }, { status: 404 });
   if (!(await canManageEvent(principal.user, event))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
@@ -76,12 +78,21 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: 'End time must be after start time.' }, { status: 400 });
   }
   if (body.leadId !== undefined) {
-    data.leadId = body.leadId ? String(body.leadId).trim() : null;
+    const leadId = body.leadId ? String(body.leadId).trim() : null;
+    if (leadId && !(await prisma.lead.findFirst({ where: { id: leadId, organizationId: principal.orgId }, select: { id: true } }))) {
+      return NextResponse.json({ error: 'Selected lead was not found.' }, { status: 400 });
+    }
+    data.leadId = leadId;
   }
   if (body.assignedToId !== undefined) {
-    data.assignedToId = body.assignedToId ? String(body.assignedToId).trim() : null;
+    const assigneeId = body.assignedToId ? String(body.assignedToId).trim() : null;
+    if (assigneeId && !(await prisma.user.findFirst({ where: { id: assigneeId, isActive: true, organizationId: principal.orgId }, select: { id: true } }))) {
+      return NextResponse.json({ error: 'Selected assignee was not found.' }, { status: 400 });
+    }
+    data.assignedToId = assigneeId;
   }
 
+  data.organizationId = principal.orgId;
   const updated = await prisma.calendarEvent.update({
     where: { id: params.id },
     data,
@@ -97,7 +108,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const principal = await getAuthenticatedPrincipal(req);
   if (!principal?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const event = await prisma.calendarEvent.findUnique({ where: { id: params.id } });
+  const event = await findOwnedEvent(params.id, principal.orgId);
   if (!event) return NextResponse.json({ error: 'Event not found.' }, { status: 404 });
   if (!(await canManageEvent(principal.user, event))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 

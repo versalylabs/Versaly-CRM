@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   const requestedPhone = normalizePhone(String(body.phone || ''));
   if (!leadId || !message) return NextResponse.json({ error: 'Lead and message are required.' }, { status: 400 });
 
-  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+  const lead = await prisma.lead.findFirst({ where: { id: leadId, organizationId: session.user?.organizationId || '__none__' } });
   if (!lead) return NextResponse.json({ error: 'Lead not found.' }, { status: 404 });
   const recipient = requestedPhone || normalizePhone(String(lead.phone || ''));
   if (recipient.length < 8) return NextResponse.json({ error: 'A valid lead phone number is required. Use international format, for example 2547XXXXXXXX.' }, { status: 400 });

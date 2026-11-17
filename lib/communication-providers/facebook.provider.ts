@@ -14,7 +14,7 @@ export class FacebookProvider extends BaseCommunicationProvider {
 
   async getConnectionStatus(organizationId: string): Promise<ChannelConnectionStatus> {
     const account = await this.getAccount(organizationId);
-    const hasEnv = Boolean(process.env.FACEBOOK_PAGE_ACCESS_TOKEN);
+    const hasEnv = Boolean(await this.envFor(organizationId, process.env.FACEBOOK_PAGE_ACCESS_TOKEN));
     const isConnected = Boolean(hasEnv || (account && account.status === 'CONNECTED' && account.accessToken));
 
     return {
@@ -24,7 +24,7 @@ export class FacebookProvider extends BaseCommunicationProvider {
       displayName: this.displayName,
       accountName: account?.accountName || (hasEnv ? 'Facebook Business Page' : undefined),
       accountHandle: account?.accountHandle || 'fb.page',
-      externalAccountId: account?.externalAccountId || process.env.FACEBOOK_PAGE_ID,
+      externalAccountId: account?.externalAccountId || (await this.envFor(organizationId, process.env.FACEBOOK_PAGE_ID)),
       lastSyncAt: account?.lastSyncAt || (isConnected ? new Date() : null),
       errorMessage: isConnected
         ? undefined
@@ -38,7 +38,7 @@ export class FacebookProvider extends BaseCommunicationProvider {
   async sendMessage(input: SendMessageInput): Promise<SendMessageResult> {
     const { recipientAddress, content, organizationId } = input;
     const account = await this.getAccount(organizationId);
-    const token = account?.accessToken || process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+    const token = account?.accessToken || (await this.envFor(organizationId, process.env.FACEBOOK_PAGE_ACCESS_TOKEN));
 
     if (!token) {
       return {

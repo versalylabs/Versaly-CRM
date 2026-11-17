@@ -4,6 +4,7 @@ import prisma from './prisma'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { getPlatformAdminEmails } from './platformAdmin'
+import { getAuthSecret } from './authSecret'
 
 // Extend the default Session/JWT types to include role & organization
 declare module 'next-auth' {
@@ -53,14 +54,8 @@ if (
     : 'https://versaly-crm.vercel.app';
 }
 
-const authSecret =
-  process.env.NEXTAUTH_SECRET ||
-  process.env.AUTH_SECRET ||
-  'versaly-crm-session-production-auth-secret-key-32-chars-long-minimum';
-
-if (!process.env.NEXTAUTH_SECRET) {
-  process.env.NEXTAUTH_SECRET = authSecret;
-}
+// No fallback secret: a missing secret must fail loudly (see lib/authSecret.ts).
+const authSecret = getAuthSecret();
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -155,10 +150,7 @@ export const authOptions: NextAuthOptions = {
     signIn: '/auth/signin',
     error: '/auth/error',
   },
-  secret:
-    process.env.NEXTAUTH_SECRET ||
-    process.env.AUTH_SECRET ||
-    'versaly-crm-session-production-auth-secret-key-32-chars-long-minimum',
+  secret: authSecret,
   debug: process.env.NODE_ENV === 'development',
 }
 

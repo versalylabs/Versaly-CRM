@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
   const status = searchParams.get('status') || undefined;
   const search = searchParams.get('search')?.trim();
 
-  const where: any = {};
+  const where: any = { lead: { organizationId: session.user?.organizationId || '__none__' } };
   if (leadId) where.leadId = leadId;
   if (type) where.type = type;
   if (status) where.status = status;
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const lead = await prisma.lead.findUnique({ where: { id: body.leadId } });
+    const lead = await prisma.lead.findFirst({ where: { id: body.leadId, organizationId: session.user?.organizationId || '__none__' } });
     if (!lead) return NextResponse.json({ error: 'Lead not found.' }, { status: 404 });
 
     const sentAt = body.sentAt ? new Date(body.sentAt) : new Date();
@@ -144,6 +144,7 @@ export async function POST(req: NextRequest) {
       if (nextFollowUp) {
         const autoTask = await createAutomaticFollowUpTask(tx, {
           leadId: lead.id,
+          organizationId: lead.organizationId,
           dueDate: nextFollowUp,
           assignedToId: lead.assignedToId,
           outreachType: type,

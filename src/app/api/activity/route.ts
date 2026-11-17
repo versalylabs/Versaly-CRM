@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../lib/auth';
+import { getOrgContext, unauthorized } from '../../../../lib/tenant';
 import prisma from '../../../../lib/prisma';
 
 type ActivityEvent = {
@@ -29,8 +28,8 @@ function leadLabel(lead: { contactName: string; companyName?: string | null } | 
 
 // GET /api/activity - unified, reverse-chronological feed built from leads, outreach, tasks, and proposals
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const ctx = await getOrgContext();
+  if (!ctx) return unauthorized();
 
   const { searchParams } = new URL(req.url);
   const type = searchParams.get('type') || undefined;
@@ -41,25 +40,25 @@ export async function GET(req: NextRequest) {
   try {
     const [leads, outreachLogs, tasks, proposals] = await Promise.all([
       prisma.lead.findMany({
-        where: leadId ? { id: leadId } : undefined,
+        where: { organizationId: ctx.orgId, ...(leadId ? { id: leadId } : {}) },
         select: { id: true, contactName: true, companyName: true, dateAdded: true, leadSource: true },
         orderBy: { dateAdded: 'desc' },
         take: 300,
       }),
       prisma.outreachLog.findMany({
-        where: leadId ? { leadId } : undefined,
+        where: { lead: { organizationId: ctx.orgId }, ...(leadId ? { leadId } : {}) },
         include: { lead: { select: { id: true, contactName: true, companyName: true } } },
         orderBy: { sentAt: 'desc' },
         take: 300,
       }),
       prisma.task.findMany({
-        where: leadId ? { leadId } : undefined,
+        where: { organizationId: ctx.orgId, ...(leadId ? { leadId } : {}) },
         include: { lead: { select: { id: true, contactName: true, companyName: true } } },
         orderBy: { createdAt: 'desc' },
         take: 300,
       }),
       prisma.proposal.findMany({
-        where: leadId ? { leadId } : undefined,
+        where: { organizationId: ctx.orgId, ...(leadId ? { leadId } : {}) },
         include: { lead: { select: { id: true, contactName: true, companyName: true } } },
         orderBy: { createdAt: 'desc' },
         take: 300,

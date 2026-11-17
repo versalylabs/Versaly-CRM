@@ -1,10 +1,10 @@
-// Prisma schema for Straten Agency CRM
+// Prisma schema for Versaly CRM
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url = env("DATABASE_URL")
 }
 
@@ -193,13 +193,18 @@ model Proposal {
 
 model EmailTemplate {
   id        String   @id @default(uuid())
-  name      String   @unique
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name      String
   subject   String
   body      String
   category  String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
 }
 
 model AutomationWorkflow {
@@ -364,6 +369,7 @@ model Organization {
   connectedChannels     ConnectedChannelAccount[]
   channelIdentities     ContactChannelIdentity[]
   pipelineStages        PipelineStageConfig[]
+  emailTemplates        EmailTemplate[]
 
   @@index([slug])
   @@index([suspendedAt])

@@ -12,13 +12,16 @@ export class WhatsAppProvider extends BaseCommunicationProvider {
   channel: CommunicationChannel = 'WHATSAPP';
   displayName = 'WhatsApp Business Cloud API';
 
-  private isConfigured(): boolean {
-    return Boolean(process.env.WHATSAPP_PHONE_NUMBER_ID && process.env.WHATSAPP_ACCESS_TOKEN);
+  private async envCreds(organizationId: string) {
+    const phoneId = await this.envFor(organizationId, process.env.WHATSAPP_PHONE_NUMBER_ID);
+    const token = await this.envFor(organizationId, process.env.WHATSAPP_ACCESS_TOKEN);
+    return { phoneId, token };
   }
 
   async getConnectionStatus(organizationId: string): Promise<ChannelConnectionStatus> {
     const account = await this.getAccount(organizationId);
-    const hasEnv = this.isConfigured();
+    const env = await this.envCreds(organizationId);
+    const hasEnv = Boolean(env.phoneId && env.token);
     const isConnected = Boolean(hasEnv || (account && account.status === 'CONNECTED' && account.accessToken));
 
     return {
@@ -27,8 +30,8 @@ export class WhatsAppProvider extends BaseCommunicationProvider {
       status: isConnected ? 'CONNECTED' : 'DISCONNECTED',
       displayName: this.displayName,
       accountName: account?.accountName || (hasEnv ? 'WhatsApp Cloud Gateway' : undefined),
-      accountHandle: account?.accountHandle || process.env.WHATSAPP_PHONE_NUMBER || undefined,
-      externalAccountId: account?.externalAccountId || process.env.WHATSAPP_PHONE_NUMBER_ID,
+      accountHandle: account?.accountHandle || (hasEnv ? process.env.WHATSAPP_PHONE_NUMBER : undefined) || undefined,
+      externalAccountId: account?.externalAccountId || env.phoneId,
       lastSyncAt: account?.lastSyncAt || (isConnected ? new Date() : null),
       errorMessage: isConnected
         ? undefined
@@ -43,8 +46,9 @@ export class WhatsAppProvider extends BaseCommunicationProvider {
     const { recipientAddress, content, organizationId } = input;
     const account = await this.getAccount(organizationId);
 
-    const token = account?.accessToken || process.env.WHATSAPP_ACCESS_TOKEN;
-    const phoneId = account?.externalAccountId || process.env.WHATSAPP_PHONE_NUMBER_ID;
+    const env = await this.envCreds(organizationId);
+    const token = account?.accessToken || env.token;
+    const phoneId = account?.externalAccountId || env.phoneId;
 
     if (!token || !phoneId) {
       return {

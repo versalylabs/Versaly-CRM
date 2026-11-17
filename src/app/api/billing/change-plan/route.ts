@@ -2,11 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../lib/auth';
 import prisma from '../../../../../lib/prisma';
+import { PLAN_LIMITS, type PlanKey } from '../../../../../lib/plans';
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // SECURITY: this endpoint switches a plan WITHOUT any payment. In production, plan changes must
+  // only happen through Stripe Checkout / the Billing Portal (the signed webhook updates the plan).
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_UNPAID_PLAN_CHANGE !== 'true') {
+    return NextResponse.json(
+      { error: 'Plan changes are handled through billing checkout.' },
+      { status: 403 }
+    );
   }
 
   if (session.user.role !== 'ADMIN') {
@@ -24,13 +34,7 @@ export async function POST(req: NextRequest) {
 
     const { plan } = await req.json();
 
-    const planLimits: Record<string, { leadLimit: number; seatLimit: number; automationRunLimit: number; name: string }> = {
-      STARTER: { leadLimit: 150, seatLimit: 3, automationRunLimit: 100, name: 'Starter Tier' },
-      GROWTH_PRO: { leadLimit: 500, seatLimit: 10, automationRunLimit: 1000, name: 'Growth Pro' },
-      ENTERPRISE: { leadLimit: 100000, seatLimit: 50, automationRunLimit: 10000, name: 'Enterprise Scale' },
-    };
-
-    const targetConfig = planLimits[plan];
+    const targetConfig = (PLAN_LIMITS as Record<string, (typeof PLAN_LIMITS)[PlanKey]>)[plan];
     if (!targetConfig) {
       return NextResponse.json(
         { error: 'Invalid plan selected. Must be STARTER, GROWTH_PRO, or ENTERPRISE.' },

@@ -1,152 +1,179 @@
-# Versaly CRM — Complete System Architecture & Production Deployment Summary
+# Versaly CRM — System Overview
 
-This document provides an exhaustive, up-to-date summary of the **Versaly CRM** platform, including all recent architectural upgrades, cloud database synchronization, authentication hardening, pricing section redesign, and live production deployment status on **Vercel** with **Prisma Postgres**.
+_Last updated: 2026-11-17. This is the single reference document for what Versaly CRM is, what it does today, how it is built, and how it is deployed. For the security/quality audit and the roadmap to market readiness see [`PRODUCT_AUDIT_AND_RECOMMENDATIONS.md`](./PRODUCT_AUDIT_AND_RECOMMENDATIONS.md)._
 
----
-
-## 1. Live Deployment & Infrastructure Status
-
-| Attribute | Production Detail |
-| :--- | :--- |
-| **Live Production URL** | `https://versaly-crm.vercel.app` |
-| **Hosting Infrastructure** | Vercel Global Edge Network (Serverless & Edge Runtime) |
-| **Cloud Database** | Managed PostgreSQL (Prisma Postgres: `prisma-postgres-blue-helmet`) |
-| **Database Status** | Connected & Synchronized (`database: "ok"`) |
-| **GitHub Primary Repository** | [`versalylabs/Versaly-CRM`](https://github.com/versalylabs/Versaly-CRM) |
-| **Active Branch** | `main` |
-| **Primary Admin Account** | `versalylabs@gmail.com` (Password: `labversaly-16`) |
-| **Secondary Demo Admin** | `demo@versaly.com` (Password: `password123`) |
-| **Local Dev Server Dependency** | **None** (Cloud runs 24/7 independently; local dev server is closed) |
-| **QA Structural Validation** | **121 / 121 checks passed** (`npm run qa:final`) |
+> **Security note:** earlier versions of this document listed admin credentials. They have been removed. Credentials must never be stored in documentation or source control. Any credential that appeared in a previous version should be treated as compromised and rotated.
 
 ---
 
-## 2. Recent Upgrades & Architectural Fixes (Last 24 Hours)
+## 1. What it is
 
-### A. Cloud Database Architecture & Self-Healing Synchronization
-- **PostgreSQL Migration**: Updated `prisma/schema.prisma` datasource provider from SQLite to PostgreSQL (`provider = "postgresql"`).
-- **Automated Build-Time Schema Push (`scripts/db-sync.js`)**:
-  - Automatically executes `npx prisma db push --accept-data-loss` during Vercel deployment (`npm run build`).
-  - Resolves connection strings dynamically across multiple standard environment variable names:
-    1. `PRISMA_DATABASE_POSTGRES_URL` (Direct TCP connection from Prisma Postgres Vercel integration)
-    2. `DATABASE_URL`
-    3. `POSTGRES_PRISMA_URL`
-    4. `POSTGRES_URL`
-    5. `PRISMA_DATABASE_URL`
-  - Eliminates manual database CLI migrations on production deployments.
-- **Auto-Seeding Admin Accounts**:
-  - Automatically creates the default tenant organization (`Versaly Labs`) and the primary administrator accounts (`versalylabs@gmail.com` and `demo@versaly.com`) during deployment if not present.
-- **On-Demand Admin Synchronization Endpoint**:
-  - Implemented `GET /api/system/init-admin` to sync and verify admin credentials on the live database at any time.
+**Versaly CRM** is a multi-tenant SaaS customer-relationship-management platform for small and mid-sized service businesses and sales teams. It combines lead and deal management, a communications hub, task/calendar management, automation, proposals, customer-success tracking and reporting. Each customer gets an isolated **workspace (organization)** with its own users, data, plan and settings.
 
----
+Brand: **Versaly Labs**. Default currency: KES (workspaces can pick USD, KES, EUR, GBP, ZAR, CAD, AUD).
 
-### B. Authentication & Session Redirection Hardening
-- **`NEXTAUTH_SECRET` Fail-Safe**:
-  - Implemented a 64-character internal encryption fallback in `lib/auth.ts` and `src/app/api/auth/[...nextauth]/route.ts`.
-  - Eliminates the fatal `[NO_SECRET]` crash that was triggering `/auth/error?error=Configuration` ("Access Denied").
-- **Reverse Proxy Session Cookie Resolution (`src/middleware.ts`)**:
-  - NextAuth in production uses the HTTPS cookie prefix `__Secure-next-auth.session-token`.
-  - Updated `middleware.ts` to inspect both `__Secure-next-auth.session-token` and `next-auth.session-token`, allowing authenticated users on Vercel's reverse proxy to seamlessly enter `/dashboard`.
-- **Domain & Callback Sanitization**:
-  - Added auto-detection that overrides placeholder URLs (e.g. `your-app-name.vercel.app`) with the real Vercel URL `https://versaly-crm.vercel.app`.
-- **Hard Client Navigation**:
-  - Upgraded sign-in and trial registration forms (`signin/page.tsx` & `signup/page.tsx`) to use `window.location.href = '/dashboard'`, preventing Next.js router freezes and ensuring immediate entry with fresh session cookies.
-- **Modern Diagnostic Auth Error Screen (`src/app/auth/error/page.tsx`)**:
-  - Replaced the blunt generic "Access Denied" page with an interactive diagnostic status modal featuring direct action buttons ("Sign In to Your Account →" and "Return to Homepage").
+## 2. Deployment & infrastructure
 
----
+| Attribute | Detail |
+| :-- | :-- |
+| Live URL | https://versaly-crm.vercel.app |
+| Hosting | Vercel (serverless, Node runtime) |
+| Database | Managed PostgreSQL via Prisma Postgres (Vercel integration) |
+| Repository | GitHub `versalylabs/Versaly-CRM`, branch `main` |
+| Framework | Next.js 14.2.5 (App Router), React 18.3, TypeScript 5.5 |
+| Styling / UI | Tailwind CSS 3, framer-motion, lucide-react; custom "Glorase" display font + Inter |
+| Auth | NextAuth v4, Credentials provider, JWT sessions (8 h) |
+| ORM | Prisma 6.19 |
+| Payments | Stripe (Checkout, Billing Portal, webhooks) |
+| Email | Nodemailer over SMTP |
+| Health check | `GET /api/health` (and `/api/health/live`) |
 
-### C. Sidebar User Profile & Sign Out Controls (`src/components/sidebar.tsx`)
-- **Quick Sign Out Icon Button**:
-  - Positioned adjacent to the user profile avatar, name, and email in the sidebar footer.
-  - Styled with smooth hover feedback (`hover:text-red-400 hover:bg-red-500/15 border-transparent hover:border-red-500/30`).
-- **Prominent Full-Width Sign Out Button**:
-  - Placed directly beneath the profile card.
-  - Styled with the system's liquid glass aesthetic: frosted border, subtle dark background, glowing red text/icon on hover, and spring tactile feedback (`active:scale-[0.98]`).
-- **Functionality**:
-  - Both buttons invoke NextAuth's `signOut({ callbackUrl: '/' })`, gracefully clearing session cookies and navigating users back to the homepage.
-  - Automatically closes the mobile drawer when triggered on mobile or tablet devices.
+Environment variables (see `.env.example`): `DATABASE_URL` (or Vercel's `PRISMA_DATABASE_POSTGRES_URL`), `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `INVITATION_SECRET`, `SMTP_*`, `STRIPE_*` (secret, webhook secret, publishable key, monthly/annual price IDs per plan), `PLATFORM_ADMIN_EMAILS`, `CRON_SECRET`, `META_*` / `WHATSAPP_*` (optional channel credentials), `LEAD_CAPTURE_API_KEY`, `RATE_LIMIT_STORE`.
 
----
+Build pipeline: `npm run build` → `scripts/db-sync.js` (runs a **non-destructive** `prisma db push`; the build fails rather than dropping data; no accounts are seeded) → `next build`. The Prisma provider is fixed to PostgreSQL, so local development needs a Postgres database too. See the audit document for the recommended move to proper Prisma migrations.
 
-### D. Modernized Landing Page Pricing Section (`PricingSection.tsx`)
-- **Fixed Clipped "Most Popular Choice" Badge**:
-  - Redesigned card container geometry and removed overflow clipping.
-  - Floating badge is cleanly positioned with high z-index, styled with a radiant cyan-to-sky gradient, pulsing sparkle icon, and halo drop shadow.
-- **React Bits Glassmorphism & Interactive Cursor Spotlight**:
-  - **Dynamic Mouse Spotlight**: Tracks cursor movement in real time with a soft radial glow (`rgba(56, 189, 248, 0.18)`).
-  - **Multi-layer Glass Effect**: Frosted backdrop blur (`backdrop-blur-2xl`), specular refraction top edge highlights, and glowing border transitions.
-  - **Spring-Based Floating Lift**: Cards elevate smoothly (`y: -8`) on hover with physics-based spring damping.
-  - **Neon Ring on Popular Tier**: Growth Pro features a dual-layer cyan/sky aura and highlighted power capabilities (WhatsApp Outreach & AI Churn Scoring).
-- **Dynamic Plan Hand-Off & Functional Links**:
-  - Plan CTAs pass structured query parameters: `/auth/signup?plan=STARTER`, `plan=GROWTH_PRO`, `plan=ENTERPRISE`.
-  - Enterprise card includes a direct "Need custom SLA or invoice? Talk to us →" linking to `#contact`.
-  - Annual vs Monthly billing switcher dynamically calculates annual savings (Save $60/yr on Starter, $180/yr on Growth Pro, $480/yr on Enterprise) with strikethrough original prices.
-- **Dynamic Signup Form (`src/app/auth/signup/page.tsx`)**:
-  - Form dynamically adjusts quotas based on the selected plan (Starter: 1,000 leads, 3 seats; Growth Pro: 5,000 leads, 10 seats; Enterprise: 100,000 leads, 50 seats).
-  - Added an interactive 3-way toggle button directly on the signup card.
+Security-relevant variables: `NEXTAUTH_SECRET` is **required** (no fallback), `CHANNEL_ENCRYPTION_KEY` encrypts stored channel credentials, `PLATFORM_ORG_SLUG` names the workspace allowed to use platform-level channel credentials from the environment, `ALLOW_INBOX_SIMULATION` enables the demo "simulate reply" tool in production (default off).
 
----
+Quality tooling: `npm run qa:final` (structural checks), `npm run qa:smoke` (live smoke test), `npm run production:check`, `npx tsc --noEmit` (currently clean).
 
-### E. Landing Page Contact Section & Inbound Lead Capture
-- **High-Converting Contact Section (`ContactSection.tsx`)**:
-  - Located directly above the footer with smooth scroll anchor `#contact`.
-  - Automatically captures inquiries and sends rich HTML notifications to `versalylabs@gmail.com`.
-  - Automatically ingests each inquiry as a CRM lead with source `WEBSITE_FORM` and creates an onboarding follow-up task.
-- **Landing Page Footer (`LandingFooter.tsx`)**:
-  - Direct telephone lines: `0704611033` and `0792986825` (clickable `tel:` links).
-  - Branded social links: Instagram, TikTok, Facebook, and X (`@versalylabs`).
+## 3. Roles & multi-tenancy
 
----
+- **Organization (workspace)** — owns users, leads, tasks, proposals, calendar, workflows, API keys, webhooks, conversations, channel accounts and pipeline configuration. Carries plan, plan status, limits, currency and suspension state.
+- **Roles** — `ADMIN`, `MANAGER`, `AGENT` (per workspace). Managers/admins see team-wide data; agents see their own assignments (e.g. calendar).
+- **Platform administrators** — Versaly staff listed in `PLATFORM_ADMIN_EMAILS`; access `/platform` to manage all workspaces, support, audit logs and automations.
+- **Team management** — admins invite users by signed, expiring invitation links, set roles, activate/deactivate users and enforce seat limits.
 
-## 3. Comprehensive Platform Capabilities Overview
+## 4. Feature catalogue
 
-Versaly CRM provides a complete end-to-end revenue operations engine:
+### 4.1 Public website
+- Landing page (hero, bento feature grid, pipeline visualizer, testimonials/metrics, pricing, FAQ, contact section, footer with phone and social links).
+- Pricing section with monthly/annual toggle and plan hand-off to signup (`/auth/signup?plan=…`).
+- Contact form → emails the Versaly team and ingests the enquiry as a lead with an onboarding follow-up task.
+- Public lead form endpoint for embedding on external websites.
 
-### 1. Lead & Pipeline Management
-- **Visual Kanban Sandbox & Pipeline Tracker**: Drag-and-drop deal movement with stages (`NEW_LEAD`, `RESEARCHING`, `CONTACTED`, `FOLLOW_UP`, `INTERESTED`, `PROPOSAL`, `WON`, `LOST`).
-- **Lead Filtering & Multi-Currency Support**: Filter by stage, source, deal value, and assignees. Native currency support for USD, KES, EUR, GBP, ZAR, CAD, and AUD.
-- **Activity Timeline & Audit Trail**: Comprehensive history tracking stage transitions, outreach logs, and notes.
+### 4.2 Account, onboarding & settings
+- Self-service signup creating a workspace + admin + 14-day trial (no card required), with welcome email and an onboarding checklist of tasks. New workspaces start empty.
+- Sign-in / sign-out, auth error screen, invite acceptance flow.
+- Settings: profile, password change, workspace currency, notification preferences, pipeline configuration, billing and channel integrations.
+- Global search and a command palette (`Ctrl/⌘ K`) across leads, tasks, proposals, calendar and outreach.
+- In-app notifications (bell + notifications page) with per-type preferences; follow-up and task alerts.
+- Light/dark theme and responsive layout with a mobile drawer.
 
-### 2. Omnichannel Unified Inbox (Phase 19)
-- **Multi-Channel Social Integration**: Unified messaging interface supporting:
-  - **WhatsApp Business Cloud API**
-  - **Instagram Direct Messages**
-  - **Facebook Messenger**
-  - **TikTok Messages**
-  - **X (Twitter) DMs**
-  - **Two-Way Email Sync**
-- **Live Sync Engine**: Webhook receiver (`/api/inbox/webhook`) and visibility-aware polling for real-time conversation updates.
+### 4.3 Leads
+- Lead records: contact, company, job title, email, phone, website, location, business type, social handles (Instagram, LinkedIn, Facebook, TikTok, X), source, deal value, last contact, next follow-up, notes, owner.
+- Filtering by stage, source, assignee and search; per-lead detail page with timeline/activity, outreach history, tasks, proposals and calendar items.
+- Lead sources: referral, cold outreach, social media, website form, event, other.
+- Plan-based lead quota enforcement; duplicate detection per workspace by email.
+- Automatic lead capture: website form, secure public API, Meta (Facebook/Instagram) Lead Ads webhook, and the authenticated developer API; new external leads are auto-assigned (round-robin by workload) and get a "respond within 24 h" task.
 
-### 3. Customer Success & Retention Engine (Phase 17)
-- **AI Churn Risk Scoring**: Proactive algorithm calculating retention health scores (0–100) based on client interaction frequency and sentiment.
-- **Health Indicators**: Healthy (80–100), Neutral (50–79), At-Risk (<50) with automated re-engagement triggers.
-- **Automated Escalation Workflows**: Tasks automatically dispatched when high-value accounts exhibit inactivity.
+### 4.4 Deals pipeline
+- Drag-and-drop Kanban board.
+- Default stages: New Lead, Researching, Contacted, Follow-up, Interested, Proposal, Won, Lost.
+- **Custom pipeline stages** (Settings → Pipeline): add, edit, reorder, recolor and delete stages; each stage has a probability and a category (Active / Won / Lost).
+- Stage-change activity logging and automation triggers; pipeline value and conversion figures.
 
-### 4. AI Sales Copilot (Phase 18)
-- **AI Proposal Generator**: Drafts comprehensive client proposals based on deal metadata and notes.
-- **Objection Handling Assistant**: Instant AI-suggested responses to common sales objections.
-- **Smart Follow-Up Scheduling**: Intelligent follow-up recommendations based on pipeline velocity.
+### 4.5 Tasks
+- Create/assign/prioritise (low/medium/high) tasks with due dates, linked to leads; complete/reopen; overdue/today views.
+- Assignment notifications; completion fires the `TASK_COMPLETED` automation trigger.
 
-### 5. Multi-Tenant SaaS Subscriptions & Billing (Phase 9–10)
-- **Subscription Tiers**: Starter ($29/mo), Growth Pro ($79/mo), Enterprise Scale ($199/mo).
-- **14-Day Free Trial Flow**: Instant workspace provisioning without upfront credit card requirements.
-- **Quota Enforcement**: Hard limits on active leads, team member seats, and automation triggers per plan.
-- **Stripe Checkout & Billing Portal**: Self-serve subscription management, upgrades, and invoice history.
+### 4.6 Calendar
+- Month/week/agenda views with an upcoming-events sidebar and diagonal weekend styling.
+- Event types: meeting, call, follow-up, property viewing, other; link to leads, locations, reminders, assignees, completion state.
+- Role-aware visibility (agents see their events; managers see the team's) and external calendar sync support.
 
-### 6. Platform Administration (Phase 11)
-- **Master Admin Portal (`/platform`)**: Platform health monitoring, tenant workspace overview, user management, and system logs.
-- **Permanent Super Admin**: `versalylabs@gmail.com` is granted permanent master platform rights.
+### 4.7 Communications
+- **Outreach** — log and track outreach (email, call, SMS, LinkedIn…) with status (pending, sent, opened, clicked, replied, bounced).
+- **Email** — compose and send email to leads over SMTP with reusable templates; sends are logged to the lead's timeline.
+- **WhatsApp** — WhatsApp Cloud API sending screen and configuration status.
+- **Unified Inbox** (`/inbox`) — conversation list, threaded messages, internal team notes, assignment, status management, unread counts, smart-reply suggestions, lead dossier panel, convert-to-lead, tasks from a conversation, canned responses. Channel provider layer for Email, WhatsApp, Instagram, Facebook, X and TikTok. **Status: partially functional** — outbound sending and webhook ingestion exist, but live account connection is developer-style (manual credentials), email receive is not implemented, and several channels are stubs. A redesign to a simplified, real-account-connected inbox is planned (see audit §4).
+- Outbound messages automatically sync to the lead's outreach log, last-contact date and stage.
 
----
+### 4.8 Proposals
+- Create proposals tied to a lead with title, description, value and status (draft, sent, accepted, rejected); status changes update the lead's stage and notify owners/managers.
 
-## 4. Verification & QA Status
+### 4.9 Automation
+- Workflow builder: **Triggers** — lead created, lead stage changed, lead updated, task created, task completed, activity created, outreach sent, outreach replied, lead inactive. **Actions** — create task, update stage, assign user, add note, send email, create activity, set follow-up.
+- Idempotent executions with a run log, per-plan monthly automation run limits, manual run, and a scheduled endpoint (`POST /api/automation/cron`, protected by `CRON_SECRET`) for time-based rules such as inactive leads.
 
-- **Automated QA Suite (`npm run qa:final`)**: **121 / 121 checks passed** (0 failures, 0 warnings).
-- **TypeScript Type Checking**: Clean compilation across all routes and components.
-- **Live Production Smoke Test**:
-  - Live Health Check: `GET /api/health` -> HTTP 200 OK (`database: "ok"`).
-  - Admin Authentication: `versalylabs@gmail.com` + `labversaly-16` -> HTTP 200 OK (`/dashboard` loaded).
-  - Trial Registration: `POST /api/auth/register` -> HTTP 201 Created -> Direct `/dashboard` entry.
-  - Sign Out Flow: Verified with session cookie destruction and redirection to `/`.
+### 4.10 AI Deal Copilot (rule-based "smart assistant")
+- Deal insights (sentiment, win probability, churn risk, buying signals, objections, suggested next actions), draft generation for follow-ups/proposals, meeting-note summarisation (transcript → summary, action items, decisions), portfolio overview.
+- Currently heuristic/rule-driven rather than backed by a language model (see audit §2 for the recommendation).
+
+### 4.11 Customer Success
+- Post-sale tracking: lifecycle stage (onboarding → adopting → active → at risk → renewal → churned), health score and status, renewal date/value/status, success owner, review dates, notes, milestones with due dates.
+- Auto-escalation tasks for at-risk, high-value accounts.
+
+### 4.12 Dashboard, activity & reports
+- Dashboard: KPI cards with dynamically computed trends, weekly activity, tasks due, recent leads/outreach/proposals, team workload (managers), clean zero-states for new workspaces.
+- Activity feed: unified chronological feed of lead, outreach, task and proposal events.
+- Reports: pipeline, conversion, source performance, revenue and team metrics with CSV export and print/PDF.
+
+### 4.13 Billing & subscriptions
+- Plans: **Starter** ($29/mo), **Growth Pro** ($79/mo), **Enterprise Scale** ($199/mo); annual billing discount.
+- 14-day trial; read-only mode when the trial expires, a payment is past due, or the subscription is cancelled; workspace suspension by platform staff.
+- Stripe Checkout, Billing Portal, plan changes, and a signature-verified, idempotent webhook that syncs plan, status, period end and limits.
+- Quotas: leads, team seats, automation runs.
+
+### 4.14 Integrations & developer platform
+- **Developer API** — workspace API keys (hashed, revocable, optional expiry), `POST/GET /api/v1/leads`.
+- **Outbound webhooks** — HMAC-signed events with delivery log and failure counts.
+- **Inbound** — public lead form, secure lead webhook, Meta Lead Ads webhook, communications webhooks.
+- Channel connection screen (Settings → Integrations) for Email/WhatsApp/Meta/TikTok/X credentials.
+
+### 4.15 Support desk
+- In-app support tickets (category, priority, status, threaded messages, internal notes) for customers; staff handle them in the platform console.
+
+### 4.16 Platform administration (`/platform`)
+- Cross-workspace overview (organizations, MRR/ARR estimate, trial and cancellation rates), organization management (plan, status, suspension), support queue, automation monitor and audit log.
+
+## 5. Data model (Prisma)
+
+Core tenant: `Organization`, `User`, `Session`, `Notification`, `NotificationPreference`, `PipelineStageConfig`.
+CRM: `Lead`, `OutreachLog`, `Task`, `CalendarEvent`, `Proposal`, `ActivityEvent`, `EmailTemplate`.
+Automation: `AutomationWorkflow`, `AutomationExecution`.
+Customer success & AI: `CustomerSuccessRecord`, `CustomerMilestone`, `AiDealInsight`, `AiMeetingSummary`.
+Inbox: `Conversation`, `ConversationMessage`, `ContactChannelIdentity`, `ConnectedChannelAccount`.
+Platform & billing: `SupportTicket`, `SupportMessage`, `PlatformAuditLog`, `ProcessedWebhookEvent`, `ApiKey`, `WebhookEndpoint`, `WebhookDelivery`.
+
+## 6. Code layout
+
+```
+src/app/            Next.js App Router pages + src/app/api/** route handlers
+src/components/     AppShell, sidebar, command palette, notification bell, landing components, UI primitives
+lib/                Server logic: auth, inbox, communication-providers/, workflows, aiCopilot, stripe,
+                    subscription, integrations, leadCapture, onboarding, notifications, email, rateLimit
+src/lib/            pipelineStages, utils
+prisma/             schema.prisma, migrations, seed
+scripts/            db-sync, db-prepare, create-admin, check-production, final-qa, smoke-test, run-automation
+public/             icons and fonts
+```
+
+## 7. Operations
+
+- **Create an admin:** `npm run admin:create` (interactive; do not hard-code credentials).
+- **Scheduled automation:** configure a scheduler (Vercel Cron or external) to call `POST /api/automation/cron` with `Authorization: Bearer $CRON_SECRET`.
+- **Stripe webhooks:** point Stripe to `/api/billing/webhook` and set `STRIPE_WEBHOOK_SECRET`.
+- **Verification:** `GET /api/health` must return `ready: true`; `npm run qa:smoke` against the live URL.
+
+## 8. Current status & known gaps (summary)
+
+| Area | Status |
+| :-- | :-- |
+| Core CRM (leads, pipeline, tasks, calendar, proposals, reports) | Built and working |
+| Billing / trial / quotas | Built; plan-limit values need unifying |
+| Automation | Built; **scheduled runs not active** until `CRON_SECRET` and a cron schedule are configured (health currently reports "degraded") |
+| Unified Inbox | Partial — real account connection and email receiving still to be built |
+| AI Copilot | Rule-based; no language-model backend yet |
+| Security / tenant isolation | **Needs remediation before commercial launch** — see audit Tier 0 |
+| Automated tests | Structural checks only; behavioural tests to be added |
+| Legal pages (privacy, terms), password reset, email verification, CSV import | Not yet present |
+
+## 9. Documentation index
+
+Older per-phase notes (`PHASE_*.md`, `*_SETUP.md`, `*_UPDATE.md`, `FIX_NOTES.md`) describe how individual features were added and remain at the repository root for history; this document supersedes them as the system summary. Recommended: move them into a `docs/` folder.
+
+| Document | Purpose |
+| :-- | :-- |
+| `PRODUCT_AUDIT_AND_RECOMMENDATIONS.md` | Bugs, gaps, inbox plan, roadmap, redesign notes |
+| `DEPLOYMENT.md`, `LAUNCH_READINESS.md`, `PRODUCTION_HARDENING.md`, `FINAL_QA_CHECKLIST.md` | Deployment and go-live checklists |
+| `EMAIL_SETUP.md`, `PHASE_9_STRIPE_SETUP.md`, `META_LEAD_ADS_SETUP.md`, `INTEGRATIONS_SETUP.md`, `AUTOMATION_SETUP.md`, `CALENDAR_SETUP.md` | Feature set-up guides |

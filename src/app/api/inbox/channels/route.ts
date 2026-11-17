@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { isManagerRole } from '@/lib/tenant';
 import {
   getConnectedChannelAccounts,
   upsertConnectedChannelAccount,
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
     }
 
     const [accounts, providers] = await Promise.all([
-      getConnectedChannelAccounts(organizationId),
+      getConnectedChannelAccounts(organizationId, { includeWebhookSecret: session?.user?.role === 'ADMIN' }),
       Promise.all(providerRegistry.getAllProviders().map(p => p.getConnectionStatus(organizationId))),
     ]);
 
@@ -35,6 +36,9 @@ export async function POST(req: NextRequest) {
     const organizationId = session?.user?.organizationId;
     if (!session || !organizationId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!isManagerRole(session.user?.role)) {
+      return NextResponse.json({ error: 'Only workspace admins and managers can manage channel connections.' }, { status: 403 });
     }
 
     const body = await req.json();
@@ -111,6 +115,9 @@ export async function DELETE(req: NextRequest) {
     const organizationId = session?.user?.organizationId;
     if (!session || !organizationId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (!isManagerRole(session.user?.role)) {
+      return NextResponse.json({ error: 'Only workspace admins and managers can manage channel connections.' }, { status: 403 });
     }
 
     const { searchParams } = new URL(req.url);

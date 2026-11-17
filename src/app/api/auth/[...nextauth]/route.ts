@@ -13,15 +13,7 @@ if (
     : 'https://versaly-crm.vercel.app';
 }
 
-const fallbackSecret = 'versaly-crm-session-production-auth-secret-key-32-chars-long-minimum';
-if (!process.env.NEXTAUTH_SECRET) {
-  process.env.NEXTAUTH_SECRET = fallbackSecret;
-}
-
-const handler = NextAuth({
-  ...authOptions,
-  secret: process.env.NEXTAUTH_SECRET || fallbackSecret,
-})
+const handler = NextAuth(authOptions)
 
 export { handler as GET, handler as POST }
 

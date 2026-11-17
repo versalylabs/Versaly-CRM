@@ -6,7 +6,8 @@ export function getPlatformAdminEmails() {
     .split(',')
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
-  const defaults = ['versalylabs@gmail.com', 'demo@versaly.com'];
+  // Only the workspace owner is trusted by default. Never add demo/test accounts here.
+  const defaults = ['versalylabs@gmail.com'];
   return Array.from(new Set([...defaults, ...configured]));
 }
 

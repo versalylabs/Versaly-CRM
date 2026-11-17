@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { getToken } from 'next-auth/jwt';
-import { authOptions } from '../../../../lib/auth';
+import { getOrgContext } from '../../../../lib/tenant';
 import { assertSubscriptionWriteAccess } from '../../../../lib/subscription';
 import prisma from '../../../../lib/prisma';
 
@@ -18,22 +16,10 @@ function parseDate(value: unknown, label: string) {
   return date;
 }
 
-async function getAuthenticatedPrincipal(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (session?.user) return { user: session.user };
-
-  // Fallback for development JWT sessions when getServerSession is not hydrated
-  // in a route request. The token is still verified with NEXTAUTH_SECRET.
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  if (!token) return null;
-  return {
-    user: {
-      id: typeof token.id === 'string' ? token.id : undefined,
-      email: typeof token.email === 'string' ? token.email : undefined,
-      name: typeof token.name === 'string' ? token.name : null,
-      role: typeof token.role === 'string' ? token.role : undefined,
-    },
-  };
+async function getAuthenticatedPrincipal(_req: NextRequest) {
+  const ctx = await getOrgContext();
+  if (!ctx) return null;
+  return { user: { id: ctx.userId, email: ctx.email || undefined, role: ctx.role }, orgId: ctx.orgId };
 }
 
 async function resolveUser(user: any) {
@@ -80,7 +66,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid date range.' }, { status: 400 });
   }
 
-  const where: any = { startAt: { gte: start, lte: end } };
+  const where: any = {
+    startAt: { gte: start, lte: end },
+    // Events created before workspaces were stamped on events are matched through their assignee.
+    OR: [{ organizationId: principal.orgId }, { organizationId: null, assignedTo: { organizationId: principal.orgId } }],
+  };
   if (!isManager(principal.user.role)) where.assignedToId = currentUserId;
 
   const events = await prisma.calendarEvent.findMany({
@@ -122,19 +112,20 @@ export async function POST(req: NextRequest) {
       : currentUserId;
 
     const assignee = await prisma.user.findFirst({
-      where: { id: assignedToId, isActive: true },
+      where: { id: assignedToId, isActive: true, organizationId: principal.orgId },
       select: { id: true }
     });
     if (!assignee) return NextResponse.json({ error: 'Selected assignee was not found or is inactive.' }, { status: 400 });
 
     const leadId = String(body.leadId || '').trim() || null;
     if (leadId) {
-      const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { id: true } });
+      const lead = await prisma.lead.findFirst({ where: { id: leadId, organizationId: principal.orgId }, select: { id: true } });
       if (!lead) return NextResponse.json({ error: 'Selected lead was not found.' }, { status: 400 });
     }
 
     const event = await prisma.calendarEvent.create({
       data: {
+        organizationId: principal.orgId,
         title,
         description: String(body.description || '').trim() || null,
         type: type as any,

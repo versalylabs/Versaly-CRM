@@ -3,19 +3,14 @@ import prisma from '../../../../../lib/prisma';
 import bcrypt from 'bcryptjs';
 import { initializeWorkspaceOnboarding } from '../../../../../lib/onboarding';
 import { sendWelcomeEmail } from '../../../../../lib/email';
+import { PLAN_LIMITS, normalizePlan } from '../../../../../lib/plans';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { name, email, companyName, password, currency, plan: rawPlan } = body;
-    const plan: 'STARTER' | 'GROWTH_PRO' | 'ENTERPRISE' =
-      rawPlan === 'STARTER' || rawPlan === 'ENTERPRISE' ? rawPlan : 'GROWTH_PRO';
-    const planLimitsMap: Record<'STARTER' | 'GROWTH_PRO' | 'ENTERPRISE', { leadLimit: number; seatLimit: number; automationRunLimit: number }> = {
-      STARTER: { leadLimit: 1000, seatLimit: 3, automationRunLimit: 100 },
-      GROWTH_PRO: { leadLimit: 5000, seatLimit: 10, automationRunLimit: 1000 },
-      ENTERPRISE: { leadLimit: 100000, seatLimit: 50, automationRunLimit: 10000 },
-    };
-    const planLimits = planLimitsMap[plan];
+    const plan = normalizePlan(rawPlan);
+    const planLimits = PLAN_LIMITS[plan];
 
     // 1. Validation
     if (!name || typeof name !== 'string' || !name.trim()) {

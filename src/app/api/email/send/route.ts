@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Lead, subject, and message are required.' }, { status: 400 });
   }
 
-  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+  const lead = await prisma.lead.findFirst({ where: { id: leadId, organizationId: session.user?.organizationId || '__none__' } });
   if (!lead) return NextResponse.json({ error: 'Lead not found.' }, { status: 404 });
   const recipient = to || lead.email;
   if (!recipient || !/^\S+@\S+\.\S+$/.test(recipient)) {

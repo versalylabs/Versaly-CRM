@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma';
+import { encryptSecret, generateWebhookSecret } from '@/lib/secretBox';
 import { providerRegistry, CommunicationChannel, SendMessageInput, InboundParsedMessage } from '@/lib/communication-providers';
 
 export * from './inbox-shared';
@@ -365,7 +366,8 @@ export async function recordInboundChannelMessage(params: {
   senderName?: string;
   senderEmail?: string;
   senderPhone?: string;
-  organizationId?: string;
+  /** Required. Must come from an authenticated source (a verified connected account), never from request input. */
+  organizationId: string;
   metadata?: any;
 }) {
   const {
@@ -381,25 +383,15 @@ export async function recordInboundChannelMessage(params: {
     metadata,
   } = params;
 
-  // 1. Resolve Organization ID securely
-  let orgId = organizationId;
-  if (!orgId && senderHandle) {
-    const channelAcc = await prisma.connectedChannelAccount.findFirst({
-      where: { channel, status: 'CONNECTED' },
-    });
-    orgId = channelAcc?.organizationId;
-  }
+  // 1. The workspace must be supplied by the caller (resolved from a verified connected account).
+  // There is deliberately NO fallback to "any" or "the first" organization.
+  const orgId = organizationId;
+  if (!orgId) throw new Error('organizationId is required to record an inbound message');
 
-  if (!orgId) {
-    const firstOrg = await prisma.organization.findFirst({ orderBy: { createdAt: 'asc' } });
-    if (!firstOrg) throw new Error('No organization registered in system');
-    orgId = firstOrg.id;
-  }
-
-  // 2. Check for duplicate message (idempotency / deduplication)
+  // 2. Check for duplicate message (idempotency / deduplication), scoped to the workspace
   if (externalMessageId) {
     const existingMsg = await prisma.conversationMessage.findFirst({
-      where: { externalMessageId },
+      where: { externalMessageId, conversation: { organizationId: orgId } },
       include: { conversation: true },
     });
     if (existingMsg) {
@@ -587,14 +579,20 @@ export async function recordInboundChannelMessage(params: {
  * Useful for automated tests and QA validation.
  */
 export async function simulateInboundMessage(params: {
+  organizationId: string;
   conversationId: string;
   content: string;
   channel?: CommunicationChannel;
 }) {
-  const { conversationId, content, channel = 'WHATSAPP' } = params;
+  const { organizationId, conversationId, content, channel = 'WHATSAPP' } = params;
 
-  const conversation = await prisma.conversation.findUnique({
-    where: { id: conversationId },
+  // Simulation is a demo/QA tool. It is disabled in production unless explicitly enabled.
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_INBOX_SIMULATION !== 'true') {
+    throw new Error('Inbound simulation is disabled in production.');
+  }
+
+  const conversation = await prisma.conversation.findFirst({
+    where: { id: conversationId, organizationId },
     include: { lead: true },
   });
 
@@ -615,7 +613,7 @@ export async function simulateInboundMessage(params: {
  * Retrieves all connected social channel accounts for an organization.
  * Sensitive tokens are sanitized for client display.
  */
-export async function getConnectedChannelAccounts(organizationId: string) {
+export async function getConnectedChannelAccounts(organizationId: string, opts: { includeWebhookSecret?: boolean } = {}) {
   const accounts = await prisma.connectedChannelAccount.findMany({
     where: { organizationId },
     orderBy: { connectedAt: 'desc' },
@@ -631,7 +629,7 @@ export async function getConnectedChannelAccounts(organizationId: string) {
     avatarUrl: acc.avatarUrl,
     hasAccessToken: Boolean(acc.accessToken),
     hasAppSecret: Boolean(acc.appSecret),
-    webhookSecret: acc.webhookSecret,
+    webhookSecret: opts.includeWebhookSecret ? acc.webhookSecret : null,
     lastSyncAt: acc.lastSyncAt,
     errorMessage: acc.errorMessage,
     connectedAt: acc.connectedAt,
@@ -684,11 +682,11 @@ export async function upsertConnectedChannelAccount(params: {
     update: {
       accountName,
       externalAccountId: externalAccountId || undefined,
-      accessToken: accessToken || undefined,
-      refreshToken: refreshToken || undefined,
+      accessToken: encryptSecret(accessToken) || undefined,
+      refreshToken: encryptSecret(refreshToken) || undefined,
       tokenExpiresAt: tokenExpiresAt || undefined,
       appId: appId || undefined,
-      appSecret: appSecret || undefined,
+      appSecret: encryptSecret(appSecret) || undefined,
       webhookSecret: webhookSecret || undefined,
       status: 'CONNECTED',
       lastSyncAt: new Date(),
@@ -703,12 +701,12 @@ export async function upsertConnectedChannelAccount(params: {
       accountName,
       accountHandle,
       externalAccountId: externalAccountId || null,
-      accessToken: accessToken || null,
-      refreshToken: refreshToken || null,
+      accessToken: encryptSecret(accessToken),
+      refreshToken: encryptSecret(refreshToken),
       tokenExpiresAt: tokenExpiresAt || null,
       appId: appId || null,
-      appSecret: appSecret || null,
-      webhookSecret: webhookSecret || `whsec_${Math.random().toString(36).substring(2, 14)}`,
+      appSecret: encryptSecret(appSecret),
+      webhookSecret: webhookSecret || generateWebhookSecret(),
       status: 'CONNECTED',
       lastSyncAt: new Date(),
       avatarUrl: avatarUrl || null,

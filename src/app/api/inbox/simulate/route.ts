@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
     }
 
     const message = await simulateInboundMessage({
+      organizationId,
       conversationId,
       content,
       channel,

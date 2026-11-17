@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 import { checkRateLimit, clientIp } from '../lib/rateLimit'
+import { getAuthSecret } from '../lib/authSecret'
 
 const SENSITIVE_LIMITS: Record<string, { limit: number; windowMs: number }> = {
   '/api/auth/register': { limit: 8, windowMs: 15 * 60 * 1000 },
@@ -53,10 +54,7 @@ export async function middleware(req: NextRequest) {
     return withRequestHeaders(NextResponse.next(), requestId)
   }
 
-  const authSecret =
-    process.env.NEXTAUTH_SECRET ||
-    process.env.AUTH_SECRET ||
-    'versaly-crm-session-production-auth-secret-key-32-chars-long-minimum';
+  const authSecret = getAuthSecret();
 
   const hasSecureCookie = req.cookies.has('__Secure-next-auth.session-token');
 

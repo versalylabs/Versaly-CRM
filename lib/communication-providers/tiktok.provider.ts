@@ -14,7 +14,7 @@ export class TikTokProvider extends BaseCommunicationProvider {
 
   async getConnectionStatus(organizationId: string): Promise<ChannelConnectionStatus> {
     const account = await this.getAccount(organizationId);
-    const hasEnv = Boolean(process.env.TIKTOK_ACCESS_TOKEN);
+    const hasEnv = Boolean(await this.envFor(organizationId, process.env.TIKTOK_ACCESS_TOKEN));
     const isConnected = Boolean(hasEnv || (account && account.status === 'CONNECTED' && account.accessToken));
 
     return {
@@ -38,7 +38,7 @@ export class TikTokProvider extends BaseCommunicationProvider {
   async sendMessage(input: SendMessageInput): Promise<SendMessageResult> {
     const { recipientAddress, content, organizationId } = input;
     const account = await this.getAccount(organizationId);
-    const token = account?.accessToken || process.env.TIKTOK_ACCESS_TOKEN;
+    const token = account?.accessToken || (await this.envFor(organizationId, process.env.TIKTOK_ACCESS_TOKEN));
 
     if (!token) {
       return {

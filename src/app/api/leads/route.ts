@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
     if (lead.assignedToId) {
       await createNotification({ userId: lead.assignedToId, type: 'LEAD_ASSIGNED', title: 'New lead assigned', message: `${lead.contactName}${lead.companyName ? ` — ${lead.companyName}` : ''} was assigned to you.`, href: leadHref(lead.id), category: 'lead' });
     } else {
-      const managers = await getManagerIds();
+      const managers = await getManagerIds(lead.organizationId || "");
       await Promise.all(managers.map((userId) => createNotification({ userId, type: 'LEAD_UNASSIGNED', title: 'New unassigned lead', message: `${lead.contactName} needs an owner.`, href: leadHref(lead.id), category: 'lead' })));
     }
     return NextResponse.json(lead, { status: 201 });

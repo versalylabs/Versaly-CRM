@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../lib/auth';
 import prisma from '../../../../../lib/prisma';
+import { getOrgContext, unauthorized } from '../../../../../lib/tenant';
 
 const DEFAULT_TEMPLATES = [
   {
@@ -74,25 +75,26 @@ Customer Success & Retention Lead`,
 ];
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const ctx = await getOrgContext();
+  if (!ctx) return unauthorized();
 
-  let count = await prisma.emailTemplate.count();
+  const count = await prisma.emailTemplate.count({ where: { organizationId: ctx.orgId } });
   if (count === 0) {
     for (const tmpl of DEFAULT_TEMPLATES) {
-      await prisma.emailTemplate.create({ data: tmpl }).catch(() => {});
+      await prisma.emailTemplate.create({ data: { ...tmpl, organizationId: ctx.orgId } }).catch(() => {});
     }
   }
 
   const templates = await prisma.emailTemplate.findMany({
+    where: { organizationId: ctx.orgId },
     orderBy: [{ isActive: 'desc' }, { name: 'asc' }],
   });
   return NextResponse.json(templates);
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const ctx = await getOrgContext();
+  if (!ctx) return unauthorized();
 
   const body = await req.json();
   const name = String(body.name || '').trim();
@@ -106,7 +108,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const template = await prisma.emailTemplate.create({
-      data: { name, subject, body: templateBody, category, isActive: body.isActive !== false },
+      data: { organizationId: ctx.orgId, name, subject, body: templateBody, category, isActive: body.isActive !== false },
     });
     return NextResponse.json(template, { status: 201 });
   } catch (error: any) {

@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../lib/auth';
+import { getOrgContext, unauthorized } from '../../../../lib/tenant';
 import prisma from '../../../../lib/prisma';
 
 const COMMUNICATION_TYPES = ['EMAIL', 'WHATSAPP', 'PHONE_CALL', 'SMS', 'LINKEDIN', 'INSTAGRAM', 'OTHER'] as const;
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const ctx = await getOrgContext();
+  if (!ctx) return unauthorized();
 
   const { searchParams } = new URL(req.url);
   const leadId = searchParams.get('leadId') || undefined;
@@ -16,7 +15,7 @@ export async function GET(req: NextRequest) {
   const limitValue = Number(searchParams.get('limit') || 300);
   const take = Number.isFinite(limitValue) && limitValue > 0 ? Math.min(limitValue, 500) : 300;
 
-  const where: any = {};
+  const where: any = { lead: { organizationId: ctx.orgId } };
   if (leadId) where.leadId = leadId;
   if (type && COMMUNICATION_TYPES.includes(type as any)) where.type = type;
   if (status) where.status = status;

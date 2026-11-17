@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
+import { getOrgContext } from '../../../../lib/tenant';
 import prisma from '../../../../lib/prisma';
 
 type SearchItem = {
@@ -36,6 +37,9 @@ function visibleForUser<T extends { assignedToId?: string | null }>(items: T[], 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const ctx = await getOrgContext();
+  if (!ctx) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const orgId = ctx.orgId;
 
   const q = (new URL(req.url).searchParams.get('q') || '').trim();
   if (!q) {
@@ -48,38 +52,38 @@ export async function GET(req: NextRequest) {
   try {
     const [leads, tasks, proposals, events, outreach, users] = await Promise.all([
       prisma.lead.findMany({
-        where: { OR: [{ contactName: contains }, { companyName: contains }, { email: contains }] },
+        where: { organizationId: orgId, OR: [{ contactName: contains }, { companyName: contains }, { email: contains }] },
         select: { id: true, contactName: true, companyName: true, email: true, assignedToId: true },
         take: 8,
         orderBy: { updatedAt: 'desc' },
       }),
       prisma.task.findMany({
-        where: { OR: [{ title: contains }, { description: contains }] },
+        where: { organizationId: orgId, OR: [{ title: contains }, { description: contains }] },
         select: { id: true, title: true, description: true, assignedToId: true, completed: true },
         take: 8,
         orderBy: { updatedAt: 'desc' },
       }),
       prisma.proposal.findMany({
-        where: { OR: [{ title: contains }, { description: contains }] },
+        where: { organizationId: orgId, OR: [{ title: contains }, { description: contains }] },
         select: { id: true, title: true, status: true, lead: { select: { contactName: true, companyName: true } } },
         take: 8,
         orderBy: { updatedAt: 'desc' },
       }),
       prisma.calendarEvent.findMany({
-        where: { OR: [{ title: contains }, { description: contains }, { location: contains }] },
+        where: { organizationId: orgId, OR: [{ title: contains }, { description: contains }, { location: contains }] },
         select: { id: true, title: true, type: true, startAt: true, assignedToId: true },
         take: 8,
         orderBy: { startAt: 'asc' },
       }),
       prisma.outreachLog.findMany({
-        where: { OR: [{ subject: contains }, { content: contains }, { type: contains }] },
+        where: { lead: { organizationId: orgId }, OR: [{ subject: contains }, { content: contains }, { type: contains }] },
         select: { id: true, type: true, subject: true, content: true, lead: { select: { contactName: true, companyName: true } } },
         take: 8,
         orderBy: { createdAt: 'desc' },
       }),
       (session.user.role === 'ADMIN' || session.user.role === 'MANAGER')
         ? prisma.user.findMany({
-            where: { isActive: true, OR: [{ name: contains }, { email: contains }] },
+            where: { isActive: true, organizationId: orgId, OR: [{ name: contains }, { email: contains }] },
             select: { id: true, name: true, email: true, role: true },
             take: 8,
           })

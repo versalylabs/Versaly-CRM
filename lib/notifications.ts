@@ -44,9 +44,10 @@ export async function notifyMany(userIds: Array<string | null | undefined>, inpu
   return Promise.all(uniqueIds.map((userId) => createNotification({ userId, ...input })));
 }
 
-export async function getManagerIds() {
+export async function getManagerIds(organizationId: string) {
+  if (!organizationId) return [];
   const users = await prisma.user.findMany({
-    where: { isActive: true, role: { in: ['ADMIN', 'MANAGER'] } },
+    where: { isActive: true, organizationId, role: { in: ['ADMIN', 'MANAGER'] } },
     select: { id: true },
   });
   return users.map((user) => user.id);

@@ -1,4 +1,5 @@
 import Stripe from 'stripe';
+import { PLAN_LIMITS } from './plans';
 
 let stripe: Stripe | null = null;
 export function getStripe() {
@@ -10,8 +11,9 @@ export function getStripe() {
   return stripe;
 }
 
+// Limits come from lib/plans.ts so signup, billing and the Stripe webhook always agree.
 export const PLAN_CONFIG: Record<string, { priceEnv: string; leadLimit: number; seatLimit: number; automationRunLimit: number }> = {
-  STARTER: { priceEnv: 'STRIPE_PRICE_STARTER_MONTHLY', leadLimit: 150, seatLimit: 3, automationRunLimit: 100 },
-  GROWTH_PRO: { priceEnv: 'STRIPE_PRICE_GROWTH_PRO_MONTHLY', leadLimit: 500, seatLimit: 10, automationRunLimit: 1000 },
-  ENTERPRISE: { priceEnv: 'STRIPE_PRICE_ENTERPRISE_MONTHLY', leadLimit: 100000, seatLimit: 50, automationRunLimit: 10000 },
+  STARTER: { priceEnv: 'STRIPE_PRICE_STARTER_MONTHLY', ...PLAN_LIMITS.STARTER },
+  GROWTH_PRO: { priceEnv: 'STRIPE_PRICE_GROWTH_PRO_MONTHLY', ...PLAN_LIMITS.GROWTH_PRO },
+  ENTERPRISE: { priceEnv: 'STRIPE_PRICE_ENTERPRISE_MONTHLY', ...PLAN_LIMITS.ENTERPRISE },
 };

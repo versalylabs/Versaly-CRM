@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../../../lib/auth';
+import { getOrgContext, unauthorized } from '../../../../../lib/tenant';
 import { assertSubscriptionWriteAccess } from '../../../../../lib/subscription';
 import prisma from '../../../../../lib/prisma';
 
@@ -11,8 +10,8 @@ function leadStatus(status: string) {
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const ctx = await getOrgContext();
+  if (!ctx) return unauthorized();
 
   try {
     const body = await req.json();
@@ -22,7 +21,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     const log = await prisma.outreachLog.update({
-      where: { id: params.id },
+      where: { id: params.id, lead: { organizationId: ctx.orgId } },
       data: {
         ...(status ? {
           status: status as any,
@@ -56,11 +55,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const ctx = await getOrgContext();
+  if (!ctx) return unauthorized();
 
   try {
-    await prisma.outreachLog.delete({ where: { id: params.id } });
+    await prisma.outreachLog.delete({ where: { id: params.id, lead: { organizationId: ctx.orgId } } });
     return NextResponse.json({ success: true });
   } catch (error: any) {
     if (error.code === 'P2025') return NextResponse.json({ error: 'Outreach activity not found.' }, { status: 404 });

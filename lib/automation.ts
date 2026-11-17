@@ -15,7 +15,7 @@ export async function logLeadActivity(
 
 export async function createAutomaticFollowUpTask(
   tx: any,
-  input: { leadId: string; dueDate: Date; assignedToId?: string | null; outreachType: string; subject?: string | null }
+  input: { leadId: string; organizationId?: string | null; dueDate: Date; assignedToId?: string | null; outreachType: string; subject?: string | null }
 ) {
   const existing = await tx.task.findFirst({
     where: {
@@ -30,6 +30,7 @@ export async function createAutomaticFollowUpTask(
   const task = await tx.task.create({
     data: {
       leadId: input.leadId,
+      organizationId: input.organizationId || null,
       assignedToId: input.assignedToId || null,
       title: `Follow up with ${input.subject?.trim() || 'lead'}`,
       description: `${AUTO_FOLLOW_UP_MARKER} Automatically created from ${input.outreachType.toLowerCase()} outreach.`,

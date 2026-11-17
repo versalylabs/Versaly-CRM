@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../../lib/auth';
 import prisma from '../../../../../../lib/prisma';
+import { getOrgContext, unauthorized } from '../../../../../../lib/tenant';
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const ctx = await getOrgContext();
+  if (!ctx) return unauthorized();
 
   const body = await req.json();
   const data: any = {};
@@ -20,7 +21,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   try {
-    const template = await prisma.emailTemplate.update({ where: { id: params.id }, data });
+    const template = await prisma.emailTemplate.update({ where: { id: params.id, organizationId: ctx.orgId }, data });
     return NextResponse.json(template);
   } catch (error: any) {
     if (error?.code === 'P2025') return NextResponse.json({ error: 'Template not found.' }, { status: 404 });
@@ -30,10 +31,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const ctx = await getOrgContext();
+  if (!ctx) return unauthorized();
   try {
-    await prisma.emailTemplate.delete({ where: { id: params.id } });
+    await prisma.emailTemplate.delete({ where: { id: params.id, organizationId: ctx.orgId } });
     return NextResponse.json({ success: true });
   } catch (error: any) {
     if (error?.code === 'P2025') return NextResponse.json({ error: 'Template not found.' }, { status: 404 });
