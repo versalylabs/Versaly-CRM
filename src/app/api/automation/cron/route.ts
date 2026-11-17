@@ -10,7 +10,7 @@ function suppliedSecret(request: NextRequest) {
   return request.headers.get('x-cron-secret')?.trim() || null;
 }
 
-export async function POST(request: NextRequest) {
+async function handle(request: NextRequest) {
   const expected = getCronSecret();
   if (!expected) {
     return NextResponse.json({ error: 'Automation scheduler is not configured.' }, { status: 503 });
@@ -27,3 +27,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Scheduled automation run failed.' }, { status: 500 });
   }
 }
+
+// Vercel Cron invokes GET with "Authorization: Bearer $CRON_SECRET"; external schedulers may use POST.
+export async function GET(request: NextRequest) { return handle(request); }
+export async function POST(request: NextRequest) { return handle(request); }
