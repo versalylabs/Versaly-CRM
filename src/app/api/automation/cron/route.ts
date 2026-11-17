@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCronSecret } from '../../../../../lib/env';
 import { runInactiveLeadWorkflows } from '../../../../../lib/workflows';
+import { syncAllMailboxes } from '../../../../../lib/emailSync';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 function suppliedSecret(request: NextRequest) {
   const authorization = request.headers.get('authorization');
@@ -21,7 +23,8 @@ async function handle(request: NextRequest) {
 
   try {
     const result = await runInactiveLeadWorkflows();
-    return NextResponse.json({ ok: true, ...result, executedAt: new Date().toISOString() });
+    const mail = await syncAllMailboxes().catch((e) => ({ accounts: 0, imported: 0, error: String(e?.message || e) }));
+    return NextResponse.json({ ok: true, ...result, mail, executedAt: new Date().toISOString() });
   } catch (error) {
     console.error('Scheduled automation run failed', error);
     return NextResponse.json({ error: 'Scheduled automation run failed.' }, { status: 500 });

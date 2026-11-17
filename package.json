@@ -22,7 +22,9 @@
     "bcryptjs": "^3.0.3",
     "clsx": "^2.1.1",
     "framer-motion": "^13.4.0",
+    "imapflow": "^2.12.1",
     "lucide-react": "^1.46.0",
+    "mailparser": "^3.14.5",
     "next": "14.2.5",
     "next-auth": "^4.24.15",
     "nodemailer": "^7.0.7",
@@ -32,6 +34,7 @@
     "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
+    "@types/mailparser": "^3.9.0",
     "@types/node": "20.14.10",
     "@types/nodemailer": "^8.0.1",
     "@types/react": "18.3.3",

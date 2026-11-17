@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     const [accounts, providers] = await Promise.all([
       getConnectedChannelAccounts(organizationId, { includeWebhookSecret: session?.user?.role === 'ADMIN' }),
-      Promise.all(providerRegistry.getAllProviders().map(p => p.getConnectionStatus(organizationId))),
+      Promise.all(providerRegistry.getAllProviders().filter(p => ['EMAIL', 'WHATSAPP'].includes(p.channel)).map(p => p.getConnectionStatus(organizationId))),
     ]);
 
     return NextResponse.json({ accounts, channels: providers }, { status: 200 });

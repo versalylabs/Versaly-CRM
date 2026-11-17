@@ -261,16 +261,28 @@ export async function sendUnifiedMessage(params: SendUnifiedMessageParams) {
     throw new Error(`Channel provider for ${channel} is not registered in the system.`);
   }
 
+  let threadMeta: Record<string, any> | undefined = metadata;
+  let replySubject = subject;
+  if (channel === 'EMAIL') {
+    const lastInbound = await prisma.conversationMessage.findFirst({
+      where: { conversationId, channel: 'EMAIL', direction: 'INBOUND' },
+      orderBy: { sentAt: 'desc' },
+    });
+    const lastMeta = (lastInbound?.metadata || {}) as any;
+    if (lastInbound?.externalMessageId) threadMeta = { ...(metadata || {}), inReplyTo: lastInbound.externalMessageId };
+    if (!replySubject && lastMeta.subject) replySubject = /^re:/i.test(lastMeta.subject) ? lastMeta.subject : `Re: ${lastMeta.subject}`;
+  }
+
   const input: SendMessageInput = {
     organizationId,
     conversationId,
     recipientAddress,
     recipientName: conversation.contactName || lead?.contactName,
-    subject: subject || conversation.subject || undefined,
+    subject: replySubject || conversation.subject || undefined,
     content,
     senderId,
     senderName,
-    metadata,
+    metadata: threadMeta,
     attachments,
   };
 
@@ -377,7 +389,7 @@ export async function recordInboundChannelMessage(params: {
     senderExternalId,
     senderHandle,
     senderName,
-    senderEmail,
+    senderEmail: rawSenderEmail,
     senderPhone,
     organizationId,
     metadata,
@@ -387,6 +399,7 @@ export async function recordInboundChannelMessage(params: {
   // There is deliberately NO fallback to "any" or "the first" organization.
   const orgId = organizationId;
   if (!orgId) throw new Error('organizationId is required to record an inbound message');
+  const senderEmail = rawSenderEmail ? rawSenderEmail.trim().toLowerCase() : undefined;
 
   // 2. Check for duplicate message (idempotency / deduplication), scoped to the workspace
   if (externalMessageId) {
@@ -525,6 +538,7 @@ export async function recordInboundChannelMessage(params: {
       lastMessageAt: sentAt,
       lastMessageSnippet: `[${channel}] ${content.slice(0, 70)}`,
       status: 'WAITING_ON_US',
+      isClosed: false,
       unreadCount: { increment: 1 },
       channel,
     },

@@ -56,6 +56,14 @@ export async function GET(req: NextRequest) {
         break;
     }
 
+    // Simple Open / Done switch used by the simplified inbox
+    const state = searchParams.get('state');
+    if (state === 'open' || state === 'done') {
+      delete where.OR;
+      where.isClosed = state === 'done';
+      where.isArchived = false;
+    }
+
     // Channel filter
     if (channel !== 'all') {
       where.channel = channel.toUpperCase();

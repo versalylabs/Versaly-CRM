@@ -3,6 +3,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  experimental: { serverComponentsExternalPackages: ['imapflow', 'mailparser', 'nodemailer'] },
   async headers() {
     const headers = [
       { key: 'X-Content-Type-Options', value: 'nosniff' },

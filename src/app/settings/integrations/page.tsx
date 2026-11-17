@@ -209,7 +209,7 @@ export default function CommunicationChannelsSettingsPage() {
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white">Communication Channels</h1>
           <p className="text-slate-400 text-sm max-w-2xl">
-            Configure omnichannel messaging connections for Email, WhatsApp, Instagram, Facebook Messenger, X (Twitter), and TikTok.
+            Connect WhatsApp here. Email is connected from the Inbox. Instagram and Facebook are coming soon.
             Credentials remain encrypted and are never exposed to clients.
           </p>
         </div>
@@ -253,7 +253,7 @@ export default function CommunicationChannelsSettingsPage() {
           <div className="py-20 text-center text-slate-400">Loading channel configurations...</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {channels.map((chan) => {
+            {channels.filter((c) => c.channel === 'WHATSAPP').map((chan) => {
               const acc = accounts.find((a) => a.channel === chan.channel);
               const isConnected = chan.connected || Boolean(acc);
               const origin = typeof window !== 'undefined' ? window.location.origin : '';
