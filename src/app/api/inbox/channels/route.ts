@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
     }, { status: 201 });
   } catch (error: any) {
     console.error('Error in POST /api/inbox/channels:', error);
-    return NextResponse.json({ error: error.message || 'Failed to connect channel' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to connect channel' }, { status: error.status || 500 });
   }
 }
 

@@ -110,7 +110,9 @@ export const authOptions: NextAuthOptions = {
     maxAge: 8 * 60 * 60,
   },
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    // Identity fields come only from the database at sign-in. Never copy them from a
+    // client `update()` payload: platform-admin access is decided by email.
+    async jwt({ token, user }) {
       if (user) {
         token.role = user.role
         token.id = user.id
@@ -120,11 +122,6 @@ export const authOptions: NextAuthOptions = {
         token.organizationName = user.organizationName
         token.plan = user.plan
         token.isPlatformAdmin = getPlatformAdminEmails().includes((user.email || '').toLowerCase())
-      }
-
-      if (trigger === 'update' && session) {
-        if (typeof session.name === 'string') token.name = session.name
-        if (typeof session.email === 'string') token.email = session.email
       }
 
       return token

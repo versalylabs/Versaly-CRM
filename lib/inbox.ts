@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma';
-import { encryptSecret, generateWebhookSecret } from '@/lib/secretBox';
+import { decryptSecret, encryptSecret, generateWebhookSecret } from '@/lib/secretBox';
 import { providerRegistry, CommunicationChannel, SendMessageInput, InboundParsedMessage } from '@/lib/communication-providers';
 
 export * from './inbox-shared';
@@ -651,6 +651,47 @@ export async function getConnectedChannelAccounts(organizationId: string, opts: 
   }));
 }
 
+class ChannelOwnershipError extends Error {
+  status = 400;
+}
+
+/**
+ * Inbound webhooks are routed to a workspace by the provider's account ID, so a workspace
+ * must never be able to claim an ID it does not own (it would receive another
+ * workspace's customer messages).
+ */
+async function assertChannelOwnership(
+  organizationId: string,
+  channel: string,
+  accountHandle: string,
+  externalAccountId: string,
+  accessToken?: string | null
+) {
+  const taken = await prisma.connectedChannelAccount.findFirst({
+    where: { channel, externalAccountId, organizationId: { not: organizationId } },
+    select: { id: true },
+  });
+  if (taken) throw new ChannelOwnershipError('This account is already connected to another workspace.');
+
+  if (!['WHATSAPP', 'FACEBOOK', 'INSTAGRAM'].includes(channel)) return;
+  let token = accessToken || null;
+  if (!token) {
+    const existing = await prisma.connectedChannelAccount.findFirst({
+      where: { organizationId, channel, accountHandle },
+      select: { accessToken: true },
+    });
+    token = decryptSecret(existing?.accessToken);
+  }
+  if (!token) throw new ChannelOwnershipError('An access token is required to verify this account.');
+  // The token must be able to read the ID it claims: proves the workspace controls it.
+  const version = process.env.WHATSAPP_GRAPH_API_VERSION || 'v21.0';
+  const res = await fetch(
+    `https://graph.facebook.com/${version}/${encodeURIComponent(externalAccountId)}?fields=id`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  ).catch(() => null);
+  if (!res?.ok) throw new ChannelOwnershipError('Could not verify this account ID with the access token provided.');
+}
+
 /**
  * Connects or updates a communication channel account with credentials.
  */
@@ -684,6 +725,8 @@ export async function upsertConnectedChannelAccount(params: {
     avatarUrl,
     metadata,
   } = params;
+
+  if (externalAccountId) await assertChannelOwnership(organizationId, channel, accountHandle, externalAccountId, accessToken);
 
   return await prisma.connectedChannelAccount.upsert({
     where: {

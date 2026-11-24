@@ -40,9 +40,16 @@ function validHmac(raw: string, header: string | null, secrets: Array<string | n
 async function accountByExternalId(channel: Channel, ids: Array<string | undefined | null>) {
   const clean = ids.filter((id): id is string => Boolean(id));
   if (!clean.length) return null;
-  return prisma.connectedChannelAccount.findFirst({
+  const matches = await prisma.connectedChannelAccount.findMany({
     where: { channel, externalAccountId: { in: clean }, status: 'CONNECTED' },
+    take: 2,
   });
+  // Refuse ambiguous routing: delivering to the wrong workspace would leak customer messages.
+  if (matches.length > 1 && new Set(matches.map((m) => m.organizationId)).size > 1) {
+    console.error(`Inbound ${channel} webhook: account ID claimed by several workspaces; message not routed.`);
+    return null;
+  }
+  return matches[0] || null;
 }
 
 function suppliedSecret(req: NextRequest) {

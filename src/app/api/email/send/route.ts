@@ -1,28 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import nodemailer from 'nodemailer';
 import { authOptions } from '../../../../../lib/auth';
 import prisma from '../../../../../lib/prisma';
 import { logLeadActivity } from '../../../../../lib/automation';
+import { providerRegistry } from '../../../../../lib/communication-providers';
 
-function smtpConfigured() {
-  return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD && process.env.SMTP_FROM);
-}
+// Sends only through the workspace's own connected mailbox (the provider enforces this),
+// never through the platform SMTP account.
+const emailProvider = () => providerRegistry.getProvider('EMAIL')!;
 
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  return NextResponse.json({ configured: smtpConfigured(), from: process.env.SMTP_FROM || null });
+  const status = await emailProvider().getConnectionStatus(session.user?.organizationId || '__none__');
+  return NextResponse.json({ configured: status.connected, from: status.accountHandle || null });
 }
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  if (!smtpConfigured()) {
-    return NextResponse.json({
-      error: 'Email delivery is not configured. Add SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, and SMTP_FROM to your environment before sending email.',
-    }, { status: 503 });
-  }
 
   const body = await req.json();
   const leadId = String(body.leadId || '').trim();
@@ -41,25 +37,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'A valid recipient email address is required.' }, { status: 400 });
   }
 
-  const port = Number(process.env.SMTP_PORT || 587);
-  const secure = String(process.env.SMTP_SECURE || '').toLowerCase() === 'true' || port === 465;
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port,
-    secure,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD },
+  const sent = await emailProvider().sendMessage({
+    organizationId: lead.organizationId!,
+    conversationId: '',
+    recipientAddress: recipient,
+    subject,
+    content,
+    senderName: session.user?.name || undefined,
   });
-
-  try {
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM,
-      to: recipient,
-      subject,
-      text: content,
-    });
-  } catch (error) {
-    console.error('CRM email send failed', error);
-    return NextResponse.json({ error: 'The email could not be sent. Check your SMTP configuration and try again.' }, { status: 502 });
+  if (!sent.success) {
+    return NextResponse.json({ error: sent.errorMessage || 'The email could not be sent.' }, { status: sent.requiresConnection ? 503 : 502 });
   }
 
   const sentAt = new Date();

@@ -1,5 +1,5 @@
 import prisma from './prisma';
-import { sendEmail } from './email';
+import { providerRegistry } from './communication-providers';
 
 export const WORKFLOW_TRIGGERS = ['LEAD_CREATED','LEAD_STAGE_CHANGED','TASK_CREATED','TASK_COMPLETED','LEAD_UPDATED','ACTIVITY_CREATED','OUTREACH_SENT','OUTREACH_REPLIED','LEAD_INACTIVE'] as const;
 export const WORKFLOW_ACTIONS = ['CREATE_TASK','UPDATE_STAGE','ASSIGN_USER','ADD_NOTE','SEND_EMAIL','CREATE_ACTIVITY','SET_FOLLOW_UP'] as const;
@@ -74,7 +74,7 @@ export async function executeAutomationWorkflows(input:{ organizationId:string; 
       } else if(workflow.actionType==='ADD_NOTE') {
         if(!lead) throw new Error('This action requires a lead.'); const note=String(cfg.note||'Automated workflow note.').trim(); await prisma.lead.update({where:{id:lead.id},data:{notes:[lead.notes,note].filter(Boolean).join('\n\n')}}); message='Added an internal lead note.';
       } else if(workflow.actionType==='SEND_EMAIL') {
-        const to=String(cfg.to||lead?.email||'').trim(); if(!to) throw new Error('No recipient email is available.'); const subject=String(cfg.subject||`Update from ${workflow.name}`); const text=String(cfg.body||`Automated message from ${workflow.name}.`); const result=await sendEmail({to,subject,text}); message=result.sent?`Email sent to ${to}.`:`Email skipped: ${result.reason}.`;
+        const to=String(cfg.to||lead?.email||'').trim(); if(!to) throw new Error('No recipient email is available.'); const subject=String(cfg.subject||`Update from ${workflow.name}`); const text=String(cfg.body||`Automated message from ${workflow.name}.`); const result=await providerRegistry.getProvider('EMAIL')!.sendMessage({organizationId:input.organizationId,conversationId:'',recipientAddress:to,subject,content:text}); /* workspace mailbox only, never platform SMTP */ message=result.success?`Email sent to ${to}.`:`Email skipped: ${result.errorMessage||'email is not connected'}.`;
       } else if(workflow.actionType==='CREATE_ACTIVITY') {
         if(!lead) throw new Error('This action requires a lead.'); await prisma.activityEvent.create({data:{leadId:lead.id,type:'WORKFLOW',action:String(cfg.action||'Automated follow-up activity'),metadata:{workflowId:workflow.id}}}); message='Created a follow-up activity.';
       } else if(workflow.actionType==='SET_FOLLOW_UP') {
