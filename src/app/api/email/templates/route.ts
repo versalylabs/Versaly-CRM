@@ -8,17 +8,17 @@ const DEFAULT_TEMPLATES = [
   {
     name: 'Strategic Partnership & Introduction',
     category: 'Outreach',
-    subject: 'Exploring strategic synergies between {{companyName}} and Versaly',
+    subject: 'An idea for {{companyName}}',
     body: `Hi {{contactName}},
 
 I’ve been closely following {{companyName}}'s rapid momentum in the industry and was genuinely impressed by your team’s focus and execution.
 
-At Versaly, we help high-growth businesses streamline multi-channel customer communications, accelerate deal conversion cycles, and automate client follow-ups from a single platform.
+We help businesses like {{companyName}} [describe the result you deliver, for example save time or win more customers].
 
-Would you be open to a brief 10-minute introductory conversation this Thursday or Friday to explore whether our platform aligns with {{companyName}}'s growth priorities for the coming quarter?
+Would you be open to a brief 10-minute introductory conversation this Thursday or Friday to explore whether we could help with {{companyName}}'s growth priorities for the coming quarter?
 
 Warm regards,
-Versaly Growth & Partnerships`,
+[Your name]`,
     isActive: true,
   },
   {

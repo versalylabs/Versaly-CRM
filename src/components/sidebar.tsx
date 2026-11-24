@@ -6,7 +6,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut } from 'lucide-react';
-import VersalyLogoIcon from '@/components/VersalyLogoIcon';
+import VersalyLabsLogo from '@/components/VersalyLabsLogo';
 
 // Clean, monochrome SVG outline icons (stroke="currentColor", fill="none")
 const Icons = {
@@ -206,6 +206,18 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
     workspace: false,
   });
 
+  // Real subscription state for the plan box (same source as the trial banner).
+  const [planStatus, setPlanStatus] = useState<{ status: string; trialDaysRemaining?: number } | null>(null);
+  useEffect(() => {
+    if (!session?.user || session.user.isPlatformAdmin) return;
+    fetch('/api/subscription/status', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setPlanStatus)
+      .catch(() => setPlanStatus(null));
+  }, [session?.user]);
+  const STATUS_LABELS: Record<string, string> = { trialing: 'Trial', active: 'Active', expired: 'Trial ended', past_due: 'Payment due', canceled: 'Canceled', suspended: 'Suspended' };
+  const statusHealthy = !planStatus || planStatus.status === 'active' || planStatus.status === 'trialing';
+
   const isActive = (href: string) => {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
@@ -238,12 +250,12 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
           onClick={() => { if (isMobile) onCloseMobile?.(); }}
           className="flex items-center space-x-3 group min-w-0"
         >
-          <VersalyLogoIcon size={36} className="shrink-0 shadow-md shadow-[#fca311]/25 group-hover:scale-105 transition-transform rounded-xl" />
+          <VersalyLabsLogo size={36} className="shrink-0 shadow-md shadow-brand-orange/25 group-hover:scale-105 transition-transform rounded-xl" />
           <div className="min-w-0">
             <span className="block truncate text-sm font-bold text-white leading-tight">
-              {session?.user?.organizationName || 'Versaly CRM'}
+              {session?.user?.organizationName || 'VersalyLabs CRM'}
             </span>
-            <span className="block text-[10px] font-semibold text-[#fca311]">
+            <span className="block text-[10px] font-semibold text-brand-orange">
               Cloud CRM Platform
             </span>
           </div>
@@ -400,23 +412,27 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
       </nav>
 
       {/* Liquid Glass SaaS Subscription Plan Callout */}
-      <div className="my-2 rounded-xl bg-gradient-to-br from-amber-500/20 via-[#1b2a4a]/90 to-[#0e172a]/95 p-3 text-white border border-[#fca311]/20 backdrop-blur-md shadow-sm">
+      <div className="my-2 rounded-xl bg-gradient-to-br from-amber-500/20 via-ink-700/90 to-ink-900/95 p-3 text-white border border-brand-orange/20 backdrop-blur-md shadow-sm">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#fca311]">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange">
             {session?.user?.isPlatformAdmin
               ? 'Platform Master'
               : session?.user?.plan
               ? session.user.plan.replace('_', ' ')
               : 'Growth Pro'}
           </span>
-          <span className="rounded-full bg-emerald-400/20 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-300">
-            {session?.user?.isPlatformAdmin ? 'Lifetime' : 'Active'}
-          </span>
+          {(session?.user?.isPlatformAdmin || planStatus) && (
+            <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${statusHealthy ? 'bg-emerald-400/20 text-emerald-300' : 'bg-amber-400/20 text-amber-300'}`}>
+              {session?.user?.isPlatformAdmin ? 'Lifetime' : STATUS_LABELS[planStatus!.status] || planStatus!.status}
+            </span>
+          )}
         </div>
         <p className="mt-1 text-[10px] text-gray-300 leading-snug">
           {session?.user?.isPlatformAdmin
             ? 'System Owner Account · Full Platform Rights'
-            : 'Multi-user SaaS Subscription'}
+            : planStatus?.status === 'trialing'
+            ? `${planStatus.trialDaysRemaining} day${planStatus.trialDaysRemaining === 1 ? '' : 's'} left in your free trial`
+            : 'Your VersalyLabs plan'}
         </p>
         <Link
           href={session?.user?.isPlatformAdmin ? '/platform' : '/settings/billing'}
@@ -435,7 +451,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2 rounded-xl bg-white/[0.03] p-1.5 border border-white/5">
               <div className="flex items-center space-x-2.5 min-w-0 flex-1">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500/30 to-[#fca311]/20 text-xs font-black text-[#fca311] border border-[#fca311]/40 shadow-inner">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-amber-500/30 to-brand-orange/20 text-xs font-black text-brand-orange border border-brand-orange/40 shadow-inner">
                   {session.user.name?.[0]?.toUpperCase() || 'U'}
                 </span>
                 <div className="min-w-0 flex-1">
@@ -466,7 +482,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
           <Link
             href="/auth/signin"
             onClick={() => { if (isMobile) onCloseMobile?.(); }}
-            className="text-xs font-semibold text-[#fca311] hover:underline"
+            className="text-xs font-semibold text-brand-orange hover:underline"
           >
             Sign in
           </Link>
@@ -478,7 +494,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
   return (
     <>
       {/* Desktop Persistent Sidebar (>= lg screens) */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden h-screen w-64 border-r border-white/10 bg-[#14213d]/95 backdrop-blur-xl shadow-[4px_0_24px_rgba(0,0,0,0.38)] lg:block">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden h-screen w-64 border-r border-white/10 bg-ink-850/95 backdrop-blur-xl shadow-[4px_0_24px_rgba(0,0,0,0.38)] lg:block">
         {renderContent(false)}
       </aside>
 
@@ -501,7 +517,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 26, stiffness: 260 }}
-              className="relative z-10 flex h-full w-72 max-w-[85vw] flex-col border-r border-white/10 bg-[#14213d] shadow-2xl"
+              className="relative z-10 flex h-full w-72 max-w-[85vw] flex-col border-r border-white/10 bg-ink-850 shadow-2xl"
             >
               {renderContent(true)}
             </motion.aside>

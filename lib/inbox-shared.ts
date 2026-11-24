@@ -12,17 +12,17 @@ export const CANNED_RESPONSES = [
   {
     id: 'intro',
     title: 'Warm Discovery Introduction',
-    content: `Hi {{name}}, thanks for reaching out to us! We'd love to learn more about your goals at {{company}} and see how Versaly CRM can streamline your sales pipeline. When would be a good time for a brief 15-minute introductory call?`,
+    content: `Hi {{name}}, thanks for reaching out to us! We'd love to learn more about your goals at {{company}} and see how we can help. When would be a good time for a brief 15-minute introductory call?`,
   },
   {
     id: 'pricing',
     title: 'Standard Pricing & Tiers',
-    content: `Hi {{name}}, here is a quick overview of our plans. Our Growth Pro plan includes unlimited pipeline tracking, automated outreach cadences, and AI deal intelligence. Let us know if you'd like a customized quote for {{company}}.`,
+    content: `Hi {{name}}, here is a quick overview of our pricing: [add your prices]. Let us know if you'd like a customised quote for {{company}}.`,
   },
   {
     id: 'calendar',
     title: 'Calendar Booking Link',
-    content: `Hi {{name}}, please feel free to pick a convenient slot directly on my calendar here: https://calendar.versaly.io/sync. Excited to speak with you!`,
+    content: `Hi {{name}}, please feel free to pick a convenient slot directly on my calendar here: [your booking link]. Excited to speak with you!`,
   },
   {
     id: 'followup',
@@ -67,7 +67,7 @@ export function generateSmartReplySuggestions(lead: any, lastMessageText: string
       {
         id: 'demo-1',
         label: 'Share Calendar Link',
-        text: `Hi ${firstName}, absolutely! You can grab any 20-minute slot on my calendar that suits you best: https://calendar.versaly.io/sync. Looking forward to our demo!`,
+        text: `Hi ${firstName}, absolutely! You can grab any 20-minute slot on my calendar that suits you best: [your booking link]. Looking forward to our demo!`,
         channel: 'EMAIL',
       },
       {

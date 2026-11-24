@@ -27,7 +27,7 @@ import {
 } from '@/lib/pipelineStages';
 
 const glassInput =
-  'w-full rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition';
+  'w-full rounded-xl bg-ink-900 border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition';
 
 export default function PipelineSettingsPage() {
   const [stages, setStages] = useState<PipelineStageItem[]>([]);
@@ -235,7 +235,7 @@ export default function PipelineSettingsPage() {
   const totalLeadsInFunnel = Object.values(leadCounts).reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <div className="min-h-screen bg-[#14213d] text-slate-100">
+    <div className="min-h-screen bg-ink-850 text-slate-100">
       <div className="container-custom py-8 space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -333,7 +333,7 @@ export default function PipelineSettingsPage() {
             return (
               <div
                 key={idx}
-                className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-[#1b2a4a]/80 to-[#0e172a]/90 p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] backdrop-blur-xl"
+                className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-ink-700/80 to-ink-900/90 p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] backdrop-blur-xl"
               >
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent" />
                 <div className="flex items-center justify-between">
@@ -347,7 +347,7 @@ export default function PipelineSettingsPage() {
         </div>
 
         {/* Pipeline Stage Management Container */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#1b2a4a]/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] backdrop-blur-xl p-6 space-y-6">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-700/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] backdrop-blur-xl p-6 space-y-6">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent" />
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
@@ -372,7 +372,7 @@ export default function PipelineSettingsPage() {
               </button>
               <button
                 onClick={openCreateModal}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-cyan-500 px-3.5 py-1.5 text-xs font-bold text-[#0e172a] hover:bg-cyan-400 transition"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-cyan-500 px-3.5 py-1.5 text-xs font-bold text-ink-900 hover:bg-cyan-400 transition"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Add Stage</span>
@@ -395,7 +395,7 @@ export default function PipelineSettingsPage() {
                 return (
                   <div
                     key={stage.id || stage.key}
-                    className="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-white/10 bg-[#0e172a]/70 p-4 transition-all hover:border-cyan-400/40 hover:bg-[#0e172a]/90"
+                    className="group relative flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 transition-all hover:border-cyan-400/40 hover:bg-ink-900/90"
                   >
                     {/* Left: Reorder arrows & Badge */}
                     <div className="flex items-center gap-3">
@@ -495,7 +495,7 @@ export default function PipelineSettingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
           <form
             onSubmit={handleCreateStage}
-            className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#1b2a4a] via-[#16233f] to-[#0e172a] p-6 shadow-2xl space-y-4"
+            className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-ink-700 via-ink-800 to-ink-900 p-6 shadow-2xl space-y-4"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
 
@@ -574,9 +574,9 @@ export default function PipelineSettingsPage() {
                   onChange={(e) => setFormCategory(e.target.value as any)}
                   className={glassInput}
                 >
-                  <option value="ACTIVE" className="bg-[#14213d] text-white">Active Funnel (In Progress)</option>
-                  <option value="WON" className="bg-[#14213d] text-white">Closed Won (Success / Converted)</option>
-                  <option value="LOST" className="bg-[#14213d] text-white">Closed Lost (Archived / Unqualified)</option>
+                  <option value="ACTIVE" className="bg-ink-850 text-white">Active Funnel (In Progress)</option>
+                  <option value="WON" className="bg-ink-850 text-white">Closed Won (Success / Converted)</option>
+                  <option value="LOST" className="bg-ink-850 text-white">Closed Lost (Archived / Unqualified)</option>
                 </select>
               </div>
             </div>
@@ -608,7 +608,7 @@ export default function PipelineSettingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
           <form
             onSubmit={handleUpdateStage}
-            className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#1b2a4a] via-[#16233f] to-[#0e172a] p-6 shadow-2xl space-y-4"
+            className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-ink-700 via-ink-800 to-ink-900 p-6 shadow-2xl space-y-4"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
 
@@ -681,9 +681,9 @@ export default function PipelineSettingsPage() {
                   onChange={(e) => setEditingStage({ ...editingStage, category: e.target.value as any })}
                   className={glassInput}
                 >
-                  <option value="ACTIVE" className="bg-[#14213d] text-white">Active Funnel (In Progress)</option>
-                  <option value="WON" className="bg-[#14213d] text-white">Closed Won (Success / Converted)</option>
-                  <option value="LOST" className="bg-[#14213d] text-white">Closed Lost (Archived / Unqualified)</option>
+                  <option value="ACTIVE" className="bg-ink-850 text-white">Active Funnel (In Progress)</option>
+                  <option value="WON" className="bg-ink-850 text-white">Closed Won (Success / Converted)</option>
+                  <option value="LOST" className="bg-ink-850 text-white">Closed Lost (Archived / Unqualified)</option>
                 </select>
               </div>
             </div>
@@ -699,7 +699,7 @@ export default function PipelineSettingsPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-xl bg-cyan-500 px-5 py-2 text-xs font-bold text-[#0e172a] hover:bg-cyan-400 disabled:opacity-50"
+                className="rounded-xl bg-cyan-500 px-5 py-2 text-xs font-bold text-ink-900 hover:bg-cyan-400 disabled:opacity-50"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
@@ -713,7 +713,7 @@ export default function PipelineSettingsPage() {
          ========================================== */}
       {deletingStage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#1b2a4a] via-[#16233f] to-[#0e172a] p-6 shadow-2xl space-y-4">
+          <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-ink-700 via-ink-800 to-ink-900 p-6 shadow-2xl space-y-4">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-rose-500 to-transparent" />
 
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
@@ -754,7 +754,7 @@ export default function PipelineSettingsPage() {
                   {stages
                     .filter((s) => s.key !== deletingStage.key)
                     .map((s) => (
-                      <option key={s.key} value={s.key} className="bg-[#14213d] text-white">
+                      <option key={s.key} value={s.key} className="bg-ink-850 text-white">
                         Move to: {s.label} ({s.probability}%)
                       </option>
                     ))}

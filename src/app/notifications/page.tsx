@@ -51,7 +51,7 @@ export default function NotificationsPage() {
   const unreadCount = items.filter((n) => !n.read).length;
 
   return (
-    <div className="min-h-screen bg-[#14213d] text-slate-100">
+    <div className="min-h-screen bg-ink-850 text-slate-100">
       <div className="container-custom py-8 space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -77,7 +77,7 @@ export default function NotificationsPage() {
         </div>
 
         {/* Notifications Container (React Bits Liquid Glass Panel) */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-4">
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-ink-700/75 via-ink-800/80 to-ink-900/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl space-y-4">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
 
           {loading ? (
@@ -100,8 +100,8 @@ export default function NotificationsPage() {
                   key={n.id}
                   className={`group relative overflow-hidden rounded-xl border p-4 transition-all duration-200 backdrop-blur-md ${
                     n.read
-                      ? 'border-white/5 bg-[#0e172a]/40 hover:bg-[#0e172a]/70'
-                      : 'border-sky-400/30 bg-gradient-to-r from-sky-500/10 via-[#1b2a4a]/70 to-[#0e172a]/80 shadow-[0_4px_16px_rgba(252, 163, 17,0.1)]'
+                      ? 'border-white/5 bg-ink-900/40 hover:bg-ink-900/70'
+                      : 'border-sky-400/30 bg-gradient-to-r from-sky-500/10 via-ink-700/70 to-ink-900/80 shadow-[0_4px_16px_rgba(255, 107, 1,0.1)]'
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">

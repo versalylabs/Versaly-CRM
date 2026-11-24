@@ -41,9 +41,9 @@ export abstract class BaseCommunicationProvider implements CommunicationProvider
   }
 
   /**
-   * Platform-level credentials from environment variables belong to the Versaly
+   * Platform-level credentials from environment variables belong to the VersalyLabs platform
    * workspace only. Other workspaces must connect their own account, otherwise
-   * they would send messages through the Versaly account identity.
+   * they would send messages through the VersalyLabs account identity.
    */
   protected async envFor(organizationId: string, value?: string | null): Promise<string | undefined> {
     if (!value) return undefined;

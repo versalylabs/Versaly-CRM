@@ -7,7 +7,7 @@ import Link from 'next/link';
 type Profile = { id: string; name: string | null; email: string; role: string; createdAt: string };
 
 const glassInput =
-  'w-full rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
+  'w-full rounded-xl bg-ink-900 border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
 
 export default function SettingsPage() {
   const { update: updateSession } = useSession();
@@ -101,7 +101,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#14213d] text-slate-100">
+    <div className="min-h-screen bg-ink-850 text-slate-100">
       <div className="container-custom py-8 space-y-8">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ export default function SettingsPage() {
         )}
 
         {notificationPrefs && (
-          <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-ink-700/75 via-ink-800/80 to-ink-900/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
             <h2 className="text-base font-bold text-white mb-1">Notification Preferences</h2>
             <p className="text-xs text-slate-400 mb-4">Choose which CRM events trigger system notifications.</p>
@@ -164,7 +164,7 @@ export default function SettingsPage() {
               ].map(([key, label]) => (
                 <label
                   key={key}
-                  className="flex items-center justify-between rounded-xl border border-white/10 bg-[#0e172a]/50 p-3 hover:bg-[#0e172a]/80 transition cursor-pointer"
+                  className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-900/50 p-3 hover:bg-ink-900/80 transition cursor-pointer"
                 >
                   <span className="text-xs font-medium text-slate-200">{label}</span>
                   <input
@@ -179,7 +179,7 @@ export default function SettingsPage() {
                         body: JSON.stringify({ [key]: e.target.checked }),
                       });
                     }}
-                    className="h-4 w-4 rounded border-white/20 bg-[#0e172a] text-sky-500 focus:ring-0 cursor-pointer"
+                    className="h-4 w-4 rounded border-white/20 bg-ink-900 text-sky-500 focus:ring-0 cursor-pointer"
                   />
                 </label>
               ))}
@@ -197,7 +197,7 @@ export default function SettingsPage() {
             {/* Profile Form (Liquid Glass Panel) */}
             <form
               onSubmit={saveProfile}
-              className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl h-fit space-y-4"
+              className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-ink-700/75 via-ink-800/80 to-ink-900/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl h-fit space-y-4"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
 
@@ -253,7 +253,7 @@ export default function SettingsPage() {
             {/* Change Password Form (Liquid Glass Panel) */}
             <form
               onSubmit={changePassword}
-              className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl h-fit space-y-4"
+              className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-ink-700/75 via-ink-800/80 to-ink-900/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl h-fit space-y-4"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
 
@@ -323,7 +323,7 @@ export default function SettingsPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pt-2">
           <Link
             href="/settings/pipeline"
-            className="group relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-5 shadow-lg backdrop-blur-xl hover:border-cyan-400/40 transition duration-300"
+            className="group relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-ink-700/75 via-ink-800/80 to-ink-900/90 p-5 shadow-lg backdrop-blur-xl hover:border-cyan-400/40 transition duration-300"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
             <div className="flex items-center gap-3 mb-2">
@@ -348,7 +348,7 @@ export default function SettingsPage() {
 
           <Link
             href="/settings/billing"
-            className="group relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-5 shadow-lg backdrop-blur-xl hover:border-sky-400/40 transition duration-300"
+            className="group relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-ink-700/75 via-ink-800/80 to-ink-900/90 p-5 shadow-lg backdrop-blur-xl hover:border-sky-400/40 transition duration-300"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
             <div className="flex items-center gap-3 mb-2">
@@ -373,7 +373,7 @@ export default function SettingsPage() {
 
           <Link
             href="/settings/integrations"
-            className="group relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-5 shadow-lg backdrop-blur-xl hover:border-indigo-400/40 transition duration-300"
+            className="group relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-ink-700/75 via-ink-800/80 to-ink-900/90 p-5 shadow-lg backdrop-blur-xl hover:border-indigo-400/40 transition duration-300"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-300/40 to-transparent" />
             <div className="flex items-center gap-3 mb-2">

@@ -8,7 +8,7 @@ import Sidebar from '@/components/sidebar';
 import CommandPalette from '@/components/CommandPalette';
 import NotificationBell from '@/components/NotificationBell';
 import SubscriptionStatusBanner from '@/components/SubscriptionStatusBanner';
-import VersalyLogoIcon from '@/components/VersalyLogoIcon';
+import VersalyLabsLogo from '@/components/VersalyLabsLogo';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
@@ -32,7 +32,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar mobileOpen={mobileOpen} onCloseMobile={() => setMobileOpen(false)} />
 
       {/* Mobile Top Navigation Bar (< lg screens) */}
-      <header className="fixed top-0 inset-x-0 z-20 flex h-14 items-center justify-between border-b border-white/10 bg-[#14213d]/95 px-4 backdrop-blur-xl lg:hidden">
+      <header className="fixed top-0 inset-x-0 z-20 flex h-14 items-center justify-between border-b border-white/10 bg-ink-850/95 px-4 backdrop-blur-xl lg:hidden">
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setMobileOpen(true)}
@@ -44,9 +44,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </svg>
           </button>
           <Link href="/dashboard" className="flex items-center gap-2">
-            <VersalyLogoIcon size={30} className="shrink-0 shadow-sm shadow-[#fca311]/25 rounded-lg" />
+            <VersalyLabsLogo size={30} className="shrink-0 shadow-sm shadow-brand-orange/25 rounded-lg" />
             <span className="text-xs font-bold text-white truncate max-w-[140px]">
-              {session?.user?.organizationName || 'Versaly CRM'}
+              {session?.user?.organizationName || 'VersalyLabs CRM'}
             </span>
           </Link>
         </div>

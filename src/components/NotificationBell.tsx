@@ -63,8 +63,8 @@ export default function NotificationBell() {
         }}
         className={`relative flex items-center justify-center rounded-xl p-2.5 transition-all duration-200 border ${
           open
-            ? 'bg-[#fca311]/20 border-[#fca311]/40 text-[#fca311] shadow-[0_0_15px_rgba(252,163,17,0.25)]'
-            : 'bg-[#0e172a]/80 hover:bg-[#1b2a4a]/80 border-white/10 hover:border-white/20 text-slate-300 hover:text-white'
+            ? 'bg-brand-orange/20 border-brand-orange/40 text-brand-orange shadow-[0_0_15px_rgba(255, 107, 1,0.25)]'
+            : 'bg-ink-900/80 hover:bg-ink-700/80 border-white/10 hover:border-white/20 text-slate-300 hover:text-white'
         }`}
         aria-label="Notifications"
         title="Notifications"
@@ -91,13 +91,13 @@ export default function NotificationBell() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 6, scale: 0.96 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute right-0 z-50 mt-2 w-96 max-w-[92vw] overflow-hidden rounded-2xl border border-[#fca311]/30 bg-gradient-to-b from-[#1d2d50]/95 via-[#16233f]/95 to-[#0e172a]/98 p-4 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_25px_0_rgba(252,163,17,0.18),inset_0_1px_1px_0_rgba(255,255,255,0.25)] backdrop-blur-2xl"
+            className="absolute right-0 z-50 mt-2 w-96 max-w-[92vw] overflow-hidden rounded-2xl border border-brand-orange/30 bg-gradient-to-b from-ink-600/95 via-ink-800/95 to-ink-900/98 p-4 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85),0_0_25px_0_rgba(255, 107, 1,0.18),inset_0_1px_1px_0_rgba(255,255,255,0.25)] backdrop-blur-2xl"
           >
             {/* Top Specular Light Refraction Line (Liquid Glass effect) */}
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#fca311]/60 to-transparent" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-orange/60 to-transparent" />
             
             {/* Subtle Ambient Glow */}
-            <div className="pointer-events-none absolute -top-16 -right-16 h-36 w-36 rounded-full bg-[#fca311]/15 blur-2xl" />
+            <div className="pointer-events-none absolute -top-16 -right-16 h-36 w-36 rounded-full bg-brand-orange/15 blur-2xl" />
             <div className="pointer-events-none absolute -bottom-16 -left-16 h-36 w-36 rounded-full bg-amber-500/10 blur-2xl" />
 
             {/* Panel Header */}
@@ -105,7 +105,7 @@ export default function NotificationBell() {
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-white tracking-wide">Notifications</span>
                 {unread > 0 && (
-                  <span className="rounded-full bg-[#fca311]/20 border border-[#fca311]/30 px-2 py-0.5 text-[10px] font-bold text-[#fca311]">
+                  <span className="rounded-full bg-brand-orange/20 border border-brand-orange/30 px-2 py-0.5 text-[10px] font-bold text-brand-orange">
                     {unread} new
                   </span>
                 )}
@@ -114,7 +114,7 @@ export default function NotificationBell() {
                 <Link
                   href="/notifications"
                   onClick={() => setOpen(false)}
-                  className="text-xs font-medium text-[#fca311] hover:text-amber-300 transition hover:underline"
+                  className="text-xs font-medium text-brand-orange hover:text-amber-300 transition hover:underline"
                 >
                   View all →
                 </Link>
@@ -145,17 +145,17 @@ export default function NotificationBell() {
                     onClick={() => setOpen(false)}
                     className={`group relative block rounded-xl p-3 transition-all duration-200 border backdrop-blur-md overflow-hidden ${
                       !n.read
-                        ? 'bg-gradient-to-r from-[#fca311]/15 via-[#1b2a4a]/75 to-[#16233f]/80 border-[#fca311]/40 hover:border-[#fca311]/60 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]'
-                        : 'bg-[#14213d]/70 hover:bg-[#1b2a4a]/80 border-white/[0.08] hover:border-white/20 shadow-sm'
+                        ? 'bg-gradient-to-r from-brand-orange/15 via-ink-700/75 to-ink-800/80 border-brand-orange/40 hover:border-brand-orange/60 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]'
+                        : 'bg-ink-850/70 hover:bg-ink-700/80 border-white/[0.08] hover:border-white/20 shadow-sm'
                     }`}
                   >
                     {/* Item Card Specular Top Line */}
                     <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
                     <div className="flex items-start justify-between gap-2">
-                      <div className="font-semibold text-xs text-white group-hover:text-[#fde68a] transition flex items-center gap-1.5">
+                      <div className="font-semibold text-xs text-white group-hover:text-brand-cream transition flex items-center gap-1.5">
                         {!n.read && (
-                          <span className="h-2 w-2 shrink-0 rounded-full bg-[#fca311] shadow-[0_0_8px_#fca311]" />
+                          <span className="h-2 w-2 shrink-0 rounded-full bg-brand-orange shadow-[0_0_8px_#ff6b01]" />
                         )}
                         <span>{n.title}</span>
                       </div>

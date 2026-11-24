@@ -272,7 +272,7 @@ export default function PipelinePage() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
-      className="min-h-screen bg-gray-50 dark:bg-[#14213d]"
+      className="min-h-screen bg-gray-50 dark:bg-ink-850"
     >
       <div className="container-custom py-8 !max-w-none">
         
@@ -295,7 +295,7 @@ export default function PipelinePage() {
           <div className="flex items-center gap-2.5">
             <Link
               href="/settings/pipeline"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-[#16233f] px-3.5 py-2.5 text-xs font-semibold text-slate-200 hover:text-white hover:bg-white/10 transition shadow-sm"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-ink-800 px-3.5 py-2.5 text-xs font-semibold text-slate-200 hover:text-white hover:bg-white/10 transition shadow-sm"
               title="Add, rename, recolor, or reorder pipeline stages"
             >
               <Settings className="h-4 w-4 text-cyan-400" />
@@ -313,7 +313,7 @@ export default function PipelinePage() {
 
         {/* Executive KPI Summary Cards */}
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#1b2a4a]/80 backdrop-blur-xl transition hover:border-sky-500/30">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-ink-700/80 backdrop-blur-xl transition hover:border-sky-500/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Active Deals
@@ -329,7 +329,7 @@ export default function PipelinePage() {
             <p className="mt-1 text-[11px] text-gray-400">Open active opportunities in funnel</p>
           </div>
 
-          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#1b2a4a]/80 backdrop-blur-xl transition hover:border-emerald-500/30">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-ink-700/80 backdrop-blur-xl transition hover:border-emerald-500/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Active Pipeline Value
@@ -346,7 +346,7 @@ export default function PipelinePage() {
             <p className="mt-1 text-[11px] text-gray-400">Total unweighted potential revenue</p>
           </div>
 
-          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#1b2a4a]/80 backdrop-blur-xl transition hover:border-teal-500/30">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-ink-700/80 backdrop-blur-xl transition hover:border-teal-500/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Weighted Forecast
@@ -363,7 +363,7 @@ export default function PipelinePage() {
             <p className="mt-1 text-[11px] text-gray-400">Calculated by stage probabilities</p>
           </div>
 
-          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-[#1b2a4a]/80 backdrop-blur-xl transition hover:border-amber-500/30">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/80 p-4 shadow-sm dark:border-white/10 dark:bg-ink-700/80 backdrop-blur-xl transition hover:border-amber-500/30">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
                 Won Rate
@@ -385,7 +385,7 @@ export default function PipelinePage() {
         </div>
 
         {/* Filter & Search Bar */}
-        <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-gray-200/80 bg-white/80 p-3.5 shadow-sm dark:border-white/10 dark:bg-[#1b2a4a]/80 backdrop-blur-xl">
+        <div className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 rounded-2xl border border-gray-200/80 bg-white/80 p-3.5 shadow-sm dark:border-white/10 dark:bg-ink-700/80 backdrop-blur-xl">
           <div className="flex flex-1 items-center gap-2.5">
             <Search className="h-4 w-4 text-gray-400 shrink-0" />
             <input
@@ -407,7 +407,7 @@ export default function PipelinePage() {
 
           <div className="flex flex-wrap items-center gap-2 border-t sm:border-t-0 sm:border-l border-gray-200/60 sm:pl-3 pt-2 sm:pt-0 dark:border-white/10">
             {/* Quick Scope Filter */}
-            <div className="flex rounded-xl bg-gray-100/80 p-1 dark:bg-[#16233f]/80">
+            <div className="flex rounded-xl bg-gray-100/80 p-1 dark:bg-ink-800/80">
               <button
                 onClick={() => setActiveFilter('all')}
                 className={`rounded-lg px-2.5 py-1 text-[11px] font-semibold transition ${
@@ -445,7 +445,7 @@ export default function PipelinePage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="rounded-xl border border-gray-200/80 bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-gray-700 dark:border-white/10 dark:bg-[#16233f] dark:text-gray-200 outline-none"
+              className="rounded-xl border border-gray-200/80 bg-white/90 px-2.5 py-1.5 text-[11px] font-medium text-gray-700 dark:border-white/10 dark:bg-ink-800 dark:text-gray-200 outline-none"
             >
               <option value="value_desc">Value: High to Low</option>
               <option value="value_asc">Value: Low to High</option>
@@ -468,14 +468,14 @@ export default function PipelinePage() {
 
         {/* Kanban Board Container */}
         {loading ? (
-          <div className="flex h-72 items-center justify-center rounded-2xl border border-gray-200/80 bg-white/80 p-12 text-center dark:border-white/10 dark:bg-[#1b2a4a]/60 backdrop-blur-xl">
+          <div className="flex h-72 items-center justify-center rounded-2xl border border-gray-200/80 bg-white/80 p-12 text-center dark:border-white/10 dark:bg-ink-700/60 backdrop-blur-xl">
             <div className="space-y-3">
               <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-sky-500 border-t-transparent" />
               <p className="text-xs text-gray-500 dark:text-gray-400">Loading pipeline deals...</p>
             </div>
           </div>
         ) : leads.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-300 bg-white/60 p-12 text-center dark:border-white/15 dark:bg-[#1b2a4a]/40 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.2)]">
+          <div className="rounded-2xl border border-dashed border-gray-300 bg-white/60 p-12 text-center dark:border-white/15 dark:bg-ink-700/40 backdrop-blur-xl shadow-[0_8px_32px_0_rgba(0,0,0,0.2)]">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-sky-500/20 bg-sky-500/10 text-sky-400">
               <TrendingUp className="h-7 w-7" />
             </div>
@@ -515,7 +515,7 @@ export default function PipelinePage() {
                       if (e.currentTarget === e.target) setActiveDropStage(null);
                     }}
                     onDrop={() => handleDrop(stage.key)}
-                    className={`w-[285px] shrink-0 flex flex-col rounded-2xl border-t-4 border border-white/10 p-3.5 backdrop-blur-xl transition-all duration-150 ${styles.accentBorder} ${styles.columnBg} bg-[#1b2a4a]/70 shadow-lg ${
+                    className={`w-[285px] shrink-0 flex flex-col rounded-2xl border-t-4 border border-white/10 p-3.5 backdrop-blur-xl transition-all duration-150 ${styles.accentBorder} ${styles.columnBg} bg-ink-700/70 shadow-lg ${
                       isDropTarget
                         ? 'ring-2 ring-cyan-400 bg-sky-950/70 border-cyan-400 scale-[1.01]'
                         : ''
@@ -530,7 +530,7 @@ export default function PipelinePage() {
                             {stage.label}
                           </h3>
                         </div>
-                        <span className="rounded-full bg-[#16233f] px-2 py-0.5 text-[10px] font-bold text-slate-200 border border-white/10">
+                        <span className="rounded-full bg-ink-800 px-2 py-0.5 text-[10px] font-bold text-slate-200 border border-white/10">
                           {stageLeads.length}
                         </span>
                       </div>
@@ -563,7 +563,7 @@ export default function PipelinePage() {
                               setDraggedId(null);
                               setActiveDropStage(null);
                             }}
-                            className={`group relative rounded-xl border border-white/10 bg-[#16233f]/90 p-3.5 shadow-sm backdrop-blur-md transition hover:border-cyan-400/50 hover:shadow-md ${
+                            className={`group relative rounded-xl border border-white/10 bg-ink-800/90 p-3.5 shadow-sm backdrop-blur-md transition hover:border-cyan-400/50 hover:shadow-md ${
                               isDragging
                                 ? 'opacity-40 scale-[0.98] border-dashed border-cyan-400 rotate-1'
                                 : ''
@@ -613,7 +613,7 @@ export default function PipelinePage() {
                             {/* Footer: Source, Owner, and Stage Select */}
                             <div className="mt-3 pt-2.5 border-t border-white/10">
                               <div className="flex items-center justify-between gap-2">
-                                <span className="rounded-md bg-[#1b2a4a] px-1.5 py-0.5 text-[10px] font-medium text-slate-300 border border-white/10">
+                                <span className="rounded-md bg-ink-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-300 border border-white/10">
                                   {formatSource(lead.leadSource)}
                                 </span>
 
@@ -634,7 +634,7 @@ export default function PipelinePage() {
                                   disabled={isUpdating}
                                   onChange={(e) => moveLead(lead.id, e.target.value)}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="w-full rounded-lg border border-white/10 bg-[#14213d] px-2 py-1 text-[10px] font-medium text-slate-200 outline-none focus:border-cyan-400"
+                                  className="w-full rounded-lg border border-white/10 bg-ink-850 px-2 py-1 text-[10px] font-medium text-slate-200 outline-none focus:border-cyan-400"
                                 >
                                   {stages.map((s) => (
                                     <option key={s.key} value={s.key}>
@@ -676,7 +676,7 @@ export default function PipelinePage() {
               {/* Add Custom Stage Column */}
               <Link
                 href="/settings/pipeline"
-                className="w-[200px] shrink-0 min-h-[460px] rounded-2xl border-2 border-dashed border-white/10 bg-[#16233f]/30 hover:bg-[#16233f]/60 hover:border-cyan-400/40 p-5 flex flex-col items-center justify-center text-center transition group cursor-pointer"
+                className="w-[200px] shrink-0 min-h-[460px] rounded-2xl border-2 border-dashed border-white/10 bg-ink-800/30 hover:bg-ink-800/60 hover:border-cyan-400/40 p-5 flex flex-col items-center justify-center text-center transition group cursor-pointer"
               >
                 <div className="h-10 w-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl mb-3 group-hover:scale-110 transition-transform">
                   +

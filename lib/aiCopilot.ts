@@ -412,7 +412,7 @@ export function generateAiOutreachDraft(params: {
     } else if (objective === 're_engagement') {
       message = `Hi ${name}! It's been a little while since we connected on ${company}'s sales workflow. We've just rolled out some new automation updates that I know you'd find valuable. Let me know if you'd like a quick preview!`;
     } else {
-      message = `Hi ${name}! Touching base from Versaly CRM regarding your current pipeline setup. Would love to share how teams similar to ${company} are accelerating their deal velocity. Let me know if you have a few minutes this week!`;
+      message = `Hi ${name}! Touching base to see how things are going at ${company}. I'd love to share how we could help. Do you have a few minutes this week?`;
     }
 
     if (customNotes) {
@@ -431,7 +431,7 @@ export function generateAiOutreachDraft(params: {
   let content = '';
 
   if (objective === 'follow_up') {
-    subject = `Next steps for ${company} & Versaly CRM`;
+    subject = `Next steps for ${company}`;
     content = `Hi ${name},
 
 Thank you for your time during our recent discussion. It was great learning more about ${company}'s growth priorities.
@@ -444,7 +444,7 @@ To keep momentum going, I've outlined the key milestones we discussed:
 Does Thursday afternoon or Friday morning work for a quick 15-minute call to finalize the rollout schedule?
 
 Best regards,
-The Versaly Sales Team`;
+[Your name]`;
   } else if (objective === 'objection_pricing') {
     subject = `Flexible options for ${company}`;
     content = `Hi ${name},
@@ -456,31 +456,29 @@ We completely understand the importance of clear ROI and predictable cash flow. 
 Would you be open to a quick 10-minute touchpoint this week to explore this adjustment?
 
 Best regards,
-The Versaly Sales Team`;
+[Your name]`;
   } else if (objective === 're_engagement') {
     subject = `Quick check-in regarding ${company}'s sales velocity`;
     content = `Hi ${name},
 
 I hope you've been having a productive month!
 
-I'm reaching out because we recently introduced new predictive deal copilot and customer retention tools in Versaly that directly target the bottlenecks we discussed previously for ${company}.
+I'm reaching out because we have some new options that could help with the challenges we discussed for ${company}.
 
 I'd love to share a 5-minute overview of how this can streamline your current operations. Let me know if you have availability later this week!
 
 Warm regards,
-The Versaly Sales Team`;
+[Your name]`;
   } else {
     subject = `Accelerating client conversion at ${company}`;
     content = `Hi ${name},
 
-I'm reaching out to introduce Versaly CRM — the modern command center built to streamline your sales pipeline, outreach touchpoints, and customer retention workflows in one unified hub.
-
-We've helped teams similar to ${company} increase conversion velocity by over 25% while eliminating manual spreadsheet tracking.
+I'm reaching out to introduce what we do and see whether we could help ${company}.
 
 Would you be open to a brief 10-minute demo to see how it works?
 
 Best regards,
-The Versaly Sales Team`;
+[Your name]`;
   }
 
   if (customNotes) {

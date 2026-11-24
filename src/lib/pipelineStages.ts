@@ -124,8 +124,8 @@ export function getStageColorStyles(colorKey: string) {
     case 'amber':
       return {
         badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-        dotColor: 'bg-[#fca311] shadow-[#fca311]/50',
-        accentBorder: 'border-t-[#fca311]',
+        dotColor: 'bg-brand-orange shadow-brand-orange/50',
+        accentBorder: 'border-t-brand-orange',
         columnBg: 'bg-amber-950/20',
         pill: 'border-amber-400/40 text-amber-300 bg-amber-950/40',
       };

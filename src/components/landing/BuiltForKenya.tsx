@@ -32,7 +32,7 @@ const COMING_NEXT = ['M-Pesa payment requests & auto-matching', 'KRA eTIMS invoi
 
 export function BuiltForKenya() {
   return (
-    <section id="why" className="relative px-5 py-10 lg:py-12 lg:px-8 border-y border-sky-500/15 bg-[#0e172a]/60">
+    <section id="why" className="relative px-5 py-10 lg:py-12 lg:px-8 border-y border-sky-500/15 bg-ink-900/60">
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
@@ -52,7 +52,7 @@ export function BuiltForKenya() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
-              className="rounded-2xl border border-white/[0.1] bg-[#16233f]/60 p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
+              className="rounded-2xl border border-white/[0.1] bg-ink-800/60 p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
             >
               <p.icon className="h-6 w-6 text-sky-400" aria-hidden="true" />
               <h3 className="mt-3 text-base font-bold text-white">{p.title}</h3>

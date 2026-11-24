@@ -18,7 +18,7 @@ export class EmailProvider extends BaseCommunicationProvider {
   channel: CommunicationChannel = 'EMAIL';
   displayName = 'Email';
 
-  /** Platform SMTP from environment variables: only the Versaly workspace may use it. */
+  /** Platform SMTP from environment variables: only the VersalyLabs platform workspace may use it. */
   private async platformSmtp(organizationId: string) {
     const host = await this.envFor(organizationId, process.env.SMTP_HOST);
     if (!host || !process.env.SMTP_USER || !process.env.SMTP_PASSWORD || !process.env.SMTP_FROM) return null;
@@ -41,7 +41,7 @@ export class EmailProvider extends BaseCommunicationProvider {
       accountHandle: mailbox?.address || account?.accountHandle || undefined,
       lastSyncAt: account?.lastSyncAt || null,
       errorMessage: hasError ? account?.errorMessage : connected ? undefined : 'Connect your email address to send and receive messages.',
-      setupInstructions: 'Enter your email address and an app password. Versaly detects the mail servers automatically.',
+      setupInstructions: 'Enter your email address and an app password. VersalyLabs detects the mail servers automatically.',
       requiresCredentials: ['Email address', 'App password'],
     };
   }

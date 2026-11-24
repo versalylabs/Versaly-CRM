@@ -9,7 +9,7 @@ export default function LegalPage({ title, updated, intro, sections }: {
   sections: LegalSection[];
 }) {
   return (
-    <div className="min-h-screen bg-[#14213d] px-5 py-12 text-sky-100/90">
+    <div className="min-h-screen bg-ink-850 px-5 py-12 text-sky-100/90">
       <article className="mx-auto max-w-3xl">
         <Link href="/" className="text-sm font-semibold text-sky-300 hover:text-white">← Back to VersalyLabs</Link>
         <h1 className="mt-6 text-3xl font-extrabold text-white sm:text-4xl">{title}</h1>

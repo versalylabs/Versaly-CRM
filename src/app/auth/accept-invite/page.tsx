@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
-import VersalyLogoIcon from '@/components/VersalyLogoIcon';
+import VersalyLabsLogo from '@/components/VersalyLabsLogo';
 
 type InviteData = {
   email: string;
@@ -97,16 +97,16 @@ function AcceptInviteForm() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 dark:bg-[#14213d]">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 dark:bg-ink-850">
       <div className="w-full max-w-md space-y-6">
         
         {/* Top Logo & Branding */}
         <div className="text-center">
           <Link href="/" className="inline-block transition-transform hover:scale-105">
-            <VersalyLogoIcon size={52} className="mx-auto shadow-xl shadow-[#fca311]/25 rounded-2xl" />
+            <VersalyLabsLogo size={52} className="mx-auto shadow-xl shadow-brand-orange/25 rounded-2xl" />
           </Link>
           <h1 className="mt-4 text-2xl font-black tracking-tight text-gray-900 dark:text-white">
-            Versaly CRM
+            VersalyLabs CRM
           </h1>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Cloud Workspace Member Invitation

@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 
 import { useSession } from 'next-auth/react';
-import VersalyLogoIcon from '@/components/VersalyLogoIcon';
+import VersalyLabsLogo, { Wordmark } from '@/components/VersalyLabsLogo';
 
 export function LandingNav() {
   const { data: session } = useSession();
@@ -37,8 +37,8 @@ export function LandingNav() {
     <motion.header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-[#0c1527]/25 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/[0.12] shadow-[0_8px_32px_0_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.15)] py-2.5'
-          : 'bg-[#0c1527]/10 backdrop-blur-xl backdrop-saturate-150 border-b border-white/[0.06] shadow-[0_4px_20px_0_rgba(0,0,0,0.15),inset_0_1px_0_0_rgba(255,255,255,0.1)] py-3.5'
+          ? 'bg-ink-950/25 backdrop-blur-2xl backdrop-saturate-150 border-b border-white/[0.12] shadow-[0_8px_32px_0_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.15)] py-2.5'
+          : 'bg-ink-950/10 backdrop-blur-xl backdrop-saturate-150 border-b border-white/[0.06] shadow-[0_4px_20px_0_rgba(0,0,0,0.15),inset_0_1px_0_0_rgba(255,255,255,0.1)] py-3.5'
       }`}
     >
       {/* Specular Top Edge Light Refraction */}
@@ -49,13 +49,11 @@ export function LandingNav() {
       <div className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-5 lg:px-8">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <VersalyLogoIcon size={40} className="shrink-0 shadow-lg shadow-[#fca311]/25 transition-transform group-hover:scale-105 rounded-2xl" />
+          <VersalyLabsLogo size={40} className="shrink-0 shadow-lg shadow-brand-orange/25 transition-transform group-hover:scale-105 rounded-2xl" />
           <div>
-            <span className="block text-lg font-black tracking-tight text-white">
-              Versaly<span className="text-sky-400">CRM</span>
-            </span>
-            <span className="block text-[9px] font-bold uppercase tracking-[0.2em] text-sky-300/70">
-              By Versaly
+            <Wordmark className="block text-xl leading-tight" />
+            <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-sky-300/70">
+              CRM
             </span>
           </div>
         </Link>
@@ -152,7 +150,7 @@ export function LandingNav() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="border-b border-white/10 bg-[#16233f]/85 px-5 py-5 backdrop-blur-2xl sm:hidden shadow-2xl"
+            className="border-b border-white/10 bg-ink-800/85 px-5 py-5 backdrop-blur-2xl sm:hidden shadow-2xl"
           >
             <nav className="flex flex-col gap-3 text-sm font-bold text-sky-100">
               <a

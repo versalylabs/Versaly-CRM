@@ -25,14 +25,14 @@ function escapeHtml(value: string) {
 }
 
 export async function sendWelcomeEmail(input: { to: string; name: string; organizationName: string; plan: string; loginUrl: string }) {
-  const subject = `Welcome to ${input.organizationName} on Versaly CRM`;
-  const text = `Hi ${input.name},\n\nWelcome to Versaly CRM! Your ${input.organizationName} workspace is ready on the ${input.plan.replace('_', ' ')} plan. We've added a starter pipeline, sample leads, and an onboarding checklist so you can explore the workspace immediately.\n\nOpen your workspace: ${input.loginUrl}\n\n— Versaly CRM`;
-  const html = `<p>Hi ${escapeHtml(input.name)},</p><p>Welcome to <strong>Versaly CRM</strong>! Your <strong>${escapeHtml(input.organizationName)}</strong> workspace is ready.</p><p>We've added a starter pipeline, sample leads, and an onboarding checklist so the workspace is ready to explore.</p><p><a href="${escapeHtml(input.loginUrl)}">Open your workspace</a></p><p>— Versaly CRM</p>`;
+  const subject = `Welcome to ${input.organizationName} on VersalyLabs CRM`;
+  const text = `Hi ${input.name},\n\nWelcome to VersalyLabs CRM! Your ${input.organizationName} workspace is ready on the ${input.plan.replace('_', ' ')} plan. We've added a starter pipeline, sample leads, and an onboarding checklist so you can explore the workspace immediately.\n\nOpen your workspace: ${input.loginUrl}\n\n— VersalyLabs CRM`;
+  const html = `<p>Hi ${escapeHtml(input.name)},</p><p>Welcome to <strong>VersalyLabs CRM</strong>! Your <strong>${escapeHtml(input.organizationName)}</strong> workspace is ready.</p><p>We've added a starter pipeline, sample leads, and an onboarding checklist so the workspace is ready to explore.</p><p><a href="${escapeHtml(input.loginUrl)}">Open your workspace</a></p><p>— VersalyLabs CRM</p>`;
   return sendEmail({ to: input.to, subject, text, html });
 }
 
 export async function sendInviteEmail(input: { to: string; organizationName: string; role: string; inviteUrl: string; expiresAt: Date }) {
-  const subject = `You're invited to join ${input.organizationName} on Versaly CRM`;
+  const subject = `You're invited to join ${input.organizationName} on VersalyLabs CRM`;
   const expiry = input.expiresAt.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
   const text = `You've been invited to join ${input.organizationName} as ${input.role}. Accept your secure invitation: ${input.inviteUrl}\n\nThis invitation expires ${expiry}.`;
   const html = `<p>You've been invited to join <strong>${escapeHtml(input.organizationName)}</strong> as <strong>${escapeHtml(input.role)}</strong>.</p><p><a href="${escapeHtml(input.inviteUrl)}">Accept secure invitation</a></p><p>This invitation expires ${escapeHtml(expiry)}.</p>`;
@@ -48,8 +48,8 @@ export async function sendContactFormEmail(input: {
   message: string;
 }) {
   const adminEmail = process.env.PLATFORM_ADMIN_EMAIL || 'versalylabs@gmail.com';
-  const emailSubject = `[Versaly CRM Lead / Inquiry] ${input.subject || 'New Contact Form Submission'} from ${input.name}`;
-  const text = `New contact inquiry received on Versaly CRM Landing Page:
+  const emailSubject = `[VersalyLabs Lead / Inquiry] ${input.subject || 'New Contact Form Submission'} from ${input.name}`;
+  const text = `New contact inquiry received on the VersalyLabs website:
 
 Name: ${input.name}
 Email: ${input.email}
@@ -68,7 +68,7 @@ Reply directly to: ${input.email}
 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #ffffff;">
   <div style="background: linear-gradient(135deg, #0284c7, #06b6d4); padding: 18px 24px; border-radius: 6px; color: white;">
     <h2 style="margin: 0; font-size: 20px; font-weight: bold;">New Lead / Contact Form Inquiry</h2>
-    <p style="margin: 6px 0 0 0; font-size: 13px; opacity: 0.95;">Delivered from Versaly CRM Landing Page</p>
+    <p style="margin: 6px 0 0 0; font-size: 13px; opacity: 0.95;">Delivered from the VersalyLabs website</p>
   </div>
   <div style="padding: 24px 0;">
     <table style="width: 100%; border-collapse: collapse; font-size: 14px;">

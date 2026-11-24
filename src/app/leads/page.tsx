@@ -101,7 +101,7 @@ function formatLeadCurrency(value: number | null) {
 }
 
 const glassInput =
-  'w-full rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
+  'w-full rounded-xl bg-ink-900 border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -278,7 +278,7 @@ export default function LeadsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#14213d] text-slate-100">
+    <div className="min-h-screen bg-ink-850 text-slate-100">
       <div className="container-custom py-8 space-y-8 !max-w-none">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -313,7 +313,7 @@ export default function LeadsPage() {
 
         {/* Add Lead Form (React Bits Liquid Glass Panel) */}
         {showForm && (
-          <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-ink-700/75 via-ink-800/80 to-ink-900/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
 
             <div className="mb-4">
@@ -383,7 +383,7 @@ export default function LeadsPage() {
                   onChange={(e) => setForm({ ...form, leadSource: e.target.value })}
                 >
                   {LEAD_SOURCES.map((source) => (
-                    <option key={source} value={source} className="bg-[#14213d]">
+                    <option key={source} value={source} className="bg-ink-850">
                       {formatSource(source)}
                     </option>
                   ))}
@@ -442,7 +442,7 @@ export default function LeadsPage() {
         )}
 
         {/* Leads Table Container (React Bits Liquid Glass Panel) */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-[#1b2a4a]/75 via-[#16233f]/80 to-[#0e172a]/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-2xl border border-white/[0.12] bg-gradient-to-b from-ink-700/75 via-ink-800/80 to-ink-900/90 p-6 shadow-[0_12px_36px_rgba(0,0,0,0.4),inset_0_1px_1px_0_rgba(255,255,255,0.15)] backdrop-blur-xl">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent" />
 
           {/* Filters Bar */}
@@ -463,9 +463,9 @@ export default function LeadsPage() {
                 value={stageFilter}
                 onChange={(e) => setStageFilter(e.target.value)}
               >
-                <option value="" className="bg-[#14213d]">All stages</option>
+                <option value="" className="bg-ink-850">All stages</option>
                 {pipelineStages.map((stage) => (
-                  <option key={stage.key} value={stage.key} className="bg-[#14213d]">
+                  <option key={stage.key} value={stage.key} className="bg-ink-850">
                     {stage.label}
                   </option>
                 ))}
@@ -478,9 +478,9 @@ export default function LeadsPage() {
                 value={sourceFilter}
                 onChange={(e) => setSourceFilter(e.target.value)}
               >
-                <option value="" className="bg-[#14213d]">All sources</option>
+                <option value="" className="bg-ink-850">All sources</option>
                 {LEAD_SOURCES.map((source) => (
-                  <option key={source} value={source} className="bg-[#14213d]">
+                  <option key={source} value={source} className="bg-ink-850">
                     {formatSource(source)}
                   </option>
                 ))}
@@ -585,10 +585,10 @@ export default function LeadsPage() {
                             value={lead.pipelineStage}
                             disabled={updatingId === lead.id}
                             onChange={(e) => updateStage(lead.id, e.target.value)}
-                            className="rounded-lg border border-white/10 bg-[#0e172a] px-2 py-1 text-[11px] text-white focus:outline-none focus:border-sky-400 transition cursor-pointer disabled:opacity-50"
+                            className="rounded-lg border border-white/10 bg-ink-900 px-2 py-1 text-[11px] text-white focus:outline-none focus:border-sky-400 transition cursor-pointer disabled:opacity-50"
                           >
                             {pipelineStages.map((stage) => (
-                              <option key={stage.key} value={stage.key} className="bg-[#14213d]">
+                              <option key={stage.key} value={stage.key} className="bg-ink-850">
                                 {stage.label}
                               </option>
                             ))}
@@ -651,7 +651,7 @@ export default function LeadsPage() {
 
 function SummaryCard({ label, value, color }: { label: string; value: string; color: string }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-b from-[#1b2a4a]/70 to-[#0e172a]/80 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-gradient-to-b from-ink-700/70 to-ink-900/80 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-xl">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent" />
       <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p>
       <p className={`mt-2 text-2xl font-extrabold ${color}`}>{value}</p>

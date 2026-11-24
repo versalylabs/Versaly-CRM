@@ -41,15 +41,15 @@ export function HeroSection() {
         />
         {/* Darker brand gradient overlay creating deep, sleek aesthetic */}
         <div 
-          className="absolute inset-0 bg-gradient-to-b from-[#080d1a]/92 via-[#0e172a]/95 to-[#14213d]"
+          className="absolute inset-0 bg-gradient-to-b from-ink-950/92 via-ink-900/95 to-ink-850"
         />
         {/* Subtle atmospheric ambient glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[500px] w-[1000px] rounded-full bg-sky-500/10 blur-[150px]" />
       </div>
 
       {/* Aceternity Spotlight Effects - subtle warm accents without overpowering orange glare */}
-      <Spotlight className="-top-40 left-0 md:left-40 md:-top-20" fill="#fca311" fillOpacity={0.05} />
-      <Spotlight className="top-1/3 right-0 md:right-20" fill="#fca311" fillOpacity={0.03} />
+      <Spotlight className="-top-40 left-0 md:left-40 md:-top-20" fill="#ff6b01" fillOpacity={0.05} />
+      <Spotlight className="top-1/3 right-0 md:right-20" fill="#ff6b01" fillOpacity={0.03} />
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 lg:px-8">
         {/* Top Announcement Badge */}
@@ -59,9 +59,9 @@ export function HeroSection() {
           transition={{ duration: 0.5 }}
           className="flex justify-center"
         >
-          <div className="inline-flex items-center gap-2.5 rounded-full border border-sky-400/35 bg-[#16233f]/85 px-4 py-1.5 text-xs font-semibold text-sky-200 shadow-[0_4px_20px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] backdrop-blur-md">
+          <div className="inline-flex items-center gap-2.5 rounded-full border border-sky-400/35 bg-ink-800/85 px-4 py-1.5 text-xs font-semibold text-sky-200 shadow-[0_4px_20px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] backdrop-blur-md">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-bold text-white">Versaly CRM 2.0</span>
+            <span className="font-bold text-white">VersalyLabs CRM</span>
             <span className="text-sky-400/60">|</span>
             <span className="text-sky-300">Intelligent Pipeline & Retention Operating System</span>
             <ArrowRight className="h-3 w-3 text-sky-400" />
@@ -98,7 +98,7 @@ export function HeroSection() {
 
             <a
               href="#pipeline"
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-sky-400/30 bg-[#16233f]/80 px-8 py-3.5 text-base font-bold text-sky-200 backdrop-blur-md transition-all hover:border-sky-400/60 hover:bg-[#1b2a4a] sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-sky-400/30 bg-ink-800/80 px-8 py-3.5 text-base font-bold text-sky-200 backdrop-blur-md transition-all hover:border-sky-400/60 hover:bg-ink-700 sm:w-auto"
             >
               <Play className="h-4 w-4 fill-sky-400 text-sky-400" />
               <span>Explore Interactive Pipeline</span>
@@ -137,7 +137,7 @@ export function HeroSection() {
               opacity: { duration: 0.6, delay: 0.4 },
               y: { duration: 4, repeat: Infinity, ease: 'easeInOut' }
             }}
-            className="absolute -top-5 -right-2 sm:-top-7 sm:-right-4 z-20 hidden sm:flex items-center gap-3 rounded-2xl border border-sky-400/40 bg-gradient-to-b from-[#22355e]/90 via-[#1b2a4a]/90 to-[#0e172a]/95 p-3.5 shadow-[0_16px_36px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.25)] backdrop-blur-xl"
+            className="absolute -top-5 -right-2 sm:-top-7 sm:-right-4 z-20 hidden sm:flex items-center gap-3 rounded-2xl border border-sky-400/40 bg-gradient-to-b from-ink-600/90 via-ink-700/90 to-ink-900/95 p-3.5 shadow-[0_16px_36px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.25)] backdrop-blur-xl"
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-400/30">
               <MessageSquare className="h-4 w-4" />
@@ -159,7 +159,7 @@ export function HeroSection() {
               opacity: { duration: 0.6, delay: 0.6 },
               y: { duration: 4.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }
             }}
-            className="absolute -bottom-5 -left-2 sm:-bottom-7 sm:-left-4 z-20 hidden sm:flex items-center gap-3 rounded-2xl border border-sky-400/40 bg-gradient-to-b from-[#22355e]/90 via-[#1b2a4a]/90 to-[#0e172a]/95 p-3.5 shadow-[0_16px_36px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.25)] backdrop-blur-xl"
+            className="absolute -bottom-5 -left-2 sm:-bottom-7 sm:-left-4 z-20 hidden sm:flex items-center gap-3 rounded-2xl border border-sky-400/40 bg-gradient-to-b from-ink-600/90 via-ink-700/90 to-ink-900/95 p-3.5 shadow-[0_16px_36px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.25)] backdrop-blur-xl"
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500/20 text-sky-300 border border-sky-400/30">
               <ShieldCheck className="h-4 w-4 text-emerald-400" />
@@ -174,7 +174,7 @@ export function HeroSection() {
           </motion.div>
 
           {/* Card Frame with Level 3 Glass & Specular Light Line */}
-          <div className="relative rounded-[2rem] border border-sky-400/35 bg-gradient-to-b from-[#16233f]/85 via-[#16233f]/90 to-[#0e172a]/95 p-3 shadow-[0_25px_60px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.2)] backdrop-blur-2xl sm:p-5">
+          <div className="relative rounded-[2rem] border border-sky-400/35 bg-gradient-to-b from-ink-800/85 via-ink-800/90 to-ink-900/95 p-3 shadow-[0_25px_60px_rgba(0,0,0,0.5),inset_0_1px_2px_rgba(255,255,255,0.2)] backdrop-blur-2xl sm:p-5">
             {/* Top specular highlight line */}
             <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
             {/* Window chrome header */}
@@ -189,7 +189,7 @@ export function HeroSection() {
               </div>
 
               {/* View Switcher inside Mockup */}
-              <div className="hidden items-center gap-1 rounded-lg bg-[#0e172a] p-1 text-xs font-semibold sm:flex">
+              <div className="hidden items-center gap-1 rounded-lg bg-ink-900 p-1 text-xs font-semibold sm:flex">
                 <button
                   onClick={() => setActiveMockTab('pipeline')}
                   className={`rounded-md px-2.5 py-1 transition-all ${
@@ -224,10 +224,10 @@ export function HeroSection() {
             </div>
 
             {/* Mockup Body Content */}
-            <div className="mt-4 rounded-xl bg-[#0e172a]/90 p-4 sm:p-6 border border-sky-500/15">
+            <div className="mt-4 rounded-xl bg-ink-900/90 p-4 sm:p-6 border border-sky-500/15">
               {/* Metric Highlights Strip with Frosted Glass Styling */}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <div className="rounded-xl border border-white/10 bg-[#16233f]/70 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-sm">
+                <div className="rounded-xl border border-white/10 bg-ink-800/70 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-sm">
                   <p className="text-[11px] font-semibold text-sky-300/70 uppercase">Active Leads</p>
                   <p className="mt-1 text-xl font-black text-white sm:text-2xl">
                     1,284
@@ -237,7 +237,7 @@ export function HeroSection() {
                   </span>
                 </div>
 
-                <div className="rounded-xl border border-white/10 bg-[#16233f]/70 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-sm">
+                <div className="rounded-xl border border-white/10 bg-ink-800/70 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-sm">
                   <p className="text-[11px] font-semibold text-sky-300/70 uppercase">Pipeline Value</p>
                   <p className="mt-1 text-xl font-black text-white sm:text-2xl">
                     KES 14.8M
@@ -247,7 +247,7 @@ export function HeroSection() {
                   </span>
                 </div>
 
-                <div className="rounded-xl border border-white/10 bg-[#16233f]/70 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-sm">
+                <div className="rounded-xl border border-white/10 bg-ink-800/70 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-sm">
                   <p className="text-[11px] font-semibold text-sky-300/70 uppercase">Retention Score</p>
                   <p className="mt-1 text-xl font-black text-white sm:text-2xl">
                     98.4%
@@ -257,7 +257,7 @@ export function HeroSection() {
                   </span>
                 </div>
 
-                <div className="rounded-xl border border-white/10 bg-[#16233f]/70 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-sm">
+                <div className="rounded-xl border border-white/10 bg-ink-800/70 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-sm">
                   <p className="text-[11px] font-semibold text-sky-300/70 uppercase">Avg Close Time</p>
                   <p className="mt-1 text-xl font-black text-white sm:text-2xl">
                     11.2 <span className="text-xs font-normal text-sky-300">Days</span>
@@ -271,13 +271,13 @@ export function HeroSection() {
               {/* Dynamic Content based on Mock Tab */}
               {activeMockTab === 'pipeline' && (
                 <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="rounded-xl border border-sky-500/20 bg-[#16233f] p-3">
+                  <div className="rounded-xl border border-sky-500/20 bg-ink-800 p-3">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-sky-300">Discovery (5)</span>
                       <span className="text-[10px] text-sky-400">KES 4.2M</span>
                     </div>
                     <div className="mt-2 space-y-2">
-                      <div className="rounded-lg bg-[#0e172a] p-2.5 border border-white/5">
+                      <div className="rounded-lg bg-ink-900 p-2.5 border border-white/5">
                         <div className="flex justify-between text-[11px] font-bold text-white">
                           <span>Safari Logistics</span>
                           <span className="text-sky-300">KES 1.4M</span>
@@ -287,13 +287,13 @@ export function HeroSection() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-sky-500/20 bg-[#16233f] p-3">
+                  <div className="rounded-xl border border-sky-500/20 bg-ink-800 p-3">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-sky-300">Proposal Sent (3)</span>
                       <span className="text-[10px] text-sky-400">KES 6.8M</span>
                     </div>
                     <div className="mt-2 space-y-2">
-                      <div className="rounded-lg bg-[#0e172a] p-2.5 border border-white/5">
+                      <div className="rounded-lg bg-ink-900 p-2.5 border border-white/5">
                         <div className="flex justify-between text-[11px] font-bold text-white">
                           <span>Koko Clean Energies</span>
                           <span className="text-sky-300">KES 3.2M</span>
@@ -303,13 +303,13 @@ export function HeroSection() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-emerald-500/20 bg-[#16233f] p-3">
+                  <div className="rounded-xl border border-emerald-500/20 bg-ink-800 p-3">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-emerald-400">Closed Won (8)</span>
                       <span className="text-[10px] text-emerald-300">KES 8.9M</span>
                     </div>
                     <div className="mt-2 space-y-2">
-                      <div className="rounded-lg bg-[#0e172a] p-2.5 border border-emerald-500/20">
+                      <div className="rounded-lg bg-ink-900 p-2.5 border border-emerald-500/20">
                         <div className="flex justify-between text-[11px] font-bold text-white">
                           <span>Twiga Commerce</span>
                           <span className="text-emerald-400">KES 4.8M</span>
@@ -322,20 +322,20 @@ export function HeroSection() {
               )}
 
               {activeMockTab === 'retention' && (
-                <div className="mt-4 rounded-xl border border-sky-500/20 bg-[#16233f] p-4 text-xs">
+                <div className="mt-4 rounded-xl border border-sky-500/20 bg-ink-800 p-4 text-xs">
                   <div className="flex items-center justify-between border-b border-white/5 pb-2">
                     <span className="font-bold text-white">Client Health & Churn Telemetry</span>
                     <span className="text-emerald-400 font-bold">100% Healthy Accounts</span>
                   </div>
                   <div className="mt-3 space-y-2">
-                    <div className="flex items-center justify-between rounded-lg bg-[#0e172a] p-2.5">
+                    <div className="flex items-center justify-between rounded-lg bg-ink-900 p-2.5">
                       <div className="flex items-center gap-2">
                         <span className="h-2 w-2 rounded-full bg-emerald-400" />
                         <span className="font-semibold text-white">Apex FinTech Global</span>
                       </div>
                       <span className="text-sky-300">98/100 Health · Renewal in 45 days</span>
                     </div>
-                    <div className="flex items-center justify-between rounded-lg bg-[#0e172a] p-2.5">
+                    <div className="flex items-center justify-between rounded-lg bg-ink-900 p-2.5">
                       <div className="flex items-center gap-2">
                         <span className="h-2 w-2 rounded-full bg-emerald-400" />
                         <span className="font-semibold text-white">Safari Logistics Ltd</span>
@@ -347,17 +347,17 @@ export function HeroSection() {
               )}
 
               {activeMockTab === 'activity' && (
-                <div className="mt-4 rounded-xl border border-sky-500/20 bg-[#16233f] p-4 text-xs">
+                <div className="mt-4 rounded-xl border border-sky-500/20 bg-ink-800 p-4 text-xs">
                   <div className="flex items-center justify-between border-b border-white/5 pb-2">
                     <span className="font-bold text-white">Live Automated Outreach Feed</span>
                     <span className="text-sky-400 font-semibold">Real-time webhooks</span>
                   </div>
                   <div className="mt-3 space-y-2">
-                    <div className="flex items-center justify-between rounded-lg bg-[#0e172a] p-2.5">
+                    <div className="flex items-center justify-between rounded-lg bg-ink-900 p-2.5">
                       <span className="text-sky-200">WhatsApp delivered to Kevin Mwangi: &quot;Proposal ready for download&quot;</span>
                       <span className="text-[10px] text-sky-400 font-mono">1 min ago</span>
                     </div>
-                    <div className="flex items-center justify-between rounded-lg bg-[#0e172a] p-2.5">
+                    <div className="flex items-center justify-between rounded-lg bg-ink-900 p-2.5">
                       <span className="text-sky-200">Email sequence step 2 dispatched to 14 marketing leads</span>
                       <span className="text-[10px] text-sky-400 font-mono">5 mins ago</span>
                     </div>

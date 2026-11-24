@@ -148,13 +148,13 @@ function getEventColor(event: { title: string; type: string }) {
     };
   }
 
-  // Tasks / Follow-ups (Versaly Gold / Amber)
+  // Tasks / Follow-ups (brand orange)
   return {
-    border: 'border-l-[#fca311]',
-    stripeBg: 'bg-[#fca311]',
-    badgeBg: 'bg-[#fca311]/15 text-amber-200 border border-[#fca311]/30',
+    border: 'border-l-brand-orange',
+    stripeBg: 'bg-brand-orange',
+    badgeBg: 'bg-brand-orange/15 text-amber-200 border border-brand-orange/30',
     cardHover: 'hover:border-amber-400/40',
-    pill: 'bg-[#fca311]/20 text-amber-300 border-[#fca311]/30',
+    pill: 'bg-brand-orange/20 text-amber-300 border-brand-orange/30',
     avatarBg: 'bg-gradient-to-tr from-amber-600 to-yellow-400',
     tag: 'Task / Follow-up',
   };
@@ -198,7 +198,7 @@ const localInput = (d: Date) => {
 };
 
 const glassInput =
-  'w-full rounded-xl bg-[#0e172a] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition';
+  'w-full rounded-xl bg-ink-900 border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition';
 
 // ==========================================
 // Main Calendar Page Component
@@ -550,7 +550,7 @@ export default function CalendarPage() {
     let ics = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//Versaly Labs//Versaly CRM Calendar//EN',
+      'PRODID:-//VersalyLabs//VersalyLabs CRM Calendar//EN',
       'CALSCALE:GREGORIAN',
       'METHOD:PUBLISH',
     ];
@@ -580,7 +580,7 @@ export default function CalendarPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `versaly-calendar-${currentDate.getFullYear()}-${currentDate.getMonth() + 1}.ics`;
+    link.download = `versalylabs-calendar-${currentDate.getFullYear()}-${currentDate.getMonth() + 1}.ics`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -609,7 +609,7 @@ export default function CalendarPage() {
               Schedule & Operations
             </span>
           </div>
-          <h1 className="mt-1 font-glorase text-3xl sm:text-4xl font-normal text-white tracking-tight">
+          <h1 className="mt-1 font-heading text-3xl sm:text-4xl font-bold text-white tracking-tight">
             Calendar & Engagements
           </h1>
           <p className="mt-1 text-xs text-slate-400">
@@ -631,7 +631,7 @@ export default function CalendarPage() {
 
           <button
             onClick={() => setSyncModalOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-[#1b2a4a]/80 px-3.5 py-2 text-xs font-semibold text-slate-200 shadow-sm backdrop-blur-md transition hover:bg-white/10 hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-ink-700/80 px-3.5 py-2 text-xs font-semibold text-slate-200 shadow-sm backdrop-blur-md transition hover:bg-white/10 hover:text-white"
           >
             <Link2 className="h-3.5 w-3.5 text-cyan-400" />
             <span>Sync External</span>
@@ -655,7 +655,7 @@ export default function CalendarPage() {
         {/* ========================================
             LEFT COLUMN: Main Calendar Grid
            ======================================== */}
-        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#1b2a4a]/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] backdrop-blur-xl">
+        <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-700/80 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] backdrop-blur-xl">
           {/* Subtle top liquid glass highlight bar */}
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent" />
 
@@ -663,7 +663,7 @@ export default function CalendarPage() {
           <div className="flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5 border-b border-white/10">
             {/* Month & Year with Prev/Next Navigation */}
             <div className="flex items-center gap-3">
-              <h2 className="font-glorase text-2xl sm:text-3xl font-normal text-white tracking-tight">
+              <h2 className="font-heading text-2xl sm:text-3xl font-bold text-white tracking-tight">
                 {MONTH_NAMES[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h2>
               <div className="flex items-center gap-1">
@@ -687,7 +687,7 @@ export default function CalendarPage() {
             {/* Filter Pills + View Switcher + Today */}
             <div className="flex flex-wrap items-center gap-2">
               {/* Type Filter Tabs (All, Interview, Task, Time Off) */}
-              <div className="flex items-center rounded-full border border-white/10 bg-[#0e172a]/60 p-1">
+              <div className="flex items-center rounded-full border border-white/10 bg-ink-900/60 p-1">
                 {[
                   { id: 'ALL', label: 'All' },
                   { id: 'MEETING', label: 'Interview' },
@@ -713,12 +713,12 @@ export default function CalendarPage() {
                 <select
                   value={viewMode}
                   onChange={(e) => setViewMode(e.target.value as ViewMode)}
-                  className="appearance-none rounded-xl border border-white/10 bg-[#0e172a]/70 px-3.5 py-1.5 pr-8 text-xs font-semibold text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-400 cursor-pointer"
+                  className="appearance-none rounded-xl border border-white/10 bg-ink-900/70 px-3.5 py-1.5 pr-8 text-xs font-semibold text-slate-200 focus:outline-none focus:ring-1 focus:ring-cyan-400 cursor-pointer"
                 >
-                  <option value="month" className="bg-[#14213d] text-white">Month</option>
-                  <option value="week" className="bg-[#14213d] text-white">Week</option>
-                  <option value="day" className="bg-[#14213d] text-white">Day</option>
-                  <option value="list" className="bg-[#14213d] text-white">List</option>
+                  <option value="month" className="bg-ink-850 text-white">Month</option>
+                  <option value="week" className="bg-ink-850 text-white">Week</option>
+                  <option value="day" className="bg-ink-850 text-white">Day</option>
+                  <option value="list" className="bg-ink-850 text-white">List</option>
                 </select>
                 <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
                   ▾
@@ -790,7 +790,7 @@ export default function CalendarPage() {
                           <span
                             className={`text-xs font-semibold ${
                               isToday
-                                ? 'flex h-6 px-1.5 items-center justify-center rounded-md bg-cyan-400 font-bold text-[#0e172a] shadow-sm'
+                                ? 'flex h-6 px-1.5 items-center justify-center rounded-md bg-cyan-400 font-bold text-ink-900 shadow-sm'
                                 : cell.isCurrentMonth
                                 ? 'text-slate-300'
                                 : 'text-slate-600'
@@ -887,7 +887,7 @@ export default function CalendarPage() {
                       className={`rounded-xl border p-3 min-h-[220px] transition ${
                         isToday
                           ? 'border-cyan-400/50 bg-cyan-950/20'
-                          : 'border-white/10 bg-[#0e172a]/40'
+                          : 'border-white/10 bg-ink-900/40'
                       }`}
                     >
                       <div className="flex items-center justify-between border-b border-white/10 pb-2">
@@ -944,7 +944,7 @@ export default function CalendarPage() {
                 </div>
                 <button
                   onClick={() => openScheduleForDate(currentDate)}
-                  className="rounded-xl bg-cyan-500 hover:bg-cyan-400 text-[#0e172a] font-bold px-3 py-1.5 text-xs transition"
+                  className="rounded-xl bg-cyan-500 hover:bg-cyan-400 text-ink-900 font-bold px-3 py-1.5 text-xs transition"
                 >
                   + Add Event
                 </button>
@@ -1011,7 +1011,7 @@ export default function CalendarPage() {
                         type="checkbox"
                         checked={ev.completed}
                         onChange={() => toggleComplete(ev)}
-                        className="mt-1 h-4 w-4 rounded border-white/20 bg-[#0e172a] text-cyan-400 focus:ring-0 cursor-pointer"
+                        className="mt-1 h-4 w-4 rounded border-white/20 bg-ink-900 text-cyan-400 focus:ring-0 cursor-pointer"
                       />
                       <div>
                         <p className={`font-semibold text-sm ${ev.completed ? 'text-slate-500 line-through' : 'text-white'}`}>
@@ -1062,7 +1062,7 @@ export default function CalendarPage() {
 
           {/* Top Banner: "Link Your Calendar" (Screenshot Card) */}
           {!linkBannerDismissed && (
-            <div className="relative overflow-hidden rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-950/40 via-[#1b2a4a]/85 to-[#0e172a]/90 p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] backdrop-blur-xl">
+            <div className="relative overflow-hidden rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-950/40 via-ink-700/85 to-ink-900/90 p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] backdrop-blur-xl">
               <button
                 onClick={() => setLinkBannerDismissed(true)}
                 className="absolute top-4 right-4 text-slate-400 hover:text-white text-xs transition"
@@ -1111,7 +1111,7 @@ export default function CalendarPage() {
           )}
 
           {/* Upcoming Events List Container */}
-          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#1b2a4a]/80 p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-700/80 p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.28)] backdrop-blur-xl">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/30 to-transparent" />
 
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
@@ -1144,7 +1144,7 @@ export default function CalendarPage() {
                   <div
                     key={ev.id}
                     onClick={() => setActiveEvent(ev)}
-                    className={`group relative rounded-xl border border-white/10 bg-[#0e172a]/60 hover:bg-[#0e172a]/90 transition-all p-3.5 cursor-pointer border-l-4 ${colors.border}`}
+                    className={`group relative rounded-xl border border-white/10 bg-ink-900/60 hover:bg-ink-900/90 transition-all p-3.5 cursor-pointer border-l-4 ${colors.border}`}
                   >
                     {/* Event Title */}
                     <div className="flex items-start justify-between gap-2">
@@ -1158,7 +1158,7 @@ export default function CalendarPage() {
                           e.stopPropagation();
                           toggleComplete(ev);
                         }}
-                        className="mt-0.5 h-3.5 w-3.5 rounded border-white/20 bg-[#0e172a] text-cyan-400 focus:ring-0 cursor-pointer"
+                        className="mt-0.5 h-3.5 w-3.5 rounded border-white/20 bg-ink-900 text-cyan-400 focus:ring-0 cursor-pointer"
                       />
                     </div>
 
@@ -1225,7 +1225,7 @@ export default function CalendarPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
           <form
             onSubmit={handleCreateEvent}
-            className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#1b2a4a] via-[#16233f] to-[#0e172a] p-6 shadow-2xl space-y-4"
+            className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-ink-700 via-ink-800 to-ink-900 p-6 shadow-2xl space-y-4"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
 
@@ -1268,7 +1268,7 @@ export default function CalendarPage() {
                   className={glassInput}
                 >
                   {EVENT_TYPES.map((t) => (
-                    <option key={t.type} value={t.type} className="bg-[#14213d] text-white">
+                    <option key={t.type} value={t.type} className="bg-ink-850 text-white">
                       {t.label}
                     </option>
                   ))}
@@ -1315,7 +1315,7 @@ export default function CalendarPage() {
                 >
                   <option value="">No lead attached</option>
                   {leads.map((l) => (
-                    <option key={l.id} value={l.id} className="bg-[#14213d] text-white">
+                    <option key={l.id} value={l.id} className="bg-ink-850 text-white">
                       {l.contactName} {l.companyName ? `(${l.companyName})` : ''}
                     </option>
                   ))}
@@ -1332,7 +1332,7 @@ export default function CalendarPage() {
                   >
                     <option value="">Assign to me</option>
                     {users.map((u) => (
-                      <option key={u.id} value={u.id} className="bg-[#14213d] text-white">
+                      <option key={u.id} value={u.id} className="bg-ink-850 text-white">
                         {u.name || u.email}
                       </option>
                     ))}
@@ -1377,7 +1377,7 @@ export default function CalendarPage() {
          ========================================== */}
       {activeEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#1b2a4a] via-[#16233f] to-[#0e172a] p-6 shadow-2xl space-y-4">
+          <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-ink-700 via-ink-800 to-ink-900 p-6 shadow-2xl space-y-4">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
 
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
@@ -1432,7 +1432,7 @@ export default function CalendarPage() {
 
                 <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
                   {activeEvent.lead && (
-                    <div className="rounded-xl border border-white/10 bg-[#0e172a]/60 p-3">
+                    <div className="rounded-xl border border-white/10 bg-ink-900/60 p-3">
                       <p className="text-[10px] uppercase font-bold text-slate-400">Attached Prospect</p>
                       <Link
                         href={`/leads/${activeEvent.lead.id}`}
@@ -1447,7 +1447,7 @@ export default function CalendarPage() {
                     </div>
                   )}
 
-                  <div className="rounded-xl border border-white/10 bg-[#0e172a]/60 p-3">
+                  <div className="rounded-xl border border-white/10 bg-ink-900/60 p-3">
                     <p className="text-[10px] uppercase font-bold text-slate-400">Assigned Team Member</p>
                     <p className="mt-1 font-semibold text-white">
                       {activeEvent.assignedTo?.name || activeEvent.assignedTo?.email || session?.user?.name || 'Assigned'}
@@ -1513,7 +1513,7 @@ export default function CalendarPage() {
                       className={glassInput}
                     >
                       {EVENT_TYPES.map((t) => (
-                        <option key={t.type} value={t.type} className="bg-[#14213d] text-white">
+                        <option key={t.type} value={t.type} className="bg-ink-850 text-white">
                           {t.label}
                         </option>
                       ))}
@@ -1551,7 +1551,7 @@ export default function CalendarPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="rounded-xl bg-cyan-500 px-4 py-1.5 text-xs font-bold text-[#0e172a] hover:bg-cyan-400"
+                    className="rounded-xl bg-cyan-500 px-4 py-1.5 text-xs font-bold text-ink-900 hover:bg-cyan-400"
                   >
                     {saving ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -1567,7 +1567,7 @@ export default function CalendarPage() {
          ========================================== */}
       {syncModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-[#1b2a4a] via-[#16233f] to-[#0e172a] p-6 shadow-2xl space-y-4">
+          <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-white/15 bg-gradient-to-b from-ink-700 via-ink-800 to-ink-900 p-6 shadow-2xl space-y-4">
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
 
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
@@ -1584,7 +1584,7 @@ export default function CalendarPage() {
             </div>
 
             <p className="text-xs text-slate-300 leading-relaxed">
-              Seamlessly subscribe to or export your Versaly CRM calendar into Google Calendar, Microsoft Outlook, or Apple Calendar.
+              Seamlessly subscribe to or export your VersalyLabs CRM calendar into Google Calendar, Microsoft Outlook, or Apple Calendar.
             </p>
 
             <div className="space-y-3">
@@ -1596,7 +1596,7 @@ export default function CalendarPage() {
                 </div>
                 <button
                   onClick={exportICS}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 px-3 py-1.5 text-xs font-bold text-[#0e172a] transition"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 px-3 py-1.5 text-xs font-bold text-ink-900 transition"
                 >
                   <Download className="h-3.5 w-3.5" />
                   <span>Download</span>

@@ -3,20 +3,18 @@
 import React from 'react';
 import Link from 'next/link';
 import { Phone } from 'lucide-react';
-import VersalyLogoIcon from '@/components/VersalyLogoIcon';
+import VersalyLabsLogo, { Wordmark } from '@/components/VersalyLabsLogo';
 
 export function LandingFooter() {
   return (
-    <footer className="border-t border-sky-500/20 bg-[#0e172a] text-sky-200/80">
+    <footer className="border-t border-sky-500/20 bg-ink-900 text-sky-200/80">
       <div className="mx-auto max-w-7xl px-5 py-14 lg:px-8">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-5">
           {/* Brand Col */}
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center gap-3">
-              <VersalyLogoIcon size={36} className="shadow-md shadow-[#fca311]/25 rounded-xl" />
-              <span className="text-lg font-black tracking-tight text-white">
-                Versaly<span className="text-sky-400">CRM</span>
-              </span>
+              <VersalyLabsLogo size={36} className="shadow-md shadow-brand-orange/25 rounded-xl" />
+              <Wordmark className="text-xl" />
             </Link>
             <p className="mt-4 max-w-sm text-xs leading-relaxed text-sky-200/70">
               The CRM for Kenyan sales teams: leads, WhatsApp and email conversations, follow-ups and your pipeline in one place.

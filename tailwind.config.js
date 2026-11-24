@@ -1,4 +1,18 @@
 /** @type {import('tailwindcss').Config} */
+const WARM = {
+  50: '#fffbf2',
+  100: '#fcf5e6',
+  200: '#f8edd2', // VersalyLabs Cream
+  300: '#f2d9aa',
+  400: '#ff8f45',
+  500: '#ff6b01', // VersalyLabs Orange
+  600: '#e85f00',
+  700: '#c24e00',
+  800: '#933c04',
+  900: '#5e2805',
+  950: '#082a2b',
+};
+
 module.exports = {
   content: [
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -6,97 +20,44 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Versaly Official Brand Palette (#14213d, #e5e5e5, #fca311)
-        versaly: {
-          navy: '#14213d',
-          platinum: '#e5e5e5',
-          gold: '#fca311',
-          amber: '#fca311',
-          card: '#1b2a4a',
-          surface: '#16233f',
-          input: '#0e172a',
-          border: '#243862',
-          hover: '#203358',
+        // VersalyLabs brand palette: ink #051f20, cream #f8edd2, orange #ff6b01.
+        // To re-colour the product, change these values (and the matching ones in globals.css).
+        brand: {
+          orange: '#ff6b01',
+          cream: '#f8edd2',
+          ink: '#051f20',
         },
+        // Dark surfaces derived from the brand ink (950 = deepest, 500 = borders).
+        ink: {
+          950: '#021213',
+          900: '#031819',
+          850: '#051f20',
+          800: '#0a2a2b',
+          700: '#0f3536',
+          600: '#164142',
+          500: '#1f4f50',
+        },
+        // Legacy palette names used across the UI, mapped to the brand: light shades are cream, mid shades orange.
+        sky: WARM,
+        cyan: WARM,
+        accent: WARM,
         primary: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#fca311', // Signature Versaly Gold Accent
-          600: '#e5940f',
-          700: '#1b2a4a',
-          800: '#14213d', // Versaly Brand Navy
-          900: '#0e172a',
-        },
-        accent: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#fca311', // Versaly Gold
-          600: '#e5940f',
-          700: '#d97706',
-          800: '#b45309',
-          900: '#78350f',
-        },
-        // Harmonize sky & cyan with Versaly's warm gold / amber signature accent
-        sky: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#fca311', // Versaly Gold Accent
-          600: '#e5940f',
-          700: '#d97706',
-          800: '#b45309',
-          900: '#78350f',
-          950: '#451a03',
-        },
-        cyan: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fca311', // Versaly Gold
-          500: '#e5940f',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#78350f',
-          900: '#451a03',
-          950: '#291002',
+          50: '#fffbf2',
+          100: '#fcf5e6',
+          200: '#f8edd2',
+          300: '#f2d9aa',
+          400: '#ff8f45',
+          500: '#ff6b01',
+          600: '#e85f00',
+          700: '#0f3536',
+          800: '#051f20',
+          900: '#031819',
         },
       },
       fontFamily: {
-        sans: [
-          'Inter',
-          'system-ui',
-          'sans-serif'
-        ],
-        heading: [
-          'Glorase',
-          'var(--font-glorase)',
-          'Georgia',
-          'Cambria',
-          'serif'
-        ],
-        glorase: [
-          'Glorase',
-          'var(--font-glorase)',
-          'Georgia',
-          'Cambria',
-          'serif'
-        ],
-        serif: [
-          'Glorase',
-          'var(--font-glorase)',
-          'Georgia',
-          'Cambria',
-          'serif'
-        ],
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
+        // Brand font (logo, headings)
+        heading: ['var(--font-quicksand)', 'Quicksand', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         lg: '0.5rem',

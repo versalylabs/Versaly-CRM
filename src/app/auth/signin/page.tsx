@@ -4,7 +4,7 @@ import { Suspense, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import VersalyLogoIcon from '@/components/VersalyLogoIcon';
+import VersalyLabsLogo from '@/components/VersalyLabsLogo';
 
 function SignInForm() {
   const router = useRouter();
@@ -47,10 +47,10 @@ function SignInForm() {
         {/* Branding Header */}
         <div className="text-center space-y-2">
           <Link href="/" className="inline-block transition-transform hover:scale-105">
-            <VersalyLogoIcon size={52} className="mx-auto shadow-xl shadow-[#fca311]/25 rounded-2xl" />
+            <VersalyLabsLogo size={52} className="mx-auto shadow-xl shadow-brand-orange/25 rounded-2xl" />
           </Link>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-            Sign in to Versaly CRM
+            Sign in to VersalyLabs CRM
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
             Access your cloud workspace & client pipeline

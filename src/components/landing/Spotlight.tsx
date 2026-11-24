@@ -9,7 +9,7 @@ type SpotlightProps = {
   fillOpacity?: number | string;
 };
 
-export function Spotlight({ className, fill = '#38bdf8', fillOpacity = '0.06' }: SpotlightProps) {
+export function Spotlight({ className, fill = '#ff6b01', fillOpacity = '0.06' }: SpotlightProps) {
   return (
     <svg
       className={cn(

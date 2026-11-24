@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import prisma from './prisma';
 
-export const API_KEY_PREFIX = 'str_live_';
+export const API_KEY_PREFIX = 'vl_live_'; // keys are verified by hash, so older str_live_ keys keep working
 
 export function createApiKeySecret() {
   return `${API_KEY_PREFIX}${crypto.randomBytes(24).toString('hex')}`;

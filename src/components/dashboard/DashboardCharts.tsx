@@ -48,7 +48,7 @@ export function Sparkline({ data, color = 'blue', height = 36, width = 110 }: Sp
   const fillD = `${pathD} L ${width},${height} L 0,${height} Z`;
 
   const colorMap = {
-    blue: { stroke: '#fca311', stopStart: '#fcd34d', stopEnd: '#e5940f' },
+    blue: { stroke: '#ff6b01', stopStart: '#f2d9aa', stopEnd: '#e85f00' },
     emerald: { stroke: '#10b981', stopStart: '#34d399', stopEnd: '#10b981' },
     purple: { stroke: '#10b981', stopStart: '#34d399', stopEnd: '#10b981' },
     amber: { stroke: '#10b981', stopStart: '#34d399', stopEnd: '#10b981' },
@@ -244,8 +244,8 @@ export function RevenueTrendChart({ data, formatCurrency, totalWon }: RevenueTre
 
             {/* Pipeline Gradient */}
             <linearGradient id={gradientPipelineId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#fca311" stopOpacity="0.22" />
-              <stop offset="100%" stopColor="#fca311" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#ff6b01" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#ff6b01" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
@@ -281,7 +281,7 @@ export function RevenueTrendChart({ data, formatCurrency, totalWon }: RevenueTre
           <path
             d={pipelineLine}
             fill="none"
-            stroke="#fca311"
+            stroke="#ff6b01"
             strokeWidth="2.5"
             strokeDasharray="5 3"
             strokeLinecap="round"
@@ -350,7 +350,7 @@ export function RevenueTrendChart({ data, formatCurrency, totalWon }: RevenueTre
                 cx={hoveredPipePt.x}
                 cy={hoveredPipePt.y}
                 r="5.5"
-                fill="#fca311"
+                fill="#ff6b01"
                 stroke="#ffffff"
                 strokeWidth="2"
               />
@@ -392,7 +392,7 @@ export function RevenueTrendChart({ data, formatCurrency, totalWon }: RevenueTre
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="flex items-center gap-1.5 text-amber-500 font-medium">
-                  <span className="h-2 w-2 rounded-full bg-[#fca311]" /> Pipeline:
+                  <span className="h-2 w-2 rounded-full bg-brand-orange" /> Pipeline:
                 </span>
                 <span className="font-bold text-gray-700 dark:text-gray-300">
                   {formatCurrency(hoveredItem.pipeline)}
@@ -435,8 +435,8 @@ export function RadialGaugeChart({ rate, target = 80, wonCount, totalLeads }: Ra
         <svg width="200" height="115" viewBox="0 0 200 115" className="overflow-visible">
           <defs>
             <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#fca311" />
-              <stop offset="50%" stopColor="#fcd34d" />
+              <stop offset="0%" stopColor="#ff6b01" />
+              <stop offset="50%" stopColor="#f2d9aa" />
               <stop offset="100%" stopColor="#10b981" />
             </linearGradient>
           </defs>
@@ -587,15 +587,14 @@ interface SubscriptionInfo {
   tier: string;
   status: string;
   badge: string;
-  billingCycle: string;
+  healthy: boolean;
+  statusLine: string;
   leadLimit: number;
   leadUsed: number;
   leadPercentage: number;
   seatLimit: number;
   seatUsed: number;
   seatPercentage: number;
-  renewalDays: number;
-  renewalDate: string;
 }
 
 interface SubscriptionCardProps {
@@ -606,7 +605,7 @@ export function SubscriptionQuotaCard({ subscription }: SubscriptionCardProps) {
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-2xl border border-sky-200/60 bg-gradient-to-r from-sky-50 via-white to-sky-50/50 p-5 shadow-sm transition hover:shadow-md dark:border-sky-800/40 dark:from-[#16233f] dark:via-[#14213d] dark:to-[#16233f]">
+      <div className="relative overflow-hidden rounded-2xl border border-sky-200/60 bg-gradient-to-r from-sky-50 via-white to-sky-50/50 p-5 shadow-sm transition hover:shadow-md dark:border-sky-800/40 dark:from-ink-800 dark:via-ink-850 dark:to-ink-800">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Plan information */}
           <div className="flex items-center space-x-3.5">
@@ -618,12 +617,12 @@ export function SubscriptionQuotaCard({ subscription }: SubscriptionCardProps) {
                 <span className="text-base font-bold text-gray-900 dark:text-white">
                   {subscription.plan}
                 </span>
-                <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300 ring-1 ring-inset ring-emerald-600/20">
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${subscription.healthy ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-emerald-600/20' : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 ring-amber-600/20'}`}>
                   ● {subscription.badge}
                 </span>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-300">
-                Monthly SaaS billing · Renews in {subscription.renewalDays} days on {subscription.renewalDate}
+                {subscription.statusLine}
               </p>
             </div>
           </div>

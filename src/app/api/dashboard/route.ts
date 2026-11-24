@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
 import prisma from '../../../../lib/prisma';
+import { getSubscriptionAccess } from '../../../../lib/subscription';
 
 const ACTIVE_STAGES = ['NEW_LEAD', 'RESEARCHING', 'CONTACTED', 'FOLLOW_UP', 'INTERESTED', 'PROPOSAL'];
 const MANAGER_ROLES = ['ADMIN', 'MANAGER'];
@@ -213,23 +214,32 @@ export async function GET(req: NextRequest) {
     const seatLimit = org?.seatLimit || 10;
     const planName = org?.name ? `${org.name} (${org.plan.replace('_', ' ')})` : 'Growth Pro';
 
+    // Real status from the workspace (previously hard-coded as "Active, renews in 14 days").
+    const access = await getSubscriptionAccess(organizationId);
+    const BADGES: Record<string, string> = { trialing: 'Free trial', active: 'Active', expired: 'Trial ended', past_due: 'Payment due', canceled: 'Canceled', suspended: 'Suspended' };
+    const periodEnd = org?.currentPeriodEnd
+      ? org.currentPeriodEnd.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+      : null;
+    const statusLine =
+      access.status === 'trialing'
+        ? `Free trial · ${access.trialDaysRemaining} day${access.trialDaysRemaining === 1 ? '' : 's'} remaining`
+        : access.status === 'active'
+          ? periodEnd ? `Renews on ${periodEnd}` : 'Subscription active'
+          : access.reason || 'Choose a plan to keep using your workspace.';
+
     const subscription = {
       plan: planName,
       tier: org?.plan || 'PRO',
-      status: org?.planStatus || 'active',
-      badge: 'Active Subscription',
-      billingCycle: 'Monthly',
+      status: access.status,
+      badge: BADGES[access.status] || access.status,
+      healthy: access.allowed,
+      statusLine,
       leadLimit,
       leadUsed: totalLeads,
       leadPercentage: Math.min(100, Math.round((totalLeads / leadLimit) * 100)),
       seatLimit,
       seatUsed: Math.max(1, workload.length),
       seatPercentage: Math.min(100, Math.round((Math.max(1, workload.length) / seatLimit) * 100)),
-      storageLimitMb: 5000,
-      storageUsedMb: totalLeads > 0 ? Math.min(620, totalLeads * 12) : 0,
-      storagePercentage: totalLeads > 0 ? Math.min(100, Math.round(((totalLeads * 12) / 5000) * 100)) : 0,
-      renewalDays: 14,
-      renewalDate: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
     };
 
     // Sparkline series for the top 4 KPIs (0-based when account is clean)

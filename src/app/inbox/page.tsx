@@ -298,7 +298,7 @@ export default function InboxPage() {
   const showWizard = channelsLoaded && !anyConnected && conversations.length === 0 && !loadingList;
 
   return (
-    <div className="flex h-[calc(100vh-6.5rem)] min-h-[520px] w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0e172a] text-slate-100">
+    <div className="flex h-[calc(100vh-6.5rem)] min-h-[520px] w-full overflow-hidden rounded-2xl border border-white/10 bg-ink-900 text-slate-100">
       {/* ----------------------------- conversation list ----------------------------- */}
       <section className={`${mobileView === 'thread' ? 'hidden' : 'flex'} w-full flex-col border-r border-white/10 md:flex md:w-[340px] md:shrink-0`}>
         <header className="space-y-3 border-b border-white/10 p-4">
@@ -460,7 +460,7 @@ export default function InboxPage() {
                     <div className="relative">
                       <button onClick={() => setShowQuick((v) => !v)} className="text-xs text-slate-400 hover:text-white">Quick replies</button>
                       {showQuick && (
-                        <div className="absolute bottom-7 right-0 z-10 w-72 overflow-hidden rounded-xl border border-white/10 bg-[#14213d] shadow-xl">
+                        <div className="absolute bottom-7 right-0 z-10 w-72 overflow-hidden rounded-xl border border-white/10 bg-ink-850 shadow-xl">
                           {CANNED_RESPONSES.map((r) => (
                             <button key={r.id} onClick={() => applyQuick(r.content)} className="block w-full border-b border-white/5 px-3 py-2 text-left text-xs text-slate-200 last:border-0 hover:bg-white/5">
                               {r.title}
@@ -535,7 +535,7 @@ function ConnectWizard({ isManager, onConnectEmail }: { isManager: boolean; onCo
     <div className="flex flex-1 items-center justify-center overflow-y-auto p-6">
       <div className="w-full max-w-lg">
         <h2 className="text-xl font-semibold text-white">Bring your conversations together</h2>
-        <p className="mt-2 text-sm text-slate-400">Connect an account and every customer message lands here. Reply without leaving Versaly.</p>
+        <p className="mt-2 text-sm text-slate-400">Connect an account and every customer message lands here. Reply without leaving VersalyLabs.</p>
 
         {!isManager && <p className="mt-4 rounded-lg bg-amber-400/10 p-3 text-xs text-amber-200">Ask a workspace admin to connect your accounts.</p>}
 
@@ -622,7 +622,7 @@ function ConnectEmailModal({ onClose, onConnected, isManager, whatsappConnected 
   const field = 'w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-500/60 focus:outline-none';
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <form onSubmit={submit} onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-4 rounded-2xl border border-white/10 bg-[#14213d] p-6 shadow-2xl">
+      <form onSubmit={submit} onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-4 rounded-2xl border border-white/10 bg-ink-850 p-6 shadow-2xl">
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-base font-semibold text-white">Connect your email</h2>
@@ -706,7 +706,7 @@ function NewMessageModal({ channels, onClose, onCreated }: { channels: ChannelIn
   const field = 'w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-500/60 focus:outline-none';
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <form onSubmit={submit} onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-3 rounded-2xl border border-white/10 bg-[#14213d] p-6 shadow-2xl">
+      <form onSubmit={submit} onClick={(e) => e.stopPropagation()} className="w-full max-w-md space-y-3 rounded-2xl border border-white/10 bg-ink-850 p-6 shadow-2xl">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-white">New message</h2>
           <button type="button" onClick={onClose} className="text-slate-400 hover:text-white" aria-label="Close">✕</button>

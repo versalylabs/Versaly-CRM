@@ -1,7 +1,6 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import localFont from 'next/font/local';
+import { Inter, Quicksand } from 'next/font/google';
 import Providers from '@/components/providers';
 import AppShell from '@/components/AppShell';
 
@@ -10,40 +9,22 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
-const glorase = localFont({
-  src: [
-    {
-      path: '../../public/fonts/Glorase.woff',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: '../../public/fonts/Glorase-Italic.woff',
-      weight: '400',
-      style: 'italic',
-    },
-  ],
-  variable: '--font-glorase',
+// Brand font for the logo and headings.
+const quicksand = Quicksand({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+  variable: '--font-quicksand',
   display: 'swap',
 });
 
+// Icons and the link-preview image come from src/app (favicon.ico, icon.svg, apple-icon.png, opengraph-image.png).
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXTAUTH_URL || 'https://versaly-crm.vercel.app'),
   title: {
-    default: 'Versaly CRM — Modern Revenue & Subscription Platform',
-    template: '%s | Versaly CRM',
+    default: 'VersalyLabs CRM: leads, WhatsApp and follow-ups in one place',
+    template: '%s | VersalyLabs CRM',
   },
-  description: 'High-velocity cloud CRM with visual pipeline, automated outreach, and multi-tenant workspaces.',
-  icons: {
-    icon: [
-      { url: '/icon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-    ],
-    shortcut: '/favicon.svg',
-    apple: [
-      { url: '/apple-icon.svg', type: 'image/svg+xml' },
-      { url: '/icon.svg', type: 'image/svg+xml' },
-    ],
-  },
+  description: 'The CRM for Kenyan sales teams: manage leads, your pipeline and WhatsApp and email conversations, with automatic follow-ups.',
 };
 
 export default function RootLayout({
@@ -52,13 +33,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.className} ${inter.variable} ${glorase.variable} dark`} style={{ colorScheme: 'dark' }}>
-      <head>
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/icon.svg" />
-      </head>
-      <body className="flex min-h-screen bg-[#14213d] text-[#e5e5e5]">
+    <html lang="en" className={`${inter.className} ${inter.variable} ${quicksand.variable} dark`} style={{ colorScheme: 'dark' }}>
+      <body className="flex min-h-screen bg-ink-850 text-brand-cream">
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

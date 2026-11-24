@@ -1,4 +1,4 @@
-// Prisma schema for Versaly CRM
+// Prisma schema for VersalyLabs CRM
 generator client {
   provider = "prisma-client-js"
 }
@@ -675,8 +675,8 @@ model ConnectedChannelAccount {
   organizationId    String
   organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   channel           String       // INSTAGRAM, FACEBOOK, TIKTOK, X, WHATSAPP, EMAIL
-  accountName       String       // e.g. "Straten CRM IG", "Straten FB Page", "Straten Agency X"
-  accountHandle     String       // e.g. "@straten_agency", "straten_official", "@straten_crm"
+  accountName       String       // e.g. "My Business Instagram"
+  accountHandle     String       // e.g. "@mybusiness"
   externalAccountId String?      // e.g. Meta Page ID, Instagram Business Account ID, TikTok Open ID, X User ID
   accessToken       String?      // API Token / OAuth User or Page Access Token
   refreshToken      String?      // Refresh token if applicable

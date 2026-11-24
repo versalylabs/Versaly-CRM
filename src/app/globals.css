@@ -2,25 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Font face definitions for Glorase (Regular & Italic) */
-@font-face {
-  font-family: 'Glorase';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/Glorase.woff') format('woff'),
-       url('https://fonts.cdnfonts.com/s/143753/Glorase.woff') format('woff');
-}
-
-@font-face {
-  font-family: 'Glorase';
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/fonts/Glorase-Italic.woff') format('woff'),
-       url('https://fonts.cdnfonts.com/s/143753/Glorase%20Italic.woff') format('woff');
-}
-
 /* Custom CSS variables for design system */
 :root {
   --background: 0 0% 100%;
@@ -65,8 +46,8 @@
   --popover: 222.2 84% 4.9%;
   --popover-foreground: 210 40% 98%;
 
-  --primary: 210 40% 98%;
-  --primary-foreground: 222.2 47.4% 11.2%;
+  --primary: 24 100% 50%; /* brand orange #ff6b01 */
+  --primary-foreground: 181 72% 7%; /* brand ink #051f20 */
 
   --secondary: 217.2 32.6% 17.5%;
   --secondary-foreground: 210 40% 98%;
@@ -110,48 +91,26 @@ body {
 }
 
 /* ==========================================================================
-   Typography System:
-   - Main Large Headings (Top of the page & Website): Glorase (Regular)
-   - Smaller Headings (In CRM System: cards, widgets, modals, tables, sidebars): Inter Sans
+   Typography: Quicksand (brand font) for page and display headings;
+   Inter for interface text and small headings inside the app.
    ========================================================================== */
-
-/* 1. Main Large Headings (Top of page & Display titles): Glorase Regular */
 h1,
-.font-glorase,
-.page-title {
-  font-family: 'Glorase', var(--font-glorase), Georgia, Cambria, 'Times New Roman', Times, serif !important;
-  font-weight: 400 !important;
-  letter-spacing: -0.015em;
-}
-
-/* Ensure h1 maintains authentic Glorase Regular */
-h1.font-extrabold, h1.font-black, h1.font-bold, h1.font-semibold {
-  font-family: 'Glorase', var(--font-glorase), Georgia, Cambria, 'Times New Roman', Times, serif !important;
-  font-weight: 400 !important;
-}
-
-/* Website (Landing Page) display headings retain Glorase */
+.page-title,
 .landing-website h1,
 .landing-website h2,
 .landing-website h3,
 .landing-website .font-heading {
-  font-family: 'Glorase', var(--font-glorase), Georgia, Cambria, 'Times New Roman', Times, serif;
-  font-weight: 400;
-  letter-spacing: -0.015em;
+  font-family: var(--font-quicksand), 'Quicksand', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
-/* 2. Smaller Headings in the System: Clean, high-visibility, crisp Inter Sans */
-.crm-system h2:not(.font-glorase),
-.crm-system h3:not(.font-glorase),
-.crm-system h4:not(.font-glorase),
-.crm-system h5:not(.font-glorase),
-.crm-system h6:not(.font-glorase),
-h2:not(.font-glorase):not(.landing-website *),
-h3:not(.font-glorase):not(.landing-website *),
-h4:not(.font-glorase):not(.landing-website *),
-h5:not(.font-glorase):not(.landing-website *),
-h6:not(.font-glorase):not(.landing-website *) {
-  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+h2:not(.landing-website *),
+h3:not(.landing-website *),
+h4:not(.landing-website *),
+h5:not(.landing-website *),
+h6:not(.landing-website *) {
+  font-family: var(--font-inter), system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   letter-spacing: -0.01em;
 }
 
@@ -299,25 +258,25 @@ h6:not(.font-glorase):not(.landing-website *) {
   color: #9ca3af;
 }
 
-/* Versaly brand dark theme (#14213d, #e5e5e5, #fca311).
-   Existing CRM pages use Tailwind utility classes, so these
-   mappings keep the current UI intact while aligning directly with Versaly branding. */
+/* VersalyLabs dark theme (ink #051f20, cream #f8edd2, orange #ff6b01).
+   Older pages use light-theme Tailwind classes (bg-white, text-gray-*), so these
+   mappings repaint them in the brand palette. Values match tailwind.config.js. */
 html,
 html.dark,
 body {
-  background: #14213d;
-  color: #e5e5e5;
+  background: #051f20;
+  color: #f8edd2;
 }
-.bg-white { background-color: #1b2a4a !important; }
-.bg-gray-50 { background-color: #14213d !important; }
-.bg-gray-100 { background-color: #1e3054 !important; }
-.bg-gray-200 { background-color: #243862 !important; }
+.bg-white { background-color: #0f3536 !important; }
+.bg-gray-50 { background-color: #051f20 !important; }
+.bg-gray-100 { background-color: #164142 !important; }
+.bg-gray-200 { background-color: #1f4f50 !important; }
 .text-gray-900, .text-gray-800 { color: #ffffff !important; }
-.text-gray-700 { color: #e5e5e5 !important; }
-.text-gray-600 { color: #d4d4d8 !important; }
-.text-gray-500 { color: #a1a1aa !important; }
-.text-gray-400 { color: #a1a1aa !important; }
-.border-gray-100, .border-gray-200, .border-gray-300 { border-color: #243862 !important; }
+.text-gray-700 { color: #f8edd2 !important; }
+.text-gray-600 { color: #dcd6c6 !important; }
+.text-gray-500 { color: #a8b5ad !important; }
+.text-gray-400 { color: #a8b5ad !important; }
+.border-gray-100, .border-gray-200, .border-gray-300 { border-color: #1f4f50 !important; }
 .hover\:bg-gray-50:hover,
 .hover\:bg-gray-50\/80:hover,
 .hover\:bg-gray-50\/70:hover,
@@ -330,19 +289,19 @@ body {
 .hover\:bg-slate-50:hover,
 .hover\:bg-slate-100:hover,
 tbody tr:hover {
-  background-color: #203358 !important;
+  background-color: #164142 !important;
 }
 .hover\:text-gray-900:hover { color: #ffffff !important; }
 input, textarea, select, .lead-input {
-  background-color: #0e172a !important;
-  color: #e5e5e5 !important;
-  border-color: #283e6b !important;
+  background-color: #031819 !important;
+  color: #f8edd2 !important;
+  border-color: #1f4f50 !important;
 }
-input::placeholder, textarea::placeholder { color: #71717a !important; }
-.lead-label { color: #e5e5e5; }
-.bg-accent-50 { background-color: rgba(20, 33, 61, 0.72) !important; }
-.text-accent-800 { color: #fde68a !important; }
-.text-accent-600 { color: #fca311 !important; }
+input::placeholder, textarea::placeholder { color: #748680 !important; }
+.lead-label { color: #f8edd2; }
+.bg-accent-50 { background-color: rgba(5, 31, 32, 0.72) !important; }
+.text-accent-800 { color: #f8edd2 !important; }
+.text-accent-600 { color: #ff6b01 !important; }
 .bg-red-50 { background-color: rgba(127, 29, 29, 0.25) !important; }
 .border-red-200 { border-color: #7f1d1d !important; }
 .bg-emerald-50 { background-color: rgba(6, 78, 59, 0.25) !important; }
