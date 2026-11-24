@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../lib/auth';
@@ -8,6 +9,8 @@ import { createNotification, taskHref } from '../../../../../lib/notifications';
 import { executeAutomationWorkflows } from '../../../../../lib/workflows';
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
@@ -17,17 +20,20 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     if ('description' in body) data.description = String(body.description || '').trim() || null;
     if ('completed' in body) data.completed = Boolean(body.completed);
     if (body.priority) data.priority = String(body.priority).toLowerCase();
-    if ('dueDate' in body) data.dueDate = body.dueDate ? new Date(body.dueDate) : null;
+    if ('dueDate' in body) {
+      data.dueDate = body.dueDate ? new Date(body.dueDate) : null;
+      if (data.dueDate && Number.isNaN(data.dueDate.getTime())) return NextResponse.json({ error: 'Invalid due date.' }, { status: 400 });
+    }
     if ('assignedToId' in body) {
       if (body.assignedToId) {
-        const user = await prisma.user.findFirst({ where: { id: body.assignedToId, isActive: true } });
+        const user = await prisma.user.findFirst({ where: { id: body.assignedToId, isActive: true, organizationId: session.user?.organizationId || '__none__' } });
         if (!user) return NextResponse.json({ error: 'Selected assignee was not found or is inactive.' }, { status: 404 });
       }
       data.assignedToId = body.assignedToId || null;
     }
     let wasCompleted = false;
     const task = await prisma.$transaction(async (tx) => {
-      const existing = await tx.task.findFirst({ where: { id: params.id, organizationId: session.user?.organizationId || undefined } });
+      const existing = await tx.task.findFirst({ where: { id: params.id, organizationId: session.user?.organizationId || '__none__' } });
       if (!existing) throw new Error('Task not found.');
       const updated = await tx.task.update({ where: { id: params.id }, data, include: { lead: { select: { id: true, contactName: true, companyName: true, email: true } }, assignedTo: { select: { id: true, name: true, email: true, role: true } } } });
       if (updated.assignedToId && existing && updated.assignedToId !== existing.assignedToId) await createNotification({ userId: updated.assignedToId, type: 'TASK_ASSIGNED', title: 'Task assigned to you', message: `"${updated.title}" was assigned to you.`, href: taskHref(), category: 'task' });
@@ -45,8 +51,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  try { await prisma.task.delete({ where: { id: params.id, organizationId: session.user?.organizationId || undefined } }); return NextResponse.json({ success: true }); }
+  try { await prisma.task.delete({ where: { id: params.id, organizationId: session.user?.organizationId || '__none__' } }); return NextResponse.json({ success: true }); }
   catch { return NextResponse.json({ error: 'Failed to delete task.' }, { status: 500 }); }
 }

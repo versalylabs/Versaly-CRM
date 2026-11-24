@@ -9,6 +9,9 @@ const SENSITIVE_LIMITS: Record<string, { limit: number; windowMs: number }> = {
   '/api/auth/accept-invite': { limit: 20, windowMs: 15 * 60 * 1000 },
   '/api/public/lead': { limit: 30, windowMs: 15 * 60 * 1000 },
   '/api/auth/callback/credentials': { limit: 15, windowMs: 15 * 60 * 1000 },
+  '/api/contact': { limit: 5, windowMs: 15 * 60 * 1000 },
+  '/api/v1/leads': { limit: 120, windowMs: 60 * 1000 },
+  '/api/integrations/leads': { limit: 120, windowMs: 60 * 1000 },
 }
 
 function withRequestHeaders(response: NextResponse, requestId: string) {
@@ -29,7 +32,7 @@ export async function middleware(req: NextRequest) {
   const policy = SENSITIVE_LIMITS[pathname]
   if (policy && ['POST', 'PUT', 'PATCH'].includes(req.method)) {
     const ip = clientIp(req.headers)
-    const result = checkRateLimit(`${pathname}:${ip}`, policy.limit, policy.windowMs)
+    const result = await checkRateLimit(`${pathname}:${ip}`, policy.limit, policy.windowMs)
     if (!result.allowed) {
       const retryAfter = Math.max(1, Math.ceil((result.resetAt - Date.now()) / 1000))
       return withRequestHeaders(NextResponse.json({ error: 'Too many requests. Please try again later.' }, {

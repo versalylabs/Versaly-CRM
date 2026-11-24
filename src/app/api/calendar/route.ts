@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrgContext } from '../../../../lib/tenant';
 import { assertSubscriptionWriteAccess } from '../../../../lib/subscription';
@@ -86,6 +87,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const principal = await getAuthenticatedPrincipal(req);
   if (!principal?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

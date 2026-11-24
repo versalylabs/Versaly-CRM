@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../lib/auth';
@@ -10,6 +11,8 @@ function normalizePhone(value: string) {
 }
 
 export async function POST(req: NextRequest) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

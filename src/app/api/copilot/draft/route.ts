@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -5,6 +6,8 @@ import prisma from '@/lib/prisma';
 import { generateAiOutreachDraft, analyzeLeadSentimentAndRisk } from '@/lib/aiCopilot';
 
 export async function POST(req: NextRequest) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   try {
     const session = await getServerSession(authOptions);
     const organizationId = session?.user?.organizationId;

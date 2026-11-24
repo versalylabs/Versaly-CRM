@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
@@ -21,7 +22,8 @@ export async function GET(req: NextRequest) {
   const status = searchParams.get('status');
   const p = searchParams.get('priority');
   const search = searchParams.get('search')?.trim();
-  const where: any = { ...(session.user?.organizationId ? { organizationId: session.user.organizationId } : {}) };
+  if (!session.user?.organizationId) return NextResponse.json({ error: 'No workspace found for this user.' }, { status: 403 });
+  const where: any = { organizationId: session.user.organizationId };
   if (status === 'completed') where.completed = true;
   if (status === 'open') where.completed = false;
   if (p) where.priority = p.toLowerCase();
@@ -40,6 +42,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   try {
@@ -53,11 +57,11 @@ export async function POST(req: NextRequest) {
       if (Number.isNaN(dueDate.getTime())) return NextResponse.json({ error: 'Invalid due date.' }, { status: 400 });
     }
     if (body.assignedToId) {
-      const user = await prisma.user.findFirst({ where: { id: body.assignedToId, isActive: true } });
+      const user = await prisma.user.findFirst({ where: { id: body.assignedToId, isActive: true, organizationId: session.user?.organizationId || '__none__' } });
       if (!user) return NextResponse.json({ error: 'Selected assignee was not found or is inactive.' }, { status: 404 });
     }
     if (body.leadId) {
-      const lead = await prisma.lead.findUnique({ where: { id: body.leadId } });
+      const lead = await prisma.lead.findFirst({ where: { id: body.leadId, organizationId: session.user?.organizationId || '__none__' } });
       if (!lead) return NextResponse.json({ error: 'Selected lead was not found.' }, { status: 404 });
     }
     const task = await prisma.$transaction(async (tx) => {

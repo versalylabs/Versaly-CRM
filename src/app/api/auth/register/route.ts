@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import prisma from '../../../../../lib/prisma';
 import bcrypt from 'bcryptjs';
 import { initializeWorkspaceOnboarding } from '../../../../../lib/onboarding';
@@ -25,8 +26,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Company or workspace name is required' }, { status: 400 });
     }
 
-    if (!password || typeof password !== 'string' || password.length < 6) {
-      return NextResponse.json({ error: 'Password must be at least 6 characters long' }, { status: 400 });
+    if (!password || typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
+      return NextResponse.json({ error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters` }, { status: 400 });
     }
 
     const cleanEmail = email.trim().toLowerCase();

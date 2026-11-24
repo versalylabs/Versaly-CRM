@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrgContext } from '../../../../../lib/tenant';
 import { assertSubscriptionWriteAccess } from '../../../../../lib/subscription';
@@ -39,6 +40,8 @@ async function canManageEvent(user: any, event: any) {
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const principal = await getAuthenticatedPrincipal(req);
   if (!principal?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -105,6 +108,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const principal = await getAuthenticatedPrincipal(req);
   if (!principal?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

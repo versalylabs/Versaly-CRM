@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../lib/auth';
@@ -7,6 +8,8 @@ const lifecycle = ['ONBOARDING','ADOPTING','ACTIVE','AT_RISK','RENEWAL','CHURNED
 const renewalStatuses = ['NOT_SET','UPCOMING','RENEWED','AT_RISK','CHURNED'];
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
   const organizationId = session?.user?.organizationId;
   if (!session || !organizationId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

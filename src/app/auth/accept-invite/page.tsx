@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
+import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
@@ -58,8 +59,8 @@ function AcceptInviteForm() {
       setFormError('Please enter your full name');
       return;
     }
-    if (password.length < 8) {
-      setFormError('Password must be at least 8 characters');
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      setFormError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`);
       return;
     }
     if (password !== confirmPassword) {
@@ -197,10 +198,10 @@ function AcceptInviteForm() {
                 <input
                   type="password"
                   required
-                  minLength={8}
+                  minLength={MIN_PASSWORD_LENGTH}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
+                  placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
                   className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-xs text-gray-900 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 />
               </div>
@@ -212,7 +213,7 @@ function AcceptInviteForm() {
                 <input
                   type="password"
                   required
-                  minLength={8}
+                  minLength={MIN_PASSWORD_LENGTH}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Repeat your password"

@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -127,6 +128,8 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   try {
     const session = await getServerSession(authOptions);
     const organizationId = session?.user?.organizationId;

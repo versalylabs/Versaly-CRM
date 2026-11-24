@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import prisma from './prisma';
 import { logLeadActivity } from './automation';
+import { leadLimitError } from './subscription';
 
 type CaptureInput = Record<string, any>;
 
@@ -19,10 +20,10 @@ function smtpConfigured() {
   return Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD && process.env.SMTP_FROM);
 }
 
-async function selectAssignee(tx: any, organizationId?: string | null) {
+async function selectAssignee(tx: any, organizationId: string) {
   if (String(process.env.AUTO_ASSIGN_EXTERNAL_LEADS || 'true').toLowerCase() === 'false') return null;
   const users = await tx.user.findMany({
-    where: { isActive: true, role: { in: ['AGENT', 'MANAGER'] }, ...(organizationId ? { organizationId } : {}) },
+    where: { isActive: true, role: { in: ['AGENT', 'MANAGER'] }, organizationId },
     include: { _count: { select: { assignedLeads: { where: { pipelineStage: { notIn: ['WON', 'LOST'] } } } } } },
     orderBy: [{ createdAt: 'asc' }],
   });
@@ -61,29 +62,34 @@ export function normalizeCaptureInput(input: CaptureInput, defaultSource = 'WEBS
   };
 }
 
-export async function captureLead(input: CaptureInput, options: { defaultSource?: string; channel: string; organizationId?: string | null }) {
+// Every captured lead belongs to exactly one workspace: callers must resolve it (never from request input).
+export async function captureLead(input: CaptureInput, options: { defaultSource?: string; channel: string; organizationId: string }) {
+  if (!options.organizationId) return { ok: false, status: 400, error: 'No workspace was specified for this lead.' };
   const data = normalizeCaptureInput(input, options.defaultSource || 'WEBSITE_FORM');
   if (!data.contactName || !data.email || !/^\S+@\S+\.\S+$/.test(data.email)) {
     return { ok: false, status: 400, error: 'A valid contactName (or name) and email are required.' };
   }
 
-  const existing = await prisma.lead.findFirst({ where: { email: data.email, ...(options.organizationId ? { organizationId: options.organizationId } : {}) } });
+  const existing = await prisma.lead.findFirst({ where: { email: data.email, organizationId: options.organizationId } });
   if (existing) {
     await prisma.activityEvent.create({ data: { leadId: existing.id, type: 'LEAD_CAPTURE', action: 'Duplicate external lead received', metadata: { channel: options.channel, externalSource: data.externalSource } as any } });
     return { ok: true, duplicate: true, lead: existing, status: 200 };
   }
+
+  const limit = await leadLimitError(options.organizationId);
+  if (limit) return { ok: false, status: 403, error: limit };
 
   const result = await prisma.$transaction(async (tx) => {
     const assignedToId = await selectAssignee(tx, options.organizationId);
     const lead = await tx.lead.create({ data: {
       contactName: data.contactName, email: data.email, companyName: data.companyName, phone: data.phone, website: data.website,
       location: data.location, jobTitle: data.jobTitle, notes: data.notes, leadSource: data.leadSource as any,
-      organizationId: options.organizationId || null,
+      organizationId: options.organizationId,
       pipelineStage: 'NEW_LEAD', assignedToId,
     } });
     await logLeadActivity(tx, lead.id, 'LEAD_CAPTURE', 'External lead captured', { channel: options.channel, externalSource: data.externalSource, autoAssigned: Boolean(assignedToId) });
     const task = await tx.task.create({ data: {
-      leadId: lead.id, organizationId: options.organizationId || null, assignedToId, title: `Respond to new lead: ${lead.contactName}`,
+      leadId: lead.id, organizationId: options.organizationId, assignedToId, title: `Respond to new lead: ${lead.contactName}`,
       description: `[AUTO_EXTERNAL_LEAD] New ${options.channel.toLowerCase()} lead captured automatically.`,
       dueDate: new Date(Date.now() + 24 * 60 * 60 * 1000), priority: 'high'
     } });

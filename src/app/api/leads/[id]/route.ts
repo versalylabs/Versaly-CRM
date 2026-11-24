@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../lib/auth';
@@ -27,7 +28,7 @@ export async function GET(
     },
   });
 
-  if (!lead || (session.user?.organizationId && lead.organizationId && lead.organizationId !== session.user.organizationId)) {
+  if (!lead || !session.user?.organizationId || lead.organizationId !== session.user.organizationId) {
     return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
   }
 
@@ -39,6 +40,8 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -49,7 +52,7 @@ export async function PATCH(
     where: { id: params.id },
     select: { id: true, contactName: true, assignedToId: true, pipelineStage: true, organizationId: true }
   });
-  if (!existing || (session.user?.organizationId && existing.organizationId && existing.organizationId !== session.user.organizationId)) {
+  if (!existing || !session.user?.organizationId || existing.organizationId !== session.user.organizationId) {
     return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
   }
 
@@ -77,6 +80,14 @@ export async function PATCH(
     if (field in body) {
       data[field] = body[field] === '' ? null : body[field];
     }
+  }
+
+  if (data.assignedToId) {
+    const assignee = await prisma.user.findFirst({ where: { id: data.assignedToId, organizationId: session.user?.organizationId || '__none__', isActive: true } });
+    if (!assignee) return NextResponse.json({ error: 'Selected assignee was not found in this workspace.' }, { status: 404 });
+  }
+  for (const field of ['lastContact', 'nextFollowUp'] as const) {
+    if (body[field] && Number.isNaN(new Date(body[field]).getTime())) return NextResponse.json({ error: `Invalid ${field} date.` }, { status: 400 });
   }
 
   if ('dealValue' in body) {
@@ -131,6 +142,8 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -141,7 +154,7 @@ export async function DELETE(
       where: { id: params.id },
       select: { id: true, organizationId: true }
     });
-    if (!existing || (session.user?.organizationId && existing.organizationId && existing.organizationId !== session.user.organizationId)) {
+    if (!existing || !session.user?.organizationId || existing.organizationId !== session.user.organizationId) {
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
     }
 

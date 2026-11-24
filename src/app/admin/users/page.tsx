@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
+import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -795,10 +796,10 @@ export default function UserManagementPage() {
                   <input
                     type="password"
                     required
-                    minLength={8}
+                    minLength={MIN_PASSWORD_LENGTH}
                     value={createForm.password}
                     onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-                    placeholder="At least 8 characters"
+                    placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
                     className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-xs text-gray-900 outline-none focus:border-sky-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                   />
                 </div>
@@ -871,7 +872,7 @@ export default function UserManagementPage() {
                   <input
                     type="password"
                     required
-                    minLength={8}
+                    minLength={MIN_PASSWORD_LENGTH}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="New password (min 8 chars)"

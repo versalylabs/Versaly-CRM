@@ -9,7 +9,8 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const where: any = { isActive: true };
-  if (session.user?.organizationId) {
+  if (!session.user?.organizationId) return NextResponse.json({ error: 'No workspace found for this user.' }, { status: 403 });
+  {
     where.organizationId = session.user.organizationId;
   }
 

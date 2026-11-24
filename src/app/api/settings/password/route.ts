@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import { getServerSession } from 'next-auth';
 import bcrypt from 'bcryptjs';
 import { authOptions } from '../../../../../lib/auth';
@@ -17,8 +18,8 @@ export async function POST(request: Request) {
     if (!currentPassword || !newPassword) {
       return NextResponse.json({ error: 'Current and new password are required' }, { status: 400 });
     }
-    if (newPassword.length < 8) {
-      return NextResponse.json({ error: 'New password must be at least 8 characters' }, { status: 400 });
+    if (newPassword.length < MIN_PASSWORD_LENGTH) {
+      return NextResponse.json({ error: `New password must be at least ${MIN_PASSWORD_LENGTH} characters` }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({ where: { id: session.user.id } });

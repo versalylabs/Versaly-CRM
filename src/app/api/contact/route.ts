@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { sendContactFormEmail } from '@/lib/email';
 import { captureLead } from '@/lib/leadCapture';
-import prisma from '@/lib/prisma';
+import { getPlatformOrgId } from '@/lib/tenant';
 
 export async function POST(req: Request) {
   try {
@@ -38,11 +38,9 @@ export async function POST(req: Request) {
 
     // 2. Ingest lead into CRM system
     try {
-      const primaryOrg = await prisma.organization.findFirst({
-        orderBy: { createdAt: 'asc' },
-      });
-
-      await captureLead(
+      // Website enquiries are VersalyLabs' own leads.
+      const platformOrgId = await getPlatformOrgId();
+      if (platformOrgId) await captureLead(
         {
           contactName: name.trim(),
           email: email.trim(),
@@ -54,7 +52,7 @@ export async function POST(req: Request) {
         },
         {
           channel: 'WEBSITE_FORM',
-          organizationId: primaryOrg?.id || null,
+          organizationId: platformOrgId,
         }
       );
     } catch (err: any) {

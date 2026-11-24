@@ -1,21 +1,16 @@
+import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { DEFAULT_PIPELINE_STAGES, slugifyStageKey, PipelineStageItem } from '@/lib/pipelineStages';
 
+// The caller's own workspace only; never fall back to another workspace.
 async function resolveOrganizationId(session: any): Promise<string | null> {
-  if (session?.user?.organizationId) return session.user.organizationId;
-  if (session?.user?.email) {
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { organizationId: true },
-    });
-    if (user?.organizationId) return user.organizationId;
-  }
-  const defaultOrg = await prisma.organization.findFirst({ select: { id: true } });
-  return defaultOrg?.id || null;
+  return session?.user?.organizationId || null;
 }
+
+const canEditStages = (role?: string | null) => role === 'ADMIN' || role === 'MANAGER';
 
 // GET /api/pipeline/stages
 export async function GET(req: NextRequest) {
@@ -79,9 +74,14 @@ export async function GET(req: NextRequest) {
 
 // POST /api/pipeline/stages - Create a new custom stage
 export async function POST(req: NextRequest) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (!canEditStages(session.user.role)) {
+    return NextResponse.json({ error: 'Only workspace admins and managers can change pipeline stages.' }, { status: 403 });
   }
 
   const organizationId = await resolveOrganizationId(session);
@@ -169,9 +169,14 @@ export async function POST(req: NextRequest) {
 
 // PATCH /api/pipeline/stages - Edit a stage, reorder, or reset to defaults
 export async function PATCH(req: NextRequest) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (!canEditStages(session.user.role)) {
+    return NextResponse.json({ error: 'Only workspace admins and managers can change pipeline stages.' }, { status: 403 });
   }
 
   const organizationId = await resolveOrganizationId(session);
@@ -290,9 +295,14 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE /api/pipeline/stages - Delete a stage with optional lead reassignment
 export async function DELETE(req: NextRequest) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  if (!canEditStages(session.user.role)) {
+    return NextResponse.json({ error: 'Only workspace admins and managers can change pipeline stages.' }, { status: 403 });
   }
 
   const organizationId = await resolveOrganizationId(session);

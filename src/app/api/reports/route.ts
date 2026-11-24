@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
     const { range, start, label } = getDateRange(params.get('range'));
 
     const organizationId = session.user.organizationId;
+    if (!organizationId) return NextResponse.json({ error: 'No workspace found for this user.' }, { status: 403 });
     const orgWhere = organizationId ? { organizationId } : {};
     const leadOwnerWhere = {
       ...orgWhere,

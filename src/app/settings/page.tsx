@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
@@ -279,13 +280,13 @@ export default function SettingsPage() {
                   <input
                     type="password"
                     required
-                    minLength={8}
+                    minLength={MIN_PASSWORD_LENGTH}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className={glassInput}
                     placeholder="••••••••"
                   />
-                  <p className="text-[11px] text-slate-400 mt-1">Minimum 8 characters required.</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Minimum {MIN_PASSWORD_LENGTH} characters required.</p>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-300 mb-1">Confirm New Password</label>

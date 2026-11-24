@@ -1,3 +1,4 @@
+import { blockIfReadOnly, leadLimitError } from '../../../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -7,6 +8,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   try {
     const session = await getServerSession(authOptions);
     const organizationId = session?.user?.organizationId;
@@ -31,6 +34,9 @@ export async function POST(
       });
       return NextResponse.json({ success: true, lead: existingLead, message: 'Conversation is already linked to a lead' });
     }
+
+    const limit = await leadLimitError(organizationId);
+    if (limit) return NextResponse.json({ error: limit }, { status: 403 });
 
     const contactName = body.contactName || conversation.contactName || 'New Prospect';
     const email = body.email || conversation.contactEmail || `lead_${Date.now()}@inbound.crm`;

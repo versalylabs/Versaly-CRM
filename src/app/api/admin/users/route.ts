@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../lib/auth';
 import { assertSubscriptionWriteAccess } from '../../../../../lib/subscription';
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: 'Enter a valid email address' }, { status: 400 });
     }
-    if (password.length < 8) return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+    if (password.length < MIN_PASSWORD_LENGTH) return NextResponse.json({ error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters` }, { status: 400 });
     if (!isRole(role)) return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
 
     // Seat quota enforcement

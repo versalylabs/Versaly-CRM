@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { API_KEY_LIMITS, normalizePlan } from '@/lib/plans';
 import { getServerSession } from 'next-auth';
@@ -12,6 +13,8 @@ export async function GET() {
   return NextResponse.json(keys);
 }
 export async function POST(req: NextRequest) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const s=await session(); if(!s?.user?.organizationId || !['ADMIN','MANAGER'].includes(s.user.role||'')) return NextResponse.json({error:'Admin or manager access required.'},{status:403});
   const org=await prisma.organization.findUnique({where:{id:s.user.organizationId},select:{id:true,plan:true,_count:{select:{apiKeys:true}}}});
   if(org && org._count.apiKeys >= (API_KEY_LIMITS[normalizePlan(org.plan)])) return NextResponse.json({error:`Your ${org.plan} plan has reached its API key limit.`},{status:403});
@@ -20,6 +23,8 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({id:key.id,name:key.name,key:secret,warning:'Copy this key now. The full secret will not be shown again.'},{status:201});
 }
 export async function DELETE(req: NextRequest) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const s=await session(); if(!s?.user?.organizationId || !['ADMIN','MANAGER'].includes(s.user.role||'')) return NextResponse.json({error:'Admin or manager access required.'},{status:403});
   const id=new URL(req.url).searchParams.get('id'); if(!id)return NextResponse.json({error:'Key id is required.'},{status:400});
   await prisma.apiKey.updateMany({where:{id,organizationId:s.user.organizationId},data:{revokedAt:new Date()}}); return NextResponse.json({success:true});

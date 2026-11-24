@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -7,6 +8,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   try {
     const session = await getServerSession(authOptions);
     const organizationId = session?.user?.organizationId;
@@ -29,6 +32,12 @@ export async function POST(
     if (!conversation) {
       return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
     }
+
+    if (assignedToId) {
+      const assignee = await prisma.user.findFirst({ where: { id: assignedToId, organizationId, isActive: true } });
+      if (!assignee) return NextResponse.json({ error: 'Selected assignee was not found in this workspace.' }, { status: 404 });
+    }
+    if (dueDate && Number.isNaN(new Date(dueDate).getTime())) return NextResponse.json({ error: 'Invalid due date.' }, { status: 400 });
 
     const task = await prisma.task.create({
       data: {

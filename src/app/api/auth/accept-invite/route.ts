@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import prisma from '../../../../../lib/prisma';
 import bcrypt from 'bcryptjs';
 import { verifyInviteToken } from '../../../../../lib/invitationToken';
@@ -45,8 +46,8 @@ export async function POST(request: Request) {
 
     if (!token) return NextResponse.json({ error: 'Missing invitation token' }, { status: 400 });
     if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
-    if (password.length < 8) {
-      return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      return NextResponse.json({ error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters` }, { status: 400 });
     }
 
     const payload = verifyInviteToken(token);

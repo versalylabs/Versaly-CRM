@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getOrgContext, unauthorized } from '../../../../../lib/tenant';
 import { assertSubscriptionWriteAccess } from '../../../../../lib/subscription';
@@ -10,6 +11,8 @@ function leadStatus(status: string) {
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const ctx = await getOrgContext();
   if (!ctx) return unauthorized();
 
@@ -55,6 +58,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const ctx = await getOrgContext();
   if (!ctx) return unauthorized();
 

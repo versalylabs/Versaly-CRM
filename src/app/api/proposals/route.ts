@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../lib/subscription';
 import { NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma';
 import { logLeadActivity } from '../../../../lib/automation';
@@ -24,6 +25,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const ctx = await getOrgContext();
   if (!ctx) return unauthorized();
   try {

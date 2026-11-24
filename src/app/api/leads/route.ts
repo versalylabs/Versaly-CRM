@@ -1,3 +1,4 @@
+import { blockIfReadOnly, leadLimitError } from '../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
@@ -19,7 +20,8 @@ export async function GET(req: NextRequest) {
   const stage = searchParams.get('stage');
 
   const where: any = {};
-  if (session.user?.organizationId) {
+  if (!session.user?.organizationId) return NextResponse.json({ error: 'No workspace found for this user.' }, { status: 403 });
+  {
     where.organizationId = session.user.organizationId;
   }
   const assignedTo = searchParams.get('assignedTo');
@@ -48,6 +50,8 @@ export async function GET(req: NextRequest) {
 
 // POST /api/leads - create a new lead
 export async function POST(req: NextRequest) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -74,23 +78,15 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Check SaaS plan lead quota
-    if (session.user?.organizationId) {
-      const org = await prisma.organization.findUnique({
-        where: { id: session.user.organizationId },
-        include: { _count: { select: { leads: true } } },
-      });
-      if (org && org._count.leads >= org.leadLimit) {
-        return NextResponse.json(
-          { error: `You have reached your limit of ${org.leadLimit} leads on your current plan. Please upgrade your subscription to add more leads.` },
-          { status: 403 }
-        );
-      }
+    if (!session.user?.organizationId) {
+      return NextResponse.json({ error: 'No workspace found for this user.' }, { status: 403 });
     }
+    const limit = await leadLimitError(session.user.organizationId);
+    if (limit) return NextResponse.json({ error: limit }, { status: 403 });
 
     const lead = await prisma.lead.create({
       data: {
-        organizationId: session.user?.organizationId || null,
+        organizationId: session.user.organizationId,
         companyName: body.companyName || null,
         contactName: body.contactName,
         jobTitle: body.jobTitle || null,

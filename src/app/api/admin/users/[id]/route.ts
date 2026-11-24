@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../../lib/auth';
 import { assertSubscriptionWriteAccess } from '../../../../../../lib/subscription';
@@ -57,7 +58,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     }
     if (body.password !== undefined && body.password !== '') {
       const password = String(body.password);
-      if (password.length < 8) return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+      if (password.length < MIN_PASSWORD_LENGTH) return NextResponse.json({ error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters` }, { status: 400 });
       data.password = await bcrypt.hash(password, 10);
     }
 

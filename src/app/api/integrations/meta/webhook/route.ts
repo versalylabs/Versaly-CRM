@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { captureLead } from '../../../../../../lib/leadCapture';
 import { fetchMetaLead, mapMetaLeadFields, verifyMetaSignature } from '../../../../../../lib/metaLeadAds';
+import prisma from '../../../../../../lib/prisma';
+import { getPlatformOrgId } from '../../../../../../lib/tenant';
+
+// The workspace that owns a Facebook page: one that connected it, or the platform workspace for its own page.
+async function orgForPage(pageId: string) {
+  if (!pageId) return null;
+  const account = await prisma.connectedChannelAccount.findMany({ where: { channel: 'FACEBOOK', externalAccountId: pageId }, select: { organizationId: true }, take: 2 });
+  if (account.length === 1) return account[0].organizationId;
+  if (account.length === 0 && pageId === process.env.FACEBOOK_PAGE_ID) return getPlatformOrgId();
+  return null; // unknown or ambiguous page: never guess a workspace
+}
 
 export const runtime = 'nodejs';
 
@@ -39,11 +50,16 @@ export async function POST(req: NextRequest) {
   const results: any[] = [];
   try {
     for (const event of events) {
+      const organizationId = await orgForPage(event.pageId);
+      if (!organizationId) {
+        results.push({ leadgenId: event.leadgenId, skipped: 'No workspace owns this page.' });
+        continue;
+      }
       const metaLead = await fetchMetaLead(event.leadgenId);
       const input = mapMetaLeadFields(metaLead.field_data || []);
-      const result = await captureLead({ ...input, notes: `Meta Lead Ad ID: ${event.leadgenId}\nForm ID: ${event.formId || 'Unknown'}` }, { defaultSource: 'SOCIAL_MEDIA', channel: 'META_LEAD_ADS' });
+      const result = await captureLead({ ...input, notes: `Meta Lead Ad ID: ${event.leadgenId}\nForm ID: ${event.formId || 'Unknown'}` }, { defaultSource: 'SOCIAL_MEDIA', channel: 'META_LEAD_ADS', organizationId });
       if (!result.ok) throw new Error(result.error || 'Unable to capture Meta lead.');
-      results.push({ leadgenId: event.leadgenId, duplicate: result.duplicate, leadId: result.lead?.id || null });
+      results.push({ leadgenId: event.leadgenId, duplicate: result.duplicate, leadId: (result as any).lead?.id || null });
     }
     return NextResponse.json({ received: true, processed: results.length, results });
   } catch (error: any) {

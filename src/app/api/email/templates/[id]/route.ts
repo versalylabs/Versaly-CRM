@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../../lib/auth';
@@ -5,6 +6,8 @@ import prisma from '../../../../../../lib/prisma';
 import { getOrgContext, unauthorized } from '../../../../../../lib/tenant';
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const ctx = await getOrgContext();
   if (!ctx) return unauthorized();
 
@@ -31,6 +34,8 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const ctx = await getOrgContext();
   if (!ctx) return unauthorized();
   try {

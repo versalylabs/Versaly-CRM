@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getOrgContext, isManagerRole, unauthorized } from '@/lib/tenant';
@@ -19,6 +20,8 @@ export async function GET(req: NextRequest) {
 
 /** POST: connect (or replace) the workspace mailbox after verifying it works. */
 export async function POST(req: NextRequest) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const ctx = await getOrgContext();
   if (!ctx) return unauthorized();
   if (!isManagerRole(ctx.role)) {

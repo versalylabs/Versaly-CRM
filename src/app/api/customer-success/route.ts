@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
@@ -86,6 +87,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
   const organizationId = session?.user?.organizationId;
   if (!session || !organizationId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

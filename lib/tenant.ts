@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { NextResponse } from 'next/server';
 import { authOptions } from './auth';
+import prisma from './prisma';
 
 export type OrgContext = {
   userId: string;
@@ -25,4 +26,13 @@ export const isManagerRole = (role?: string | null) => role === 'ADMIN' || role 
 
 export function unauthorized() {
   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+}
+
+/** The VersalyLabs platform workspace (receives the landing-page contact form and platform-level integrations). */
+export async function getPlatformOrgId(): Promise<string | null> {
+  const org = await prisma.organization.findUnique({
+    where: { slug: process.env.PLATFORM_ORG_SLUG || 'versaly-hq' },
+    select: { id: true },
+  });
+  return org?.id || null;
 }

@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
     
     // Multi-tenant organization scoping
     const organizationId = session.user.organizationId;
+    if (!organizationId) return NextResponse.json({ error: 'No workspace found for this user.' }, { status: 403 });
     const orgWhere = organizationId ? { organizationId } : {};
     const ownerWhere = {
       ...orgWhere,

@@ -1,3 +1,6 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from './auth';
 import prisma from './prisma';
 
 export type SubscriptionAccess = {
@@ -33,4 +36,35 @@ export async function getSubscriptionAccess(organizationId?: string | null): Pro
 export async function assertSubscriptionWriteAccess(organizationId?: string | null) {
   const access = await getSubscriptionAccess(organizationId);
   return access.allowed ? null : access;
+}
+
+/**
+ * Guard for routes that change workspace data. Returns a 402 response when the
+ * signed-in user's workspace is read-only (trial ended, unpaid, canceled or suspended),
+ * otherwise null. Unauthenticated requests return null: the route's own auth check handles them.
+ * Usage at the top of a write handler: `const readOnly = await blockIfReadOnly(); if (readOnly) return readOnly;`
+ */
+export async function blockIfReadOnly(): Promise<NextResponse | null> {
+  const session = await getServerSession(authOptions);
+  const orgId = session?.user?.organizationId;
+  if (!orgId || session?.user?.isPlatformAdmin) return null;
+  const denied = await assertSubscriptionWriteAccess(orgId);
+  if (!denied) return null;
+  return NextResponse.json(
+    { error: denied.reason || 'Your workspace is read-only. Choose a plan to make changes.', readOnly: true, status: denied.status },
+    { status: 402 }
+  );
+}
+
+/**
+ * Returns an error message when the workspace is at its plan's lead limit, otherwise null.
+ * shortcut: count-then-insert can let two simultaneous creates both pass; acceptable as a soft cap, move to a DB constraint if it matters.
+ */
+export async function leadLimitError(organizationId: string): Promise<string | null> {
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { leadLimit: true, _count: { select: { leads: true } } },
+  });
+  if (!org || org._count.leads < org.leadLimit) return null;
+  return `You have reached your plan's limit of ${org.leadLimit.toLocaleString('en-US')} leads. Upgrade your plan to add more.`;
 }

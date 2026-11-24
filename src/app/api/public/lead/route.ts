@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { captureLead } from '../../../../../lib/leadCapture';
+import prisma from '../../../../../lib/prisma';
 
 function cors(req: NextRequest, response: NextResponse) {
   const allowed = process.env.LEAD_CAPTURE_ALLOWED_ORIGIN || '*';
@@ -14,7 +15,11 @@ export async function OPTIONS(req: NextRequest) { return cors(req, new NextRespo
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const result = await captureLead(body, { defaultSource: 'WEBSITE_FORM', channel: 'WEBSITE_FORM' });
+    // Embedded website forms identify their workspace by its public slug (?workspace=acme or body.workspace).
+    const slug = String(req.nextUrl.searchParams.get('workspace') || body?.workspace || '').trim().toLowerCase();
+    const org = slug ? await prisma.organization.findUnique({ where: { slug }, select: { id: true, suspendedAt: true } }) : null;
+    if (!org || org.suspendedAt) return cors(req, NextResponse.json({ error: 'Unknown workspace. Check the form code you copied.' }, { status: 404 }));
+    const result = await captureLead(body, { defaultSource: 'WEBSITE_FORM', channel: 'WEBSITE_FORM', organizationId: org.id });
     const response = result.ok
       ? NextResponse.json({ success: true, duplicate: result.duplicate, message: result.duplicate ? 'This contact is already in our CRM.' : 'Thanks. Your enquiry has been received.' }, { status: result.status })
       : NextResponse.json({ error: result.error }, { status: result.status });

@@ -1,3 +1,4 @@
+import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextResponse } from 'next/server';
 import prisma from '../../../../../lib/prisma';
 import { logLeadActivity } from '../../../../../lib/automation';
@@ -8,6 +9,8 @@ import { assertSubscriptionWriteAccess } from '../../../../../lib/subscription';
 type Params = { params: { id: string } };
 
 export async function PATCH(request: Request, { params }: Params) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const ctx = await getOrgContext();
   if (!ctx) return unauthorized();
   try {
@@ -63,6 +66,8 @@ export async function PATCH(request: Request, { params }: Params) {
 }
 
 export async function DELETE(_request: Request, { params }: Params) {
+  const readOnly = await blockIfReadOnly();
+  if (readOnly) return readOnly;
   const ctx = await getOrgContext();
   if (!ctx) return unauthorized();
   try {

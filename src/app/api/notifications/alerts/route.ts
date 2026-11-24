@@ -52,9 +52,9 @@ export async function POST() {
 
   const isManager = session.user.role === 'ADMIN' || session.user.role === 'MANAGER';
   if (isManager) {
-    const unassignedLeads = await prisma.lead.count({ where: { assignedToId: null, pipelineStage: { notIn: ['WON', 'LOST'] } } });
+    const unassignedLeads = await prisma.lead.count({ where: { organizationId: session.user.organizationId || '__none__', assignedToId: null, pipelineStage: { notIn: ['WON', 'LOST'] } } });
     if (unassignedLeads > 0) await add('UNASSIGNED_LEADS', 'Unassigned leads', `${unassignedLeads} active lead(s) are currently unassigned.`, '/leads', 'lead');
-    const unassignedTasks = await prisma.task.count({ where: { assignedToId: null, completed: false } });
+    const unassignedTasks = await prisma.task.count({ where: { organizationId: session.user.organizationId || '__none__', assignedToId: null, completed: false } });
     if (unassignedTasks > 0) await add('UNASSIGNED_TASKS', 'Unassigned tasks', `${unassignedTasks} open task(s) are currently unassigned.`, '/tasks', 'task');
   }
 

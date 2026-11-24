@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
+import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -203,13 +204,13 @@ function SignUpForm() {
             {/* Password */}
             <div>
               <label htmlFor="password" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                Create Password <span className="font-normal text-gray-400">(minimum 6 characters)</span>
+                Create Password <span className="font-normal text-gray-400">(minimum {MIN_PASSWORD_LENGTH} characters)</span>
               </label>
               <input
                 id="password"
                 type="password"
                 required
-                minLength={6}
+                minLength={MIN_PASSWORD_LENGTH}
                 placeholder="••••••••"
                 autoComplete="new-password"
                 value={password}

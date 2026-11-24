@@ -61,8 +61,8 @@ export async function executeAutomationWorkflows(input:{ organizationId:string; 
       if (workflow.actionType==='CREATE_TASK') {
         const delay=Math.max(0,Number(cfg.delayHours ?? 24)); const marker=`[WORKFLOW:${workflow.id}]`;
         const exists=await prisma.task.findFirst({where:{organizationId:input.organizationId,leadId:lead?.id||null,completed:false,description:{contains:marker}}});
-        if(exists){status='SKIPPED';message='A matching workflow task is already open.';} else {
-          await prisma.task.create({data:{organizationId:input.organizationId,leadId:lead?.id||null,assignedToId:cfg.assignedToId||lead?.assignedToId||null,title:String(cfg.title||`Follow up with ${lead?.contactName||'customer'}`),description:`${marker} ${String(cfg.description||'Created automatically by a workflow.')}`,dueDate:new Date(Date.now()+delay*3600000),priority:['low','medium','high'].includes(String(cfg.priority))?String(cfg.priority):'medium'}});
+        if(exists){status='SKIPPED';message='A matching workflow task is already open.';} else {const assignee=cfg.assignedToId?(await prisma.user.findFirst({where:{id:String(cfg.assignedToId),organizationId:input.organizationId,isActive:true},select:{id:true}}))?.id:null;
+          await prisma.task.create({data:{organizationId:input.organizationId,leadId:lead?.id||null,assignedToId:assignee||lead?.assignedToId||null,title:String(cfg.title||`Follow up with ${lead?.contactName||'customer'}`),description:`${marker} ${String(cfg.description||'Created automatically by a workflow.')}`,dueDate:new Date(Date.now()+delay*3600000),priority:['low','medium','high'].includes(String(cfg.priority))?String(cfg.priority):'medium'}});
           message='Created a follow-up task.';
         }
       } else if(workflow.actionType==='UPDATE_STAGE') {

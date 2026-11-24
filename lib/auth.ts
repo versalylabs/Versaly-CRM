@@ -1,5 +1,4 @@
 import type { NextAuthOptions } from 'next-auth'
-import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import prisma from './prisma'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
@@ -57,8 +56,9 @@ if (
 // No fallback secret: a missing secret must fail loudly (see lib/authSecret.ts).
 const authSecret = getAuthSecret();
 
+const DISABLED = '__disabled__'
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -122,6 +122,21 @@ export const authOptions: NextAuthOptions = {
         token.organizationName = user.organizationName
         token.plan = user.plan
         token.isPlatformAdmin = getPlatformAdminEmails().includes((user.email || '').toLowerCase())
+      } else if (token.id && token.id !== DISABLED) {
+        // Re-read role, workspace and active status on every server-side session read, so a
+        // deactivated user or a role/plan change takes effect immediately rather than after 8 hours.
+        const fresh = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { isActive: true, role: true, organizationId: true, organization: { select: { name: true, plan: true } } },
+        })
+        if (!fresh || !fresh.isActive) {
+          // Not a valid identity any more: ids that match nothing, no workspace, no admin rights.
+          return { ...token, id: DISABLED, email: null, role: undefined, organizationId: null, isPlatformAdmin: false }
+        }
+        token.role = fresh.role
+        token.organizationId = fresh.organizationId
+        token.organizationName = fresh.organization?.name
+        token.plan = fresh.organization?.plan
       }
 
       return token
