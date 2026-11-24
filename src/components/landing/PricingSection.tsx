@@ -3,86 +3,12 @@
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Check, Sparkles, ArrowRight, Shield, Zap, HelpCircle, PhoneCall } from 'lucide-react';
+import { Check, Sparkles, ArrowRight, Shield, Zap, PhoneCall, Clock } from 'lucide-react';
+import { PLANS as PLANS_BY_KEY, PLAN_ORDER, SHARED_FEATURES, annualSavingsKes, type PlanDetails } from '@/lib/plans';
 
-interface PricingPlan {
-  id: string;
-  name: string;
-  monthlyPrice: number;
-  annualPrice: number;
-  annualSavings: number;
-  description: string;
-  popular?: boolean;
-  highlightFeatures: string[];
-  features: string[];
-  ctaText: string;
-  signupKey: 'STARTER' | 'GROWTH_PRO' | 'ENTERPRISE';
-}
+type PricingPlan = PlanDetails;
 
-const PLANS: PricingPlan[] = [
-  {
-    id: 'starter',
-    name: 'Starter',
-    monthlyPrice: 3900,
-    annualPrice: 3200,
-    annualSavings: 8400,
-    description: 'A focused, high-precision workspace for boutique agencies and lean sales teams.',
-    signupKey: 'STARTER',
-    ctaText: 'Start 14-Day Free Trial',
-    highlightFeatures: ['Visual deal pipeline', 'Email sequences'],
-    features: [
-      '1,000 active customer leads',
-      'Up to 3 team members',
-      'Visual deal pipeline & stage tracking',
-      'Email sequences & task scheduler',
-      'Standard conversion rate reports',
-      'Community & email support',
-    ],
-  },
-  {
-    id: 'growth',
-    name: 'Growth Pro',
-    monthlyPrice: 9900,
-    annualPrice: 8200,
-    annualSavings: 20400,
-    description: 'The complete revenue engine with automated WhatsApp outreach & customer retention analytics.',
-    popular: true,
-    signupKey: 'GROWTH_PRO',
-    ctaText: 'Start 14-Day Free Trial',
-    highlightFeatures: ['Integrated WhatsApp outreach', 'AI Customer Retention & Churn Scoring'],
-    features: [
-      '5,000 active customer leads',
-      'Up to 10 team members',
-      'Integrated WhatsApp & Email outreach',
-      'AI Customer Retention & Churn Scoring',
-      'Role-based permissions & audit log',
-      'Revenue trajectory forecasting',
-      'Automated SLA & task escalation',
-      'Priority live chat support',
-    ],
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise Scale',
-    monthlyPrice: 24900,
-    annualPrice: 19900,
-    annualSavings: 60000,
-    description: 'Mission-critical capacity, unlimited automation triggers, and dedicated account onboarding.',
-    signupKey: 'ENTERPRISE',
-    ctaText: 'Start 14-Day Free Trial',
-    highlightFeatures: ['100,000 active customer leads', 'Dedicated Customer Success Manager'],
-    features: [
-      '100,000 active customer leads',
-      'Up to 50 team members',
-      'Custom webhook triggers & integrations',
-      'Multi-currency billing (KES, USD, EUR)',
-      'Custom data schemas & field validation',
-      'Export audit trails & compliance logs',
-      'Dedicated Customer Success Manager',
-      '99.9% Uptime SLA commitment',
-    ],
-  },
-];
+const PLANS: PricingPlan[] = PLAN_ORDER.map((key) => PLANS_BY_KEY[key]);
 
 /**
  * Interactive React Bits inspired Glass Spotlight Card
@@ -98,8 +24,8 @@ function PricingCard({
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
 
-  const price = annual ? plan.annualPrice : plan.monthlyPrice;
-  const originalPrice = plan.monthlyPrice;
+  const price = annual ? plan.priceKes.annual : plan.priceKes.monthly;
+  const originalPrice = plan.priceKes.monthly;
 
   function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     if (!cardRef.current) return;
@@ -197,7 +123,7 @@ function PricingCard({
                 </div>
                 {annual && (
                   <span className="text-[11px] font-bold text-emerald-300">
-                    Billed annually (Save KES {plan.annualSavings.toLocaleString()}/yr)
+                    Billed annually (Save KES {annualSavingsKes(plan).toLocaleString()}/yr)
                   </span>
                 )}
               </div>
@@ -207,45 +133,46 @@ function PricingCard({
           {/* Included Features Checklist */}
           <div className="mt-6">
             <p className="text-xs font-black uppercase tracking-wider text-sky-300/90 flex items-center gap-1.5">
-              <span>Included Capabilities</span>
+              <span>Plan includes</span>
             </p>
             <ul className="mt-3.5 space-y-3 text-sm text-sky-100/90">
-              {plan.features.map((feature, i) => {
-                const isHighlighted = plan.highlightFeatures.some((hf) =>
-                  feature.toLowerCase().includes(hf.toLowerCase())
-                );
-                return (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <div
-                      className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
-                        isHighlighted || plan.popular
-                          ? 'bg-cyan-400/25 text-cyan-300 ring-1 ring-cyan-400/40'
-                          : 'bg-sky-500/20 text-sky-400'
-                      }`}
-                    >
-                      <Check className="h-3 w-3 stroke-[3]" />
-                    </div>
-                    <span className={isHighlighted ? 'font-semibold text-white' : ''}>
-                      {feature}
-                    </span>
-                  </li>
-                );
-              })}
+              {plan.features.map((feature) => (
+                <li key={feature} className="flex items-start gap-2.5">
+                  <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-cyan-400/25 text-cyan-300 ring-1 ring-cyan-400/40">
+                    <Check className="h-3 w-3 stroke-[3]" />
+                  </div>
+                  <span>{feature}</span>
+                </li>
+              ))}
             </ul>
+            <p className="mt-4 text-xs text-sky-200/70">Plus everything listed below the plans.</p>
+            {plan.comingSoon.length > 0 && (
+              <div className="mt-5">
+                <p className="text-xs font-black uppercase tracking-wider text-sky-300/60">Coming soon</p>
+                <ul className="mt-2.5 space-y-2 text-sm text-sky-100/60">
+                  {plan.comingSoon.map((feature) => (
+                    <li key={feature} className="flex items-start gap-2.5">
+                      <Clock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
 
         {/* CTA Button and Microcopy */}
         <div className="relative z-10 mt-8 pt-4 border-t border-white/10">
           <Link
-            href={`/auth/signup?plan=${plan.signupKey}&billing=${annual ? 'annual' : 'monthly'}`}
+            href={`/auth/signup?plan=${plan.key}&billing=${annual ? 'annual' : 'monthly'}`}
             className={`group/btn flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-center text-sm font-extrabold transition-all duration-200 ${
               plan.popular
                 ? 'bg-gradient-to-r from-sky-500 via-cyan-400 to-sky-500 bg-[length:200%_auto] text-[#0c1527] hover:brightness-110 shadow-[0_4px_20px_rgba(252, 163, 17,0.5)] active:scale-[0.98]'
                 : 'border border-sky-400/40 bg-sky-950/50 text-white hover:bg-sky-500/20 hover:border-sky-300 shadow-[0_4px_16px_rgba(0,0,0,0.3)] active:scale-[0.98]'
             }`}
           >
-            <span>{plan.ctaText}</span>
+            <span>Start 14-Day Free Trial</span>
             <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover/btn:translate-x-1" />
           </Link>
 
@@ -256,14 +183,14 @@ function PricingCard({
           </div>
 
           {/* Enterprise custom contact link */}
-          {plan.id === 'enterprise' && (
+          {plan.key === 'ENTERPRISE' && (
             <div className="mt-3 text-center">
               <a
                 href="#contact"
                 className="inline-flex items-center gap-1 text-xs font-semibold text-sky-300 hover:text-white transition-colors"
               >
                 <PhoneCall className="h-3 w-3" />
-                <span>Need custom SLA or invoice? Talk to us →</span>
+                <span>Need a custom quote or invoice? Talk to us →</span>
               </a>
             </div>
           )}
@@ -341,25 +268,30 @@ export function PricingSection() {
         {/* Pricing Cards Grid */}
         <div className="mt-8 lg:mt-12 grid gap-6 lg:grid-cols-3 lg:items-stretch">
           {PLANS.map((plan) => (
-            <PricingCard key={plan.id} plan={plan} annual={annual} />
+            <PricingCard key={plan.key} plan={plan} annual={annual} />
           ))}
         </div>
 
-        {/* Security, Compliance & Multi-Currency Assurance Bar */}
-        <div className="mt-10 lg:mt-12 flex flex-wrap items-center justify-center gap-6 rounded-2xl border border-white/15 bg-[#0c1527]/80 px-6 py-4 text-xs font-semibold text-sky-200/90 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-          <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-sky-400" />
-            <span>Encrypted Multi-Tenant Isolation</span>
-          </div>
-          <span className="text-sky-500/40 hidden sm:inline">•</span>
-          <div className="flex items-center gap-2">
-            <Zap className="h-4 w-4 text-emerald-400" />
-            <span>Instant Workspace Setup (&lt; 60 seconds)</span>
-          </div>
-          <span className="text-sky-500/40 hidden sm:inline">•</span>
-          <div className="flex items-center gap-2">
-            <Check className="h-4 w-4 text-cyan-400" />
-            <span>KES, USD, EUR Multi-Currency Checkout</span>
+        {/* Included in every plan */}
+        <div className="mt-10 lg:mt-12 rounded-2xl border border-white/15 bg-[#0c1527]/80 px-6 py-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+          <p className="text-center text-xs font-black uppercase tracking-wider text-sky-300/90">Every plan includes</p>
+          <ul className="mt-4 grid gap-x-6 gap-y-2.5 text-sm text-sky-100/90 sm:grid-cols-2 lg:grid-cols-3">
+            {SHARED_FEATURES.map((feature) => (
+              <li key={feature} className="flex items-start gap-2.5">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-cyan-400" aria-hidden="true" />
+                <span>{feature}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-6 border-t border-white/10 pt-4 text-xs font-semibold text-sky-200/90">
+            <div className="flex items-center gap-2">
+              <Shield className="h-4 w-4 text-sky-400" />
+              <span>Connected account credentials encrypted at rest</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-emerald-400" />
+              <span>Set up your workspace in minutes</span>
+            </div>
           </div>
         </div>
       </div>

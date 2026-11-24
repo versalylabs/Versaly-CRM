@@ -17,7 +17,6 @@ import {
   ArrowUpRight
 } from 'lucide-react';
 import { Spotlight } from './Spotlight';
-import { AnimatedCounter } from './AnimatedCounter';
 
 export function HeroSection() {
   const [activeMockTab, setActiveMockTab] = useState<'pipeline' | 'retention' | 'activity'>('pipeline');
@@ -112,10 +111,10 @@ export function HeroSection() {
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> No credit card required
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> KES & USD billing supported
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Prices in Kenyan shillings
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> 100% Multi-tenant data isolation
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Cancel anytime
             </span>
           </div>
         </motion.div>
@@ -185,7 +184,7 @@ export function HeroSection() {
                 <div className="h-3 w-3 rounded-full bg-amber-500/80" />
                 <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
                 <span className="ml-2 text-xs font-bold text-sky-200">
-                  Versaly Command Center · <span className="text-emerald-400">Live Workspace</span>
+                  Product preview · <span className="text-emerald-400">Sample data</span>
                 </span>
               </div>
 
@@ -219,7 +218,7 @@ export function HeroSection() {
 
               <div className="flex items-center gap-2">
                 <span className="rounded-md bg-sky-950/80 px-2.5 py-1 text-[11px] font-bold text-sky-300 border border-sky-500/30">
-                  demo@versaly.com
+                  Sample workspace
                 </span>
               </div>
             </div>
@@ -231,7 +230,7 @@ export function HeroSection() {
                 <div className="rounded-xl border border-white/10 bg-[#16233f]/70 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-sm">
                   <p className="text-[11px] font-semibold text-sky-300/70 uppercase">Active Leads</p>
                   <p className="mt-1 text-xl font-black text-white sm:text-2xl">
-                    <AnimatedCounter value={1284} duration={2} />
+                    1,284
                   </p>
                   <span className="mt-1 inline-flex items-center text-[10px] font-bold text-emerald-400">
                     <TrendingUp className="mr-1 h-3 w-3" /> +18.4% this mo
@@ -241,7 +240,7 @@ export function HeroSection() {
                 <div className="rounded-xl border border-white/10 bg-[#16233f]/70 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-sm">
                   <p className="text-[11px] font-semibold text-sky-300/70 uppercase">Pipeline Value</p>
                   <p className="mt-1 text-xl font-black text-white sm:text-2xl">
-                    <AnimatedCounter prefix="KES " value={14.8} decimals={1} suffix="M" duration={2.2} />
+                    KES 14.8M
                   </p>
                   <span className="mt-1 inline-flex items-center text-[10px] font-bold text-emerald-400">
                     <TrendingUp className="mr-1 h-3 w-3" /> +24.2% MoM
@@ -251,7 +250,7 @@ export function HeroSection() {
                 <div className="rounded-xl border border-white/10 bg-[#16233f]/70 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)] backdrop-blur-sm">
                   <p className="text-[11px] font-semibold text-sky-300/70 uppercase">Retention Score</p>
                   <p className="mt-1 text-xl font-black text-white sm:text-2xl">
-                    <AnimatedCounter value={98.4} decimals={1} suffix="%" duration={1.8} />
+                    98.4%
                   </p>
                   <span className="mt-1 inline-flex items-center text-[10px] font-bold text-emerald-400">
                     <ShieldCheck className="mr-1 h-3 w-3" /> Zero Churn

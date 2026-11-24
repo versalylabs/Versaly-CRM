@@ -603,7 +603,6 @@ interface SubscriptionCardProps {
 }
 
 export function SubscriptionQuotaCard({ subscription }: SubscriptionCardProps) {
-  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <>
@@ -674,87 +673,6 @@ export function SubscriptionQuotaCard({ subscription }: SubscriptionCardProps) {
         </div>
       </div>
 
-      {/* Subscription Tier Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-2xl dark:border-gray-700 dark:bg-gray-900 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                  Subscription & Tier Management
-                </h3>
-                <p className="text-xs text-gray-500">
-                  Manage your agency subscription package & team expansion.
-                </p>
-              </div>
-              <button
-                onClick={() => setModalOpen(false)}
-                className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="mt-4 space-y-4">
-              <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-4 dark:border-sky-800/60 dark:bg-sky-950/20">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-sky-700 dark:text-sky-300">
-                      Current Active Tier
-                    </span>
-                    <h4 className="text-base font-bold text-gray-900 dark:text-white">
-                      Growth Pro ($79 / month)
-                    </h4>
-                  </div>
-                  <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                    Active
-                  </span>
-                </div>
-                <ul className="mt-3 space-y-1.5 text-xs text-gray-600 dark:text-gray-300">
-                  <li>✓ Up to 500 Active Leads & Unlimited Contacts</li>
-                  <li>✓ 10 Team Seats with Role-Based Permissions</li>
-                  <li>✓ Full Pipeline & Automated Email/WhatsApp Sequences</li>
-                  <li>✓ Advanced Visual Analytics & Custom Reporting</li>
-                </ul>
-              </div>
-
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 dark:border-emerald-800/40 dark:bg-emerald-950/20">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
-                      Scale Tier Upgrade
-                    </span>
-                    <h4 className="text-base font-bold text-gray-900 dark:text-white">
-                      Enterprise Scale ($199 / month)
-                    </h4>
-                  </div>
-                  <button
-                    onClick={() => {
-                      alert('Upgrade requested! Support team will assist your account migration.');
-                      setModalOpen(false);
-                    }}
-                    className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-500"
-                  >
-                    Upgrade
-                  </button>
-                </div>
-                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  Unlimited leads, 50 team members, dedicated webhooks, white-label branding, and dedicated account manager.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-end gap-2 border-t border-gray-100 pt-3 dark:border-gray-800">
-              <button
-                onClick={() => setModalOpen(false)}
-                className="rounded-lg border border-gray-300 px-4 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }

@@ -63,11 +63,11 @@ export function LandingNav() {
         {/* Desktop Navigation Links with Smooth Scroll and Glass Hover States */}
         <nav className="hidden items-center gap-1.5 text-sm font-semibold text-sky-100/80 md:flex">
           <a
-            href="#testimonials"
-            onClick={(e) => scrollTo(e, '#testimonials')}
+            href="#why"
+            onClick={(e) => scrollTo(e, '#why')}
             className="rounded-lg px-3.5 py-1.5 transition-all hover:bg-white/[0.08] hover:text-white"
           >
-            Testimonials
+            Why us
           </a>
           <a
             href="#features"
@@ -156,11 +156,11 @@ export function LandingNav() {
           >
             <nav className="flex flex-col gap-3 text-sm font-bold text-sky-100">
               <a
-                href="#testimonials"
-                onClick={(e) => scrollTo(e, '#testimonials')}
+                href="#why"
+                onClick={(e) => scrollTo(e, '#why')}
                 className="rounded-lg px-3 py-1.5 hover:bg-white/[0.08] hover:text-white"
               >
-                Testimonials
+                Why us
               </a>
               <a
                 href="#features"

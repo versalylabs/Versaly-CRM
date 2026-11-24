@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Heart, Phone, Mail } from 'lucide-react';
+import { Phone } from 'lucide-react';
 import VersalyLogoIcon from '@/components/VersalyLogoIcon';
 
 export function LandingFooter() {
@@ -19,13 +19,8 @@ export function LandingFooter() {
               </span>
             </Link>
             <p className="mt-4 max-w-sm text-xs leading-relaxed text-sky-200/70">
-              The high-velocity revenue and retention operating system designed for modern subscription businesses, agencies, and B2B scale-ups.
+              The CRM for Kenyan sales teams: leads, WhatsApp and email conversations, follow-ups and your pipeline in one place.
             </p>
-
-            <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-emerald-400">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>All Systems Operational (99.9% Uptime)</span>
-            </div>
 
             {/* Direct Phone Lines */}
             <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-sky-200">
@@ -96,7 +91,7 @@ export function LandingFooter() {
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-white">Platform</h4>
             <ul className="mt-4 space-y-2.5 text-xs text-sky-200/70">
-              <li><a href="#testimonials" className="hover:text-white transition-colors">Client Testimonials</a></li>
+              <li><a href="#why" className="hover:text-white transition-colors">Why VersalyLabs</a></li>
               <li><a href="#features" className="hover:text-white transition-colors">Platform Features</a></li>
               <li><a href="#pipeline" className="hover:text-white transition-colors">Visual Pipeline</a></li>
               <li><a href="#pricing" className="hover:text-white transition-colors">Subscription Pricing</a></li>
@@ -105,36 +100,29 @@ export function LandingFooter() {
             </ul>
           </div>
 
-          {/* Solutions Links */}
+          {/* Legal */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white">Solutions</h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-white">Legal</h4>
             <ul className="mt-4 space-y-2.5 text-xs text-sky-200/70">
-              <li><span className="text-sky-200/50">B2B Agencies</span></li>
-              <li><span className="text-sky-200/50">Recurring SaaS</span></li>
-              <li><span className="text-sky-200/50">Consulting Firms</span></li>
-              <li><span className="text-sky-200/50">FinTech Operators</span></li>
-              <li><span className="text-sky-200/50">Sales Teams</span></li>
+              <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
             </ul>
           </div>
 
-          {/* Trust & Security */}
+          {/* Support */}
           <div>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-white">Trust & Security</h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-white">Support</h4>
             <ul className="mt-4 space-y-2.5 text-xs text-sky-200/70">
-              <li className="flex items-center gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 text-sky-400" /> Multi-Tenant Isolation
-              </li>
-              <li><span className="text-sky-200/50">End-to-End Encryption</span></li>
-              <li><span className="text-sky-200/50">KES & USD Billing</span></li>
-              <li><span className="text-sky-200/50">GDPR & Data Privacy</span></li>
-              <li><a href="#faqs" className="hover:text-white transition-colors">FAQ Knowledge Base</a></li>
+              <li><a href="#faqs" className="hover:text-white transition-colors">FAQs</a></li>
+              <li><a href="#contact" className="hover:text-white transition-colors">Contact us</a></li>
+              <li><a href="mailto:versalylabs@gmail.com" className="hover:text-white transition-colors">versalylabs@gmail.com</a></li>
             </ul>
           </div>
         </div>
 
         {/* Bottom copyright & notes */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-sky-500/10 pt-8 text-xs text-sky-300/60 sm:flex-row">
-          <p>© 2026 Versaly Technologies Inc. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} VersalyLabs. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link href="/auth/signin" className="hover:text-sky-200 transition-colors">
               Workspace Login
@@ -142,9 +130,12 @@ export function LandingFooter() {
             <Link href="/auth/signup?plan=GROWTH_PRO" className="hover:text-sky-200 transition-colors">
               Start Free Trial
             </Link>
-            <a href="#faqs" className="hover:text-sky-200 transition-colors">
-              Help Center
-            </a>
+            <Link href="/privacy" className="hover:text-sky-200 transition-colors">
+              Privacy
+            </Link>
+            <Link href="/terms" className="hover:text-sky-200 transition-colors">
+              Terms
+            </Link>
           </div>
         </div>
       </div>

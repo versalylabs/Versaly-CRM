@@ -4,7 +4,7 @@ import React from 'react';
 import { LandingNav } from './LandingNav';
 import { BackgroundGrid } from './BackgroundGrid';
 import { HeroSection } from './HeroSection';
-import { TestimonialsAndMetrics } from './TestimonialsAndMetrics';
+import { BuiltForKenya } from './BuiltForKenya';
 import { PipelineVisualizer } from './PipelineVisualizer';
 import { BentoGridFeatures } from './BentoGridFeatures';
 import { PricingSection } from './PricingSection';
@@ -27,8 +27,8 @@ export default function LandingPage() {
       {/* Hero Section with Aceternity Spotlight, React Bits Animated Counters & Interactive CRM Dashboard Preview */}
       <HeroSection />
 
-      {/* Social Proof Numbers & Real Testimonials */}
-      <TestimonialsAndMetrics />
+      {/* Why VersalyLabs: honest value points (no invented metrics or testimonials) */}
+      <BuiltForKenya />
 
       {/* Aceternity Bento Grid Features: WhatsApp Outreach, CS Retention Scoring, Telemetry & SLA Dispatch */}
       <BentoGridFeatures />
@@ -44,7 +44,7 @@ export default function LandingPage() {
               Watch deals move forward with total visibility.
             </h2>
             <p className="mt-3 text-base text-sky-200/70 sm:text-lg">
-              No hidden stages. No forgotten accounts. Click any deal to simulate advancing stages, automated WhatsApp triggers, and real-time revenue recalculation.
+              No hidden stages. No forgotten accounts. Click any sample deal to move it forward and watch the pipeline value update.
             </p>
           </div>
 

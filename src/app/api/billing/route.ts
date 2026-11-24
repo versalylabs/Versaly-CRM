@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
 import prisma from '../../../../lib/prisma';
+import { PLANS, PLAN_ORDER, SHARED_FEATURES, normalizePlan } from '../../../../lib/plans';
 
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -38,75 +39,26 @@ export async function GET(req: NextRequest) {
     const trialEndMs = createdAt + trialDurationMs;
     const daysRemaining = Math.max(0, Math.ceil((trialEndMs - now) / (24 * 60 * 60 * 1000)));
 
-    const currency = org.currency || 'KES';
-    const isKes = currency === 'KES';
-
-    const plans = [
-      {
-        id: 'STARTER',
-        name: 'Starter Tier',
-        priceMonthly: isKes ? 3900 : 29,
-        currency,
-        description: 'Essential CRM tools for boutique agents and solo dealmakers.',
-        leadLimit: 150,
-        seatLimit: 3,
-        features: [
-          'Up to 150 Active Prospects',
-          '3 Team Member Seats',
-          'Pipeline Kanban & Status Flow',
-          'Standard Email Templates',
-          'Standard Analytics',
-        ],
-      },
-      {
-        id: 'GROWTH_PRO',
-        name: 'Growth Pro',
-        badge: 'Most Popular',
-        priceMonthly: isKes ? 9900 : 79,
-        currency,
-        description: 'Advanced pipeline intelligence & multi-channel outreach for high-growth teams.',
-        leadLimit: 500,
-        seatLimit: 10,
-        features: [
-          'Up to 500 Active Prospects',
-          '10 Team Member Seats',
-          'Interactive Trajectory Area Charts',
-          'Conversion Radial Gauges & Velocity Bars',
-          'WhatsApp & Automated Email Workflows',
-          'Priority Email & Chat Support',
-        ],
-      },
-      {
-        id: 'ENTERPRISE',
-        name: 'Enterprise Scale',
-        badge: 'Maximum Power',
-        priceMonthly: isKes ? 24900 : 199,
-        currency,
-        description: 'High-volume prospecting, custom webhooks, and team governance.',
-        leadLimit: 100000,
-        seatLimit: 50,
-        features: [
-          'Unlimited Active Prospects',
-          'Up to 50 Team Member Seats',
-          'Full Webhook & Meta Lead Ads Integration',
-          'White-Label Workspace & Custom Domain',
-          'Dedicated Account Manager & 99.9% SLA',
-        ],
-      },
-    ];
-
-    const currentPlan = plans.find((p) => p.id === org.plan) || plans[1];
-
-    const invoices = [
-      {
-        id: 'INV-2026-009',
-        date: new Date(now - 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        amount: org.plan === 'STARTER' ? 29 : org.plan === 'ENTERPRISE' ? 199 : 79,
-        currency: org.currency || 'USD',
-        status: 'Paid',
-        plan: currentPlan.name,
-      },
-    ];
+    // Prices are set in KES (lib/plans.ts). Invoices will come from the payment
+    // provider in Phase 4; until then none are shown rather than placeholder ones.
+    const plans = PLAN_ORDER.map((key) => {
+      const p = PLANS[key];
+      return {
+        id: p.key,
+        name: p.name,
+        badge: p.popular ? 'Most Popular' : undefined,
+        priceMonthly: p.priceKes.monthly,
+        priceAnnual: p.priceKes.annual,
+        currency: 'KES',
+        description: p.description,
+        leadLimit: p.leadLimit,
+        seatLimit: p.seatLimit,
+        features: p.features,
+        comingSoon: p.comingSoon,
+      };
+    });
+    const currentPlan = plans.find((p) => p.id === normalizePlan(org.plan)) || plans[1];
+    const invoices: Array<{ id: string; date: string; amount: number; currency: string; status: string; plan: string }> = [];
 
     return NextResponse.json({
       organization: {
@@ -127,6 +79,7 @@ export async function GET(req: NextRequest) {
         seatPercentage: Math.min(100, Math.round((Math.max(1, totalSeats) / org.seatLimit) * 100)),
       },
       plans,
+      sharedFeatures: SHARED_FEATURES,
       currentPlan,
       invoices,
     });

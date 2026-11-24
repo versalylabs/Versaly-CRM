@@ -247,7 +247,9 @@ function SignUpForm() {
 
           {/* Terms & Privacy note */}
           <p className="mt-4 text-center text-[11px] text-gray-400 dark:text-gray-500">
-            By signing up, you agree to our Terms of Service & Privacy Policy.
+            By signing up, you agree to our{' '}
+            <Link href="/terms" className="underline hover:text-gray-200">Terms of Service</Link> and{' '}
+            <Link href="/privacy" className="underline hover:text-gray-200">Privacy Policy</Link>.
           </p>
         </div>
 

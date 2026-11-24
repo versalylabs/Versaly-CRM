@@ -4,36 +4,37 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, HelpCircle } from 'lucide-react';
 
+// Answers must describe what the product does today; mark anything planned as coming soon.
 const FAQS = [
   {
     question: 'How does the 14-day free trial work?',
     answer:
-      'You get complete, unrestricted access to the Growth Pro plan for 14 days. No credit card is required to begin. You can import your contacts, invite your team members, connect WhatsApp & email, and test all automated workflows with zero obligation.',
+      'You get 14 days of full access on the plan you choose, and no credit card is needed to start. Invite your team, connect your email and WhatsApp, build your pipeline and try automations before you decide.',
   },
   {
-    question: 'Can I pay in Kenyan Shillings (KES) or USD?',
+    question: 'How do I pay? Can I pay in Kenyan shillings?',
     answer:
-      'Yes! Versaly CRM natively supports multi-currency billing including KES, USD, EUR, and GBP. You can pay via international cards, Stripe checkout, or regional payment rails seamlessly.',
+      'Our prices are set in Kenyan shillings. You can pay by card today, and M-Pesa payments are coming soon. If you need an invoice for your accounts team, contact us.',
   },
   {
     question: 'How does the WhatsApp integration work?',
     answer:
-      'Versaly integrates directly with WhatsApp so your team can send personalized follow-ups, trigger automated alerts when leads advance stages, and receive prospect replies directly in the CRM contact timeline without sharing personal devices.',
+      "You connect your WhatsApp Business number through the WhatsApp Cloud API from Meta. Messages your team sends, and replies from customers, appear in the shared inbox and on each lead's timeline. A simpler one-click connection is coming soon.",
   },
   {
-    question: 'Is our company data completely private and isolated?',
+    question: 'Is our company data private?',
     answer:
-      'Absolutely. Every organization in Versaly CRM operates in a cryptographically isolated multi-tenant workspace with strict row-level security. Your leads, confidential deal terms, revenue numbers, and customer conversations are strictly yours and never shared.',
+      "Yes. Each workspace's data is kept separate and is only visible to the people you invite. Passwords and app credentials for your connected email and WhatsApp accounts are encrypted. Our privacy policy explains how we handle your data.",
   },
   {
-    question: 'Can I import existing leads and deals from Excel, CSV, or another CRM?',
+    question: 'Can I import my existing leads from Excel or another CRM?',
     answer:
-      'Yes. Versaly includes a one-click CSV and Excel contact importer with smart column mapping. We also provide native API webhooks so leads from Meta Lead Ads, Google Forms, and your website landing pages land straight into your pipeline.',
+      'Self-service CSV and Excel import is coming soon. Until then, contact us and we will help you move your contacts across. Developers can also add leads through our API.',
   },
   {
     question: 'Can we change plans or cancel at any time?',
     answer:
-      'Yes, you maintain full control. You can upgrade, downgrade, or cancel your subscription anytime directly from your Subscription & Billing settings. There are no cancellation penalties or hidden termination fees.',
+      'Yes. Workspace admins can change plans in Settings → Billing and cancel at any time. There are no cancellation fees.',
   },
 ];
 
@@ -55,7 +56,7 @@ export function FaqSection() {
             Frequently Asked Questions
           </h2>
           <p className="mt-2 text-base text-sky-200/70">
-            Everything you need to know about switching to Versaly CRM.
+            Everything you need to know before you start.
           </p>
         </div>
 

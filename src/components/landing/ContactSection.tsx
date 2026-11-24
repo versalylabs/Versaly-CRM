@@ -140,7 +140,7 @@ export function ContactSection() {
                 <div className="grid grid-cols-2 gap-3 pt-2">
                   <div className="flex items-center gap-2 text-xs text-sky-200/70">
                     <Clock className="h-4 w-4 text-cyan-400 shrink-0" />
-                    <span>Avg. Response: &lt; 15 mins</span>
+                    <span>We reply within one working day</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-sky-200/70">
                     <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />

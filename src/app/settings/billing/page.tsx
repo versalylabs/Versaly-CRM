@@ -28,16 +28,20 @@ type BillingData = {
     name: string;
     badge?: string;
     priceMonthly: number;
+    priceAnnual: number;
     currency: string;
     description: string;
     leadLimit: number;
     seatLimit: number;
     features: string[];
+    comingSoon: string[];
   }[];
+  sharedFeatures: string[];
   currentPlan: {
     id: string;
     name: string;
     priceMonthly: number;
+    priceAnnual: number;
     currency: string;
   };
   invoices: {
@@ -49,6 +53,8 @@ type BillingData = {
     plan: string;
   }[];
 };
+
+const kes = (amount: number) => `KES ${amount.toLocaleString('en-US')}`;
 
 export default function BillingPage() {
   const { data: session } = useSession();
@@ -262,7 +268,7 @@ export default function BillingPage() {
                   ? 'System Owner account with trial exemption, unlimited platform resources, and full administrative rights.'
                   : org.isTrialing
                   ? `Your trial gives full access to all ${data.currentPlan.name} features. Choose a plan below to keep uninterrupted access.`
-                  : `Subscribed to ${data.currentPlan.name} ($${data.currentPlan.priceMonthly}/mo). Renews automatically next billing cycle.`}
+                  : `Subscribed to ${data.currentPlan.name} (${kes(data.currentPlan.priceMonthly)}/mo). Renews automatically next billing cycle.`}
               </p>
             </div>
           </div>
@@ -339,11 +345,11 @@ export default function BillingPage() {
           </div>
           <div className="mt-3">
             <span className="text-2xl font-black text-gray-900 dark:text-white">
-              ${data.currentPlan.priceMonthly} <span className="text-xs font-semibold text-gray-400">/ month</span>
+              {kes(data.currentPlan.priceMonthly)} <span className="text-xs font-semibold text-gray-400">/ month</span>
             </span>
           </div>
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Billed in {org.currency} · Auto-renews monthly
+            Or {kes(data.currentPlan.priceAnnual)} / month billed annually
           </p>
         </div>
       </section>
@@ -392,7 +398,7 @@ export default function BillingPage() {
 
                   <div className="mt-4 flex items-baseline gap-1 border-b border-gray-100 pb-4 dark:border-gray-800">
                     <span className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-                      {plan.currency === 'KES' ? `KES ${plan.priceMonthly.toLocaleString()}` : `$${plan.priceMonthly}`}
+                      {kes(plan.priceMonthly)}
                     </span>
                     <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">/ month</span>
                   </div>
@@ -405,6 +411,19 @@ export default function BillingPage() {
                       </li>
                     ))}
                   </ul>
+                  {plan.comingSoon.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Coming soon</p>
+                      <ul className="mt-2 space-y-1.5 text-xs text-gray-500 dark:text-gray-400">
+                        {plan.comingSoon.map((feat) => (
+                          <li key={feat} className="flex items-center gap-2">
+                            <span aria-hidden="true">○</span>
+                            <span>{feat}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-8 pt-4 border-t border-gray-100 dark:border-gray-800">
@@ -437,6 +456,17 @@ export default function BillingPage() {
             );
           })}
         </div>
+        <div className="rounded-2xl border border-gray-200/80 bg-white p-5 dark:border-gray-800 dark:bg-gray-900">
+          <p className="text-xs font-bold text-gray-900 dark:text-white">Every plan includes</p>
+          <ul className="mt-3 grid gap-2 text-xs text-gray-600 dark:text-gray-300 sm:grid-cols-2 lg:grid-cols-3">
+            {data.sharedFeatures.map((feat) => (
+              <li key={feat} className="flex items-center gap-2">
+                <span className="text-emerald-500 font-bold">✓</span>
+                <span>{feat}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
       {/* Payment Method & Invoices */}
@@ -445,35 +475,17 @@ export default function BillingPage() {
         <div className="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-4">
           <div>
             <h3 className="text-sm font-bold text-gray-900 dark:text-white">Payment Method</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Card used for recurring monthly charges</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Used for your recurring subscription charges</p>
           {isAdmin && (
             <button onClick={handleManageBilling} disabled={Boolean(actionLoading)} className="mt-3 rounded-xl border border-gray-200 px-4 py-2 text-xs font-bold hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 disabled:opacity-50">
-              {actionLoading === 'portal' ? 'Opening…' : 'Manage billing in Stripe →'}
+              {actionLoading === 'portal' ? 'Opening…' : 'Open billing portal →'}
             </button>
           )}
           </div>
 
-          <div className="rounded-xl border border-gray-200 bg-gray-50/70 p-4 dark:border-gray-800 dark:bg-gray-800/40 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-9 w-12 items-center justify-center rounded-lg bg-white font-bold text-xs shadow-sm border border-gray-200 dark:bg-gray-900 dark:border-gray-700 text-sky-600">
-                VISA
-              </div>
-              <div>
-                <p className="text-xs font-bold text-gray-900 dark:text-white">•••• •••• •••• 4242</p>
-                <p className="text-[10px] text-gray-500">Expires 08/2029</p>
-              </div>
-            </div>
-            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-              Default
-            </span>
-          </div>
-
-          <button
-            onClick={() => alert('Billing portal integration: update payment method')}
-            className="w-full rounded-xl border border-gray-300 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 transition"
-          >
-            Update Payment Card
-          </button>
+          <p className="rounded-xl border border-dashed border-gray-200 p-4 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
+            Card details are stored by our payment provider, never by VersalyLabs. Once you subscribe, use the billing portal to view or update your payment method.
+          </p>
         </div>
 
         {/* Invoices History Table */}
@@ -485,43 +497,36 @@ export default function BillingPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-xs">
-              <thead className="border-b border-gray-100 text-gray-500 dark:border-gray-800 dark:text-gray-400">
-                <tr>
-                  <th className="pb-3 font-semibold">Invoice ID</th>
-                  <th className="pb-3 font-semibold">Date</th>
-                  <th className="pb-3 font-semibold">Amount</th>
-                  <th className="pb-3 font-semibold">Status</th>
-                  <th className="pb-3 font-semibold text-right">Receipt</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {data.invoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/40">
-                    <td className="py-3 font-semibold text-gray-900 dark:text-white">{inv.id}</td>
-                    <td className="py-3 text-gray-500">{inv.date}</td>
-                    <td className="py-3 font-bold text-gray-900 dark:text-white">
-                      ${inv.amount} {inv.currency}
-                    </td>
-                    <td className="py-3">
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                        {inv.status}
-                      </span>
-                    </td>
-                    <td className="py-3 text-right">
-                      <button
-                        onClick={() => alert(`Downloading receipt for ${inv.id}`)}
-                        className="font-semibold text-sky-600 hover:underline dark:text-sky-400"
-                      >
-                        PDF ↓
-                      </button>
-                    </td>
+          {data.invoices.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-gray-200 p-6 text-center text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
+              No invoices yet. Receipts for your payments will appear here.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left text-xs">
+                <thead className="border-b border-gray-100 text-gray-500 dark:border-gray-800 dark:text-gray-400">
+                  <tr>
+                    <th className="pb-3 font-semibold">Invoice</th>
+                    <th className="pb-3 font-semibold">Date</th>
+                    <th className="pb-3 font-semibold">Amount</th>
+                    <th className="pb-3 font-semibold">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {data.invoices.map((inv) => (
+                    <tr key={inv.id}>
+                      <td className="py-3 font-semibold text-gray-900 dark:text-white">{inv.id}</td>
+                      <td className="py-3 text-gray-500">{inv.date}</td>
+                      <td className="py-3 font-bold text-gray-900 dark:text-white">
+                        {inv.currency} {inv.amount.toLocaleString('en-US')}
+                      </td>
+                      <td className="py-3">{inv.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </section>
     </div>
