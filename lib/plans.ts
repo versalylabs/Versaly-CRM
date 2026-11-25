@@ -24,11 +24,11 @@ export const PLAN_LIMITS: Record<PlanKey, PlanLimits> = {
 };
 
 /** Other numeric limits, enforced server-side. */
-export const PLAN_QUOTAS: Record<PlanKey, { automationRules: number; apiKeys: number; proposalsPerMonth: number; customFields: number }> = {
-  SOLO: { automationRules: 0, apiKeys: 0, proposalsPerMonth: 5, customFields: 0 },
-  STARTER: { automationRules: 5, apiKeys: 0, proposalsPerMonth: UNLIMITED, customFields: 5 },
-  GROWTH_PRO: { automationRules: UNLIMITED, apiKeys: 10, proposalsPerMonth: UNLIMITED, customFields: UNLIMITED },
-  ENTERPRISE: { automationRules: UNLIMITED, apiKeys: 50, proposalsPerMonth: UNLIMITED, customFields: UNLIMITED },
+export const PLAN_QUOTAS: Record<PlanKey, { automationRules: number; apiKeys: number; proposalsPerMonth: number; customFields: number; mpesaAccounts: number; mpesaRequestsPerMonth: number }> = {
+  SOLO: { automationRules: 0, apiKeys: 0, proposalsPerMonth: 5, customFields: 0, mpesaAccounts: 1, mpesaRequestsPerMonth: 30 },
+  STARTER: { automationRules: 5, apiKeys: 0, proposalsPerMonth: UNLIMITED, customFields: 5, mpesaAccounts: 1, mpesaRequestsPerMonth: UNLIMITED },
+  GROWTH_PRO: { automationRules: UNLIMITED, apiKeys: 10, proposalsPerMonth: UNLIMITED, customFields: UNLIMITED, mpesaAccounts: 3, mpesaRequestsPerMonth: UNLIMITED },
+  ENTERPRISE: { automationRules: UNLIMITED, apiKeys: 50, proposalsPerMonth: UNLIMITED, customFields: UNLIMITED, mpesaAccounts: UNLIMITED, mpesaRequestsPerMonth: UNLIMITED },
 };
 
 /** Backwards-compatible alias used by the developer keys route. */
@@ -41,6 +41,9 @@ export const API_KEY_LIMITS: Record<PlanKey, number> = {
 
 /** Features that exist today, and the lowest plan that includes each one. */
 export const FEATURES = {
+  mpesa_payments: { label: 'M-Pesa payment requests & links', minPlan: 'SOLO' },
+  mpesa_reconciliation: { label: 'M-Pesa auto-reconciliation for your Paybill or Till', minPlan: 'STARTER' },
+  instalment_plans: { label: 'Instalment plans, payment reminders & debtor ageing', minPlan: 'GROWTH_PRO' },
   email_inbox: { label: 'Team inbox for your own email address', minPlan: 'STARTER' },
   automations: { label: 'Workflow automations', minPlan: 'STARTER' },
   whatsapp: { label: 'WhatsApp Business API inbox', minPlan: 'GROWTH_PRO' },
@@ -83,6 +86,8 @@ const limitLines = (key: PlanKey) => {
     q.automationRules ? `${q.automationRules >= UNLIMITED ? 'Unlimited' : q.automationRules} automation rules · ${n(p.automationRunLimit)} runs / month` : null,
     q.proposalsPerMonth < UNLIMITED ? `${q.proposalsPerMonth} proposals / month` : 'Unlimited proposals',
     q.customFields ? `${q.customFields >= UNLIMITED ? 'Unlimited' : q.customFields} custom lead fields` : null,
+    q.mpesaRequestsPerMonth < UNLIMITED ? `${q.mpesaRequestsPerMonth} M-Pesa payment requests / month` : null,
+    `${q.mpesaAccounts >= UNLIMITED ? 'Unlimited' : q.mpesaAccounts} M-Pesa Paybill/Till${q.mpesaAccounts === 1 ? '' : 's'}`,
   ].filter(Boolean) as string[];
 };
 
@@ -92,8 +97,8 @@ export const PLANS: Record<PlanKey, PlanDetails> = {
     ...PLAN_LIMITS.SOLO,
     priceKes: { monthly: 1500, annual: 1200 },
     description: 'For one-person businesses (agents, consultants, freelancers) moving out of WhatsApp chats and notebooks.',
-    features: [...limitLines('SOLO'), 'Help centre support'],
-    comingSoon: ['M-Pesa payment requests', 'CSV & Excel contact import'],
+    features: [...limitLines('SOLO'), ...featuresFor('SOLO'), 'Help centre support'],
+    comingSoon: [],
   },
   STARTER: {
     key: 'STARTER',
@@ -101,7 +106,7 @@ export const PLANS: Record<PlanKey, PlanDetails> = {
     priceKes: { monthly: 3900, annual: 3200 },
     description: 'For small teams that want every enquiry in one inbox and follow-ups that happen on their own.',
     features: ['Everything in Solo', ...limitLines('STARTER'), ...featuresFor('STARTER'), 'Email support'],
-    comingSoon: ['M-Pesa auto-reconciliation (1 till or paybill)', 'Bulk SMS'],
+    comingSoon: ['Bulk SMS'],
   },
   GROWTH_PRO: {
     key: 'GROWTH_PRO',
@@ -110,7 +115,7 @@ export const PLANS: Record<PlanKey, PlanDetails> = {
     description: 'For sales and collections teams that run on WhatsApp and need automation without limits.',
     popular: true,
     features: ['Everything in Starter', ...limitLines('GROWTH_PRO'), ...featuresFor('GROWTH_PRO'), 'Priority email & WhatsApp support'],
-    comingSoon: ['Instalment plans & payment reminders', 'KRA eTIMS invoicing', 'AI reply assistant'],
+    comingSoon: ['KRA eTIMS invoicing', 'AI reply assistant'],
   },
   ENTERPRISE: {
     key: 'ENTERPRISE',

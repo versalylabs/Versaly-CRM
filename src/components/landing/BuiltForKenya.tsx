@@ -28,7 +28,7 @@ const POINTS = [
   },
 ];
 
-const COMING_NEXT = ['M-Pesa payment requests & auto-matching', 'KRA eTIMS invoices', 'CSV & Excel import'];
+const COMING_NEXT = ['KRA eTIMS invoices', 'Bulk SMS', 'AI reply assistant'];
 
 export function BuiltForKenya() {
   return (

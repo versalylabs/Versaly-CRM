@@ -108,6 +108,15 @@ Quality tooling: `npm run qa:final` (structural checks), `npm run qa:smoke` (liv
 - Activity feed: unified chronological feed of lead, outreach, task and proposal events.
 - Reports: pipeline, conversion, source performance, revenue and team metrics with CSV export and print/PDF.
 
+### 4.12a M-Pesa payments from customers (`/payments`)
+- Each workspace connects its own Paybill or Till with Safaricom Daraja keys (sandbox first, then production). Keys are verified with Safaricom and stored encrypted.
+- From a customer's **Payments** tab: send an M-Pesa prompt (STK Push) or create a pay link (`/pay/<token>`, works on any phone); status updates live and is logged on the timeline. Every customer gets a short account number for paying the Paybill directly.
+- Money paid straight to the Paybill/Till is matched automatically (account number → phone → a single open request of the same amount); anything else waits in the **Unmatched** queue for one-click assignment.
+- Payments page: received today / this month, outstanding and overdue instalments, debtor ageing, transactions with CSV export, M-Pesa settings.
+- **Instalment plans** (Growth Pro+): deposit plus N weekly/monthly instalments, payments applied oldest-first, reminders by email or WhatsApp with a pay link (3 days before, on the day, 1 and 7 days late).
+- Automation triggers: payment received, instalment overdue, plan fully paid. Outbound webhook event `payment.received`.
+- Plan limits: Solo 30 requests/month and 1 shortcode; Starter adds auto-matching; Growth Pro 3 shortcodes and instalments; Enterprise unlimited.
+
 ### 4.13 Billing & subscriptions
 - Plans: **Starter** ($29/mo), **Growth Pro** ($79/mo), **Enterprise Scale** ($199/mo); annual billing discount.
 - 14-day trial; read-only mode when the trial expires, a payment is past due, or the subscription is cancelled; workspace suspension by platform staff.

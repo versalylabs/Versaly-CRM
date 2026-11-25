@@ -34,6 +34,8 @@ const EXEMPT = {
   'platform/organizations/[id]': 'platform staff console',
   'platform/support/[id]': 'platform staff console',
   'public/lead': 'public website form; inbound leads keep flowing',
+  'pay/[token]': 'customers can always pay; money keeps flowing when read-only',
+  'payments/callback/[token]/[kind]': 'Safaricom M-Pesa callbacks; payments keep flowing',
   settings: 'profile must stay editable',
   'settings/password': 'password must stay changeable',
   'support/tickets': 'customers must reach support',

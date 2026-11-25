@@ -303,7 +303,11 @@ Customer Success, Copilot and the Activity feed move into contact pages or Repor
 
 ---
 
-## Phase 6: M-Pesa for customers (L) — needs A5 (sandbox works before approval)
+## Phase 6: M-Pesa for customers (L) — needs A5 (sandbox works before approval) ✅ BUILT (25 Nov 2026, awaiting your review)
+
+**What shipped:** connect a Paybill/Till with Daraja keys (checked with Safaricom, encrypted); STK prompts and public pay links (`/pay/<token>`) from a customer's Payments tab, with live status; C2B auto-matching by account number, then phone, then a unique open amount, with an Unmatched queue; Payments page (overview, transactions + CSV export, unmatched, instalments, settings); instalment plans with oldest-first allocation, reminders by email/WhatsApp (3 days before, on the day, 1 and 7 days late) from the daily cron, and debtor ageing; automation triggers `PAYMENT_RECEIVED`, `PAYMENT_OVERDUE`, `PLAN_COMPLETED`; plan limits in `lib/plans.ts`. Production schema change: `prisma/manual/2026-11-25-phase6-mpesa.sql` (additive only), run before deploying.
+
+**Not done in this phase:** reminders by SMS (Phase 7), payments from invoices (Phase 8), M-Pesa Ratiba standing orders (needs Safaricom approval).
 
 **Goal:** the headline differentiator. Customers get paid on M-Pesa from inside the CRM, and payments match themselves to the right customer.
 

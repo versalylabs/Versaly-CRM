@@ -84,6 +84,7 @@ model Lead {
   nextFollowUp       DateTime?
   notes              String?
   customFields       Json?       // values keyed by CustomField.key
+  paymentRef         String?     // short M-Pesa account number customers type at a Paybill
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
 
@@ -98,6 +99,8 @@ model Lead {
   meetingSummaries  AiMeetingSummary[]
   conversations     Conversation[]
   channelIdentities ContactChannelIdentity[]
+  payments          Payment[]
+  paymentPlans      PaymentPlan[]
   assignedToId       String?
   assignedTo         User?       @relation("LeadAssignee", fields: [assignedToId], references: [id])
   organizationId     String?
@@ -106,6 +109,7 @@ model Lead {
   @@index([assignedToId])
   @@index([organizationId])
   @@unique([organizationId, email])
+  @@unique([organizationId, paymentRef])
   @@index([organizationId, pipelineStage])
 }
 
@@ -384,6 +388,9 @@ model Organization {
   @@index([suspendedAt])
   invoices    Invoice[]
   customFields CustomField[]
+  mpesaAccounts MpesaAccount[]
+  payments      Payment[]
+  paymentPlans  PaymentPlan[]
 }
 
 model PipelineStageConfig {
@@ -745,4 +752,93 @@ model CustomField {
 
   @@unique([organizationId, key])
   @@index([organizationId, order])
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6: M-Pesa for a workspace's own customers (Safaricom Daraja)
+// ---------------------------------------------------------------------------
+
+model MpesaAccount {
+  id              String       @id @default(uuid())
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  label           String
+  type            String       // PAYBILL or TILL
+  shortcode       String       // Paybill number, or the Till's store (head office) number
+  tillNumber      String?      // Till only: the number customers pay (STK PartyB)
+  environment     String       @default("sandbox") // sandbox or production
+  consumerKey     String       // encrypted
+  consumerSecret  String       // encrypted
+  passkey         String       // encrypted (Lipa na M-Pesa Online passkey)
+  callbackToken   String       @unique // secret part of the callback URLs Safaricom calls
+  c2bRegisteredAt DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  payments        Payment[]
+
+  @@unique([organizationId, shortcode])
+  @@index([organizationId])
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  organizationId    String
+  organization      Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  mpesaAccountId    String?
+  mpesaAccount      MpesaAccount? @relation(fields: [mpesaAccountId], references: [id], onDelete: SetNull)
+  leadId            String?       // null = unmatched, waiting for someone to assign it
+  lead              Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  source            String        // STK, C2B or LINK
+  status            String        // REQUESTED (link not used yet), PENDING (prompt sent), PAID, FAILED, CANCELLED
+  amount            Int           // whole KES (M-Pesa has no cents)
+  phone             String?
+  payerName         String?
+  accountRef        String?       // account number typed at the Paybill, or sent with the prompt
+  description       String?
+  mpesaReceipt      String?
+  checkoutRequestId String?       @unique
+  resultDesc        String?
+  linkToken         String?       @unique // public /pay/<token> link
+  matchedBy         String?       // REFERENCE, PHONE, AMOUNT, REQUEST or MANUAL
+  createdById       String?
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@unique([organizationId, mpesaReceipt])
+  @@index([organizationId, status, createdAt])
+  @@index([organizationId, leadId])
+}
+
+model PaymentPlan {
+  id             String        @id @default(uuid())
+  organizationId String
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leadId         String
+  lead           Lead          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  title          String
+  totalAmount    Int
+  status         String        @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
+  createdById    String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  installments   Installment[]
+
+  @@index([organizationId, status])
+  @@index([leadId])
+}
+
+model Installment {
+  id            String      @id @default(uuid())
+  planId        String
+  plan          PaymentPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  dueDate       DateTime
+  amount        Int
+  paidAmount    Int         @default(0)
+  remindersSent Json?       // reminder stages already sent, e.g. ["BEFORE","DUE"]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([planId, dueDate])
+  @@index([dueDate])
 }

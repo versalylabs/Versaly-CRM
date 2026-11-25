@@ -2,13 +2,13 @@ import prisma from './prisma';
 import { getStageGroups } from '@/lib/stages';
 import { providerRegistry } from './communication-providers';
 
-export const WORKFLOW_TRIGGERS = ['LEAD_CREATED','LEAD_STAGE_CHANGED','TASK_CREATED','TASK_COMPLETED','LEAD_UPDATED','ACTIVITY_CREATED','OUTREACH_SENT','OUTREACH_REPLIED','LEAD_INACTIVE'] as const;
+export const WORKFLOW_TRIGGERS = ['LEAD_CREATED','LEAD_STAGE_CHANGED','TASK_CREATED','TASK_COMPLETED','LEAD_UPDATED','ACTIVITY_CREATED','OUTREACH_SENT','OUTREACH_REPLIED','LEAD_INACTIVE','PAYMENT_RECEIVED','PAYMENT_OVERDUE','PLAN_COMPLETED'] as const;
 export const WORKFLOW_ACTIONS = ['CREATE_TASK','UPDATE_STAGE','ASSIGN_USER','ADD_NOTE','SEND_EMAIL','CREATE_ACTIVITY','SET_FOLLOW_UP'] as const;
 export type Trigger = (typeof WORKFLOW_TRIGGERS)[number];
 
 export const TRIGGER_LABELS: Record<Trigger,string> = {
   LEAD_CREATED:'New lead created', LEAD_STAGE_CHANGED:'Lead/deal stage changed', TASK_CREATED:'Task created', TASK_COMPLETED:'Task completed',
-  LEAD_UPDATED:'Customer/contact updated', ACTIVITY_CREATED:'New workspace activity', OUTREACH_SENT:'Outreach sent', OUTREACH_REPLIED:'Outreach replied', LEAD_INACTIVE:'Lead inactive'
+  LEAD_UPDATED:'Customer/contact updated', ACTIVITY_CREATED:'New workspace activity', OUTREACH_SENT:'Outreach sent', OUTREACH_REPLIED:'Outreach replied', LEAD_INACTIVE:'Lead inactive', PAYMENT_RECEIVED:'M-Pesa payment received', PAYMENT_OVERDUE:'Instalment overdue', PLAN_COMPLETED:'Instalment plan fully paid'
 };
 
 export function parseObject(value: unknown): Record<string, any> { return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {}; }

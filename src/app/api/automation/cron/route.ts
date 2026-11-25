@@ -3,6 +3,7 @@ import { getCronSecret } from '../../../../../lib/env';
 import { runInactiveLeadWorkflows } from '../../../../../lib/workflows';
 import { syncAllMailboxes } from '../../../../../lib/emailSync';
 import { runBillingCycle } from '../../../../../lib/billing';
+import { runPaymentReminders } from '../../../../../lib/payments';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -26,7 +27,8 @@ async function handle(request: NextRequest) {
     const result = await runInactiveLeadWorkflows();
     const mail = await syncAllMailboxes().catch((e) => ({ accounts: 0, imported: 0, error: String(e?.message || e) }));
     const billing = await runBillingCycle(new Date(), process.env.NEXTAUTH_URL || request.nextUrl.origin).catch((e) => ({ error: String(e?.message || e) }));
-    return NextResponse.json({ ok: true, ...result, mail, billing, executedAt: new Date().toISOString() });
+    const reminders = await runPaymentReminders().catch((e) => ({ error: String(e?.message || e) }));
+    return NextResponse.json({ ok: true, ...result, mail, billing, reminders, executedAt: new Date().toISOString() });
   } catch (error) {
     console.error('Scheduled automation run failed', error);
     return NextResponse.json({ error: 'Scheduled automation run failed.' }, { status: 500 });
