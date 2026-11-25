@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import SettingsTabs from '@/components/SettingsTabs';
 import PlanGate from '@/components/PlanGate';
 const field='mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-accent-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100';
 const events=['lead.created','lead.updated','lead.stage_changed','task.created','task.completed','activity.created','calendar.created','workflow.executed'];
@@ -12,7 +13,7 @@ function IntegrationsPageContent(){
  const createHook=async()=>{const r=await fetch('/api/developer/webhooks',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:name||'CRM webhook',url,events:selected})});const j=await r.json();if(!r.ok){setMessage(j.error||'Unable to create webhook');return}setNewSecret(j.secret);setUrl('');setName('');load()};
  const delHook=async(id:string)=>{await fetch('/api/developer/webhooks?id='+encodeURIComponent(id),{method:'DELETE'});load()};
  const toggle=(e:string)=>setSelected(v=>v.includes(e)?v.filter(x=>x!==e):[...v,e]);
- return <div className="mx-auto max-w-6xl space-y-6">
+ return <div className="mx-auto max-w-6xl space-y-6"><SettingsTabs />
   <div><p className="text-sm font-medium text-accent-700">Developer platform</p><h1 className="mt-1 text-3xl font-bold text-gray-900 dark:text-gray-100">Integrations & API</h1><p className="mt-2 text-gray-600 dark:text-gray-400">Connect websites, automation platforms and your own software with workspace-scoped credentials and signed events.</p></div>
   {message&&<div className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">{message}</div>}
   <div className="rounded-2xl border border-sky-500/30 bg-gradient-to-r from-sky-900/30 via-ink-700 to-cyan-900/30 p-5 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">

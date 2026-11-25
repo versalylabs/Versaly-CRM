@@ -509,7 +509,7 @@ export default function OutreachPage() {
                             {type?.label || label(log.type)}
                           </span>
                           <span
-                            className={`rounded-md border px-2 py-0.5 text-[10px] font-semibold ${
+                            className={`rounded-md border px-2 py-0.5 text-[11px] font-semibold ${
                               STATUS_STYLES[log.status] || STATUS_STYLES.PENDING
                             }`}
                           >

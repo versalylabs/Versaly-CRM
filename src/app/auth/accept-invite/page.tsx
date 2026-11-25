@@ -147,7 +147,7 @@ function AcceptInviteForm() {
           ) : (
             <form onSubmit={handleAccept} className="space-y-5">
               <div className="rounded-2xl border border-sky-200/70 bg-sky-50/50 p-4 text-center dark:border-sky-800/50 dark:bg-sky-950/30">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-400">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-400">
                   Workspace Invitation
                 </span>
                 <h2 className="mt-1 text-base font-black text-gray-900 dark:text-white">

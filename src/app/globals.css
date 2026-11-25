@@ -310,3 +310,9 @@ input::placeholder, textarea::placeholder { color: #748680 !important; }
 .border-amber-200 { border-color: #92400e !important; }
 .shadow-soft { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.28); }
 
+
+/* Keyboard focus: a clear brand-orange ring on every focusable element. */
+*:focus-visible {
+  outline: 2px solid #ff6b01 !important;
+  outline-offset: 2px;
+}

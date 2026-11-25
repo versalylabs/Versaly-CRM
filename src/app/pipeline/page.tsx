@@ -530,7 +530,7 @@ export default function PipelinePage() {
                             {stage.label}
                           </h3>
                         </div>
-                        <span className="rounded-full bg-ink-800 px-2 py-0.5 text-[10px] font-bold text-slate-200 border border-white/10">
+                        <span className="rounded-full bg-ink-800 px-2 py-0.5 text-[11px] font-bold text-slate-200 border border-white/10">
                           {stageLeads.length}
                         </span>
                       </div>
@@ -539,7 +539,7 @@ export default function PipelinePage() {
                         <span className="font-bold text-slate-200">
                           {formatCurrency(stageValue)}
                         </span>
-                        <span className="text-[10px] font-medium text-slate-400">
+                        <span className="text-[11px] font-medium text-slate-400">
                           {stage.probability}% win prob
                         </span>
                       </div>
@@ -578,7 +578,7 @@ export default function PipelinePage() {
                               <span className="inline-flex items-center rounded-lg bg-emerald-950/60 px-2 py-0.5 text-xs font-bold text-emerald-300 border border-emerald-500/30">
                                 {lead.dealValue ? formatCurrency(lead.dealValue) : 'No Value'}
                               </span>
-                              <span className="text-[10px] font-medium text-slate-400">
+                              <span className="text-[11px] font-medium text-slate-400">
                                 {getDaysAgo(lead.createdAt)}
                               </span>
                             </div>
@@ -613,14 +613,14 @@ export default function PipelinePage() {
                             {/* Footer: Source, Owner, and Stage Select */}
                             <div className="mt-3 pt-2.5 border-t border-white/10">
                               <div className="flex items-center justify-between gap-2">
-                                <span className="rounded-md bg-ink-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-300 border border-white/10">
+                                <span className="rounded-md bg-ink-700 px-1.5 py-0.5 text-[11px] font-medium text-slate-300 border border-white/10">
                                   {formatSource(lead.leadSource)}
                                 </span>
 
                                 {lead.assignedTo && (
                                   <div
                                     title={`Assigned to ${lead.assignedTo.name || lead.assignedTo.email}`}
-                                    className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-950 text-[10px] font-bold text-cyan-300 border border-cyan-500/30"
+                                    className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-950 text-[11px] font-bold text-cyan-300 border border-cyan-500/30"
                                   >
                                     {lead.assignedTo.name?.[0]?.toUpperCase() || 'U'}
                                   </div>
@@ -634,7 +634,7 @@ export default function PipelinePage() {
                                   disabled={isUpdating}
                                   onChange={(e) => moveLead(lead.id, e.target.value)}
                                   onClick={(e) => e.stopPropagation()}
-                                  className="w-full rounded-lg border border-white/10 bg-ink-850 px-2 py-1 text-[10px] font-medium text-slate-200 outline-none focus:border-cyan-400"
+                                  className="w-full rounded-lg border border-white/10 bg-ink-850 px-2 py-1 text-[11px] font-medium text-slate-200 outline-none focus:border-cyan-400"
                                 >
                                   {stages.map((s) => (
                                     <option key={s.key} value={s.key}>
@@ -687,7 +687,7 @@ export default function PipelinePage() {
                 <p className="text-[11px] text-slate-400 mt-1 max-w-[150px] leading-relaxed">
                   Tailor pipeline stages specifically to your company
                 </p>
-                <span className="mt-3 text-[10px] font-semibold text-cyan-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                <span className="mt-3 text-[11px] font-semibold text-cyan-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                   Configure Settings →
                 </span>
               </Link>

@@ -24,11 +24,11 @@ export const PLAN_LIMITS: Record<PlanKey, PlanLimits> = {
 };
 
 /** Other numeric limits, enforced server-side. */
-export const PLAN_QUOTAS: Record<PlanKey, { automationRules: number; apiKeys: number; proposalsPerMonth: number }> = {
-  SOLO: { automationRules: 0, apiKeys: 0, proposalsPerMonth: 5 },
-  STARTER: { automationRules: 5, apiKeys: 0, proposalsPerMonth: UNLIMITED },
-  GROWTH_PRO: { automationRules: UNLIMITED, apiKeys: 10, proposalsPerMonth: UNLIMITED },
-  ENTERPRISE: { automationRules: UNLIMITED, apiKeys: 50, proposalsPerMonth: UNLIMITED },
+export const PLAN_QUOTAS: Record<PlanKey, { automationRules: number; apiKeys: number; proposalsPerMonth: number; customFields: number }> = {
+  SOLO: { automationRules: 0, apiKeys: 0, proposalsPerMonth: 5, customFields: 0 },
+  STARTER: { automationRules: 5, apiKeys: 0, proposalsPerMonth: UNLIMITED, customFields: 5 },
+  GROWTH_PRO: { automationRules: UNLIMITED, apiKeys: 10, proposalsPerMonth: UNLIMITED, customFields: UNLIMITED },
+  ENTERPRISE: { automationRules: UNLIMITED, apiKeys: 50, proposalsPerMonth: UNLIMITED, customFields: UNLIMITED },
 };
 
 /** Backwards-compatible alias used by the developer keys route. */
@@ -82,6 +82,7 @@ const limitLines = (key: PlanKey) => {
     p.seatLimit === 1 ? '1 user' : `Up to ${p.seatLimit} team members`,
     q.automationRules ? `${q.automationRules >= UNLIMITED ? 'Unlimited' : q.automationRules} automation rules · ${n(p.automationRunLimit)} runs / month` : null,
     q.proposalsPerMonth < UNLIMITED ? `${q.proposalsPerMonth} proposals / month` : 'Unlimited proposals',
+    q.customFields ? `${q.customFields >= UNLIMITED ? 'Unlimited' : q.customFields} custom lead fields` : null,
   ].filter(Boolean) as string[];
 };
 

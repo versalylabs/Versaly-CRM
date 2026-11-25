@@ -77,7 +77,7 @@ export default function NotificationBell() {
           />
         </svg>
         {unread > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-extrabold text-white shadow-[0_0_8px_rgba(244,63,94,0.6)]">
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[11px] font-extrabold text-white shadow-[0_0_8px_rgba(244,63,94,0.6)]">
             {unread > 99 ? '99+' : unread}
           </span>
         )}
@@ -105,7 +105,7 @@ export default function NotificationBell() {
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-white tracking-wide">Notifications</span>
                 {unread > 0 && (
-                  <span className="rounded-full bg-brand-orange/20 border border-brand-orange/30 px-2 py-0.5 text-[10px] font-bold text-brand-orange">
+                  <span className="rounded-full bg-brand-orange/20 border border-brand-orange/30 px-2 py-0.5 text-[11px] font-bold text-brand-orange">
                     {unread} new
                   </span>
                 )}
@@ -160,7 +160,7 @@ export default function NotificationBell() {
                         <span>{n.title}</span>
                       </div>
                       {n.createdAt && (
-                        <span className="text-[10px] text-slate-400 shrink-0">
+                        <span className="text-[11px] text-slate-400 shrink-0">
                           {new Date(n.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                         </span>
                       )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import SettingsTabs from '@/components/SettingsTabs';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { ShieldCheck, Clock, Sparkles, CheckCircle2 } from 'lucide-react';
@@ -186,7 +187,7 @@ export default function BillingPage() {
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sky-600 dark:text-sky-400">
               <span>{org.name} Workspace</span>
               <span className="text-gray-300 dark:text-gray-700">·</span>
-              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-800 dark:bg-sky-950 dark:text-sky-300">
+              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-bold text-sky-800 dark:bg-sky-950 dark:text-sky-300">
                 {org.plan.replace('_', ' ')}
               </span>
             </div>
@@ -199,27 +200,7 @@ export default function BillingPage() {
           </div>
         </div>
 
-        {/* Tab Switcher */}
-        <div className="mt-6 flex border-b border-gray-200 dark:border-gray-800">
-          <Link
-            href="/settings"
-            className="border-b-2 border-transparent px-4 py-2.5 text-xs font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition"
-          >
-            👤 Profile & Security
-          </Link>
-          <Link
-            href="/settings/pipeline"
-            className="border-b-2 border-transparent px-4 py-2.5 text-xs font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition"
-          >
-            🎯 Pipeline Stages
-          </Link>
-          <Link
-            href="/settings/billing"
-            className="border-b-2 border-sky-600 px-4 py-2.5 text-xs font-bold text-sky-600 dark:border-sky-400 dark:text-sky-400"
-          >
-            ⚡ Subscription & Plans
-          </Link>
-        </div>
+        <SettingsTabs />
       </div>
 
       {/* Dynamic Toast Notification */}
@@ -276,7 +257,7 @@ export default function BillingPage() {
                     : 'Payment needed'}
                 </span>
                 <span
-                  className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                  className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
                     session?.user?.isPlatformAdmin
                       ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
                       : org.isTrialing
@@ -438,7 +419,7 @@ export default function BillingPage() {
               >
                 {/* Badge if featured / popular */}
                 {plan.badge && (
-                  <div className="absolute -top-3 right-6 rounded-full bg-gradient-to-r from-sky-600 to-sky-500 px-3 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white shadow">
+                  <div className="absolute -top-3 right-6 rounded-full bg-gradient-to-r from-sky-600 to-sky-500 px-3 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-white shadow">
                     {plan.badge}
                   </div>
                 )}
@@ -447,7 +428,7 @@ export default function BillingPage() {
                   <div className="flex items-center justify-between">
                     <h3 className="text-base font-bold text-gray-900 dark:text-white">{plan.name}</h3>
                     {isCurrent && (
-                      <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+                      <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                         Current
                       </span>
                     )}

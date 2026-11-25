@@ -131,7 +131,7 @@ export function HeroSection() {
                 <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
                 <span>WhatsApp Outreach Sent</span>
               </div>
-              <p className="text-[10px] text-sky-200/80">Kevin M. replied in 42s · Hot Lead</p>
+              <p className="text-[11px] text-sky-200/80">Kevin M. replied in 42s · Hot Lead</p>
             </div>
           </motion.div>
 
@@ -151,9 +151,9 @@ export function HeroSection() {
             <div>
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-white">
                 <span>CS Health: 98.4%</span>
-                <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-300">LOW CHURN RISK</span>
+                <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[11px] font-extrabold text-emerald-300">LOW CHURN RISK</span>
               </div>
-              <p className="text-[10px] text-sky-200/80">Twiga Commerce renewed · KES 4.8M</p>
+              <p className="text-[11px] text-sky-200/80">Twiga Commerce renewed · KES 4.8M</p>
             </div>
           </motion.div>
 
@@ -216,7 +216,7 @@ export function HeroSection() {
                   <p className="mt-1 text-xl font-black text-white sm:text-2xl">
                     1,284
                   </p>
-                  <span className="mt-1 inline-flex items-center text-[10px] font-bold text-emerald-400">
+                  <span className="mt-1 inline-flex items-center text-[11px] font-bold text-emerald-400">
                     <TrendingUp className="mr-1 h-3 w-3" /> +18.4% this mo
                   </span>
                 </div>
@@ -226,7 +226,7 @@ export function HeroSection() {
                   <p className="mt-1 text-xl font-black text-white sm:text-2xl">
                     KES 14.8M
                   </p>
-                  <span className="mt-1 inline-flex items-center text-[10px] font-bold text-emerald-400">
+                  <span className="mt-1 inline-flex items-center text-[11px] font-bold text-emerald-400">
                     <TrendingUp className="mr-1 h-3 w-3" /> +24.2% MoM
                   </span>
                 </div>
@@ -236,7 +236,7 @@ export function HeroSection() {
                   <p className="mt-1 text-xl font-black text-white sm:text-2xl">
                     98.4%
                   </p>
-                  <span className="mt-1 inline-flex items-center text-[10px] font-bold text-emerald-400">
+                  <span className="mt-1 inline-flex items-center text-[11px] font-bold text-emerald-400">
                     <ShieldCheck className="mr-1 h-3 w-3" /> Zero Churn
                   </span>
                 </div>
@@ -246,7 +246,7 @@ export function HeroSection() {
                   <p className="mt-1 text-xl font-black text-white sm:text-2xl">
                     11.2 <span className="text-xs font-normal text-sky-300">Days</span>
                   </p>
-                  <span className="mt-1 inline-flex items-center text-[10px] font-bold text-cyan-400">
+                  <span className="mt-1 inline-flex items-center text-[11px] font-bold text-cyan-400">
                     <Zap className="mr-1 h-3 w-3" /> 2.4x Faster
                   </span>
                 </div>
@@ -258,7 +258,7 @@ export function HeroSection() {
                   <div className="rounded-xl border border-sky-500/20 bg-ink-800 p-3">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-sky-300">Discovery (5)</span>
-                      <span className="text-[10px] text-sky-400">KES 4.2M</span>
+                      <span className="text-[11px] text-sky-400">KES 4.2M</span>
                     </div>
                     <div className="mt-2 space-y-2">
                       <div className="rounded-lg bg-ink-900 p-2.5 border border-white/5">
@@ -266,7 +266,7 @@ export function HeroSection() {
                           <span>Safari Logistics</span>
                           <span className="text-sky-300">KES 1.4M</span>
                         </div>
-                        <p className="text-[10px] text-sky-300/60 mt-0.5">WhatsApp sequence active</p>
+                        <p className="text-[11px] text-sky-300/60 mt-0.5">WhatsApp sequence active</p>
                       </div>
                     </div>
                   </div>
@@ -274,7 +274,7 @@ export function HeroSection() {
                   <div className="rounded-xl border border-sky-500/20 bg-ink-800 p-3">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-sky-300">Proposal Sent (3)</span>
-                      <span className="text-[10px] text-sky-400">KES 6.8M</span>
+                      <span className="text-[11px] text-sky-400">KES 6.8M</span>
                     </div>
                     <div className="mt-2 space-y-2">
                       <div className="rounded-lg bg-ink-900 p-2.5 border border-white/5">
@@ -282,7 +282,7 @@ export function HeroSection() {
                           <span>Koko Clean Energies</span>
                           <span className="text-sky-300">KES 3.2M</span>
                         </div>
-                        <p className="text-[10px] text-amber-300/80 mt-0.5">Awaiting contract sign</p>
+                        <p className="text-[11px] text-amber-300/80 mt-0.5">Awaiting contract sign</p>
                       </div>
                     </div>
                   </div>
@@ -290,7 +290,7 @@ export function HeroSection() {
                   <div className="rounded-xl border border-emerald-500/20 bg-ink-800 p-3">
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-bold text-emerald-400">Closed Won (8)</span>
-                      <span className="text-[10px] text-emerald-300">KES 8.9M</span>
+                      <span className="text-[11px] text-emerald-300">KES 8.9M</span>
                     </div>
                     <div className="mt-2 space-y-2">
                       <div className="rounded-lg bg-ink-900 p-2.5 border border-emerald-500/20">
@@ -298,7 +298,7 @@ export function HeroSection() {
                           <span>Twiga Commerce</span>
                           <span className="text-emerald-400">KES 4.8M</span>
                         </div>
-                        <p className="text-[10px] text-emerald-300/80 mt-0.5">Billed & active in CRM</p>
+                        <p className="text-[11px] text-emerald-300/80 mt-0.5">Billed & active in CRM</p>
                       </div>
                     </div>
                   </div>
@@ -339,11 +339,11 @@ export function HeroSection() {
                   <div className="mt-3 space-y-2">
                     <div className="flex items-center justify-between rounded-lg bg-ink-900 p-2.5">
                       <span className="text-sky-200">WhatsApp delivered to Kevin Mwangi: &quot;Proposal ready for download&quot;</span>
-                      <span className="text-[10px] text-sky-400 font-mono">1 min ago</span>
+                      <span className="text-[11px] text-sky-400 font-mono">1 min ago</span>
                     </div>
                     <div className="flex items-center justify-between rounded-lg bg-ink-900 p-2.5">
                       <span className="text-sky-200">Email sequence step 2 dispatched to 14 marketing leads</span>
-                      <span className="text-[10px] text-sky-400 font-mono">5 mins ago</span>
+                      <span className="text-[11px] text-sky-400 font-mono">5 mins ago</span>
                     </div>
                   </div>
                 </div>

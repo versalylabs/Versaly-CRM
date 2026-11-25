@@ -118,15 +118,15 @@ function SignUpForm() {
         <div className="grid grid-cols-3 gap-2 rounded-2xl border border-sky-100 bg-sky-50/70 p-3 text-center text-xs dark:border-sky-900/40 dark:bg-sky-950/20">
           <div>
             <span className="block font-bold text-sky-900 dark:text-sky-200">{currentPlan.name}</span>
-            <span className="text-[10px] text-sky-700 dark:text-sky-400">{currentPlan.trial}</span>
+            <span className="text-[11px] text-sky-700 dark:text-sky-400">{currentPlan.trial}</span>
           </div>
           <div className="border-x border-sky-200/60 dark:border-sky-800/60">
             <span className="block font-bold text-sky-900 dark:text-sky-200">{currentPlan.leads}</span>
-            <span className="text-[10px] text-sky-700 dark:text-sky-400">Active Contacts</span>
+            <span className="text-[11px] text-sky-700 dark:text-sky-400">Active Contacts</span>
           </div>
           <div>
             <span className="block font-bold text-sky-900 dark:text-sky-200">{currentPlan.seats}</span>
-            <span className="text-[10px] text-sky-700 dark:text-sky-400">Team Workload</span>
+            <span className="text-[11px] text-sky-700 dark:text-sky-400">Team Workload</span>
           </div>
         </div>
 

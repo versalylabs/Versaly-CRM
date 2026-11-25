@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import SettingsTabs from '@/components/SettingsTabs';
 import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -115,39 +116,7 @@ export default function SettingsPage() {
           </p>
         </div>
 
-        {/* Settings Navigation Tabs (Liquid Glass Style) */}
-        <div className="flex gap-2 border-b border-white/10 pb-3">
-          <Link
-            href="/settings"
-            className="rounded-xl px-4 py-2 text-xs font-bold bg-sky-500/20 text-cyan-300 border border-sky-400/30 transition"
-          >
-            👤 Profile & Security
-          </Link>
-          <Link
-            href="/settings/pipeline"
-            className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 border border-transparent transition"
-          >
-            🎯 Pipeline Stages
-          </Link>
-          <Link
-            href="/settings/lead-capture"
-            className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 border border-transparent transition"
-          >
-            🧲 Lead Capture
-          </Link>
-          <Link
-            href="/settings/billing"
-            className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 border border-transparent transition"
-          >
-            ⚡ Subscription & Plans
-          </Link>
-          <Link
-            href="/settings/integrations"
-            className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 border border-transparent transition"
-          >
-            💬 Communication Channels
-          </Link>
-        </div>
+        <SettingsTabs />
 
         {loadError && (
           <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs text-rose-200">
@@ -341,7 +310,7 @@ export default function SettingsPage() {
                 <h3 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">
                   Pipeline & Deal Stages
                 </h3>
-                <span className="text-[10px] text-cyan-400/90 font-medium">Custom Sales Workflow</span>
+                <span className="text-[11px] text-cyan-400/90 font-medium">Custom Sales Workflow</span>
               </div>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
@@ -366,7 +335,7 @@ export default function SettingsPage() {
                 <h3 className="text-sm font-bold text-white group-hover:text-sky-300 transition-colors">
                   Subscription & Billing
                 </h3>
-                <span className="text-[10px] text-sky-400/90 font-medium">Quotas & Invoicing</span>
+                <span className="text-[11px] text-sky-400/90 font-medium">Quotas & Invoicing</span>
               </div>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
@@ -391,7 +360,7 @@ export default function SettingsPage() {
                 <h3 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">
                   Communication Channels
                 </h3>
-                <span className="text-[10px] text-indigo-400/90 font-medium">Omnichannel Setup</span>
+                <span className="text-[11px] text-indigo-400/90 font-medium">Omnichannel Setup</span>
               </div>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">

@@ -268,7 +268,7 @@ export function RevenueTrendChart({ data, formatCurrency, totalWon }: RevenueTre
                   x={padLeft - 8}
                   y={y + 3.5}
                   textAnchor="end"
-                  className="fill-gray-400 text-[10px] font-medium dark:fill-gray-500"
+                  className="fill-gray-400 text-[11px] font-medium dark:fill-gray-500"
                 >
                   {tick >= 1000 ? `${Math.round(tick / 1000)}k` : tick}
                 </text>
@@ -532,14 +532,14 @@ export function WeeklyActivityBarChart({ days }: WeeklyActivityBarChartProps) {
             <div key={item.day} className="group relative flex flex-1 flex-col items-center justify-end h-full">
               {/* Peak indicator floating badge - only if count > 0 */}
               {item.isPeak && item.count > 0 && (
-                <div className="absolute -top-7 animate-bounce rounded-full bg-sky-600 px-1.5 py-0.5 text-[10px] font-bold text-white shadow-sm">
+                <div className="absolute -top-7 animate-bounce rounded-full bg-sky-600 px-1.5 py-0.5 text-[11px] font-bold text-white shadow-sm">
                   {item.count}
                 </div>
               )}
 
               {/* Tooltip on non-peak hover */}
               {(!item.isPeak || item.count === 0) && (
-                <div className="pointer-events-none absolute -top-6 hidden rounded bg-gray-900 px-1.5 py-0.5 text-[10px] font-medium text-white shadow group-hover:block dark:bg-gray-100 dark:text-gray-900">
+                <div className="pointer-events-none absolute -top-6 hidden rounded bg-gray-900 px-1.5 py-0.5 text-[11px] font-medium text-white shadow group-hover:block dark:bg-gray-100 dark:text-gray-900">
                   {item.count}
                 </div>
               )}

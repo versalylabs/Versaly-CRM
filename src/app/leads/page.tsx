@@ -3,6 +3,7 @@
 import { formatCurrency } from '../../../lib/currency';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import CustomFieldInputs, { useCustomFields, type CustomValues } from '@/components/CustomFieldInputs';
 import { useSession } from 'next-auth/react';
 import {
   PipelineStageItem,
@@ -85,6 +86,7 @@ function emptyForm() {
     dealValue: '',
     notes: '',
     assignedToId: '',
+    customFields: {} as CustomValues,
   };
 }
 
@@ -116,6 +118,27 @@ export default function LeadsPage() {
   const [sourceFilter, setSourceFilter] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm());
+  const customFields = useCustomFields();
+  const canManage = ['ADMIN', 'MANAGER'].includes(session?.user?.role || '');
+  const [selected, setSelected] = useState<string[]>([]);
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  async function runBulk(payload: { action: 'assign' | 'stage' | 'delete'; assignedToId?: string; stage?: string }) {
+    if (payload.action === 'delete' && !window.confirm(`Delete ${selected.length} leads permanently? This cannot be undone.`)) return;
+    setBulkBusy(true);
+    setError('');
+    try {
+      const res = await fetch('/api/leads/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...payload, ids: selected }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Bulk update failed.');
+      setSelected([]);
+      await fetchLeads();
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setBulkBusy(false);
+    }
+  }
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [page, setPage] = useState(1);
@@ -425,6 +448,15 @@ export default function LeadsPage() {
                 </Field>
               </div>
 
+              {customFields.length > 0 && (
+                <CustomFieldInputs
+                  fields={customFields}
+                  values={form.customFields}
+                  inputClass={glassInput}
+                  onChange={(key, value) => setForm((f) => ({ ...f, customFields: { ...f.customFields, [key]: value } }))}
+                />
+              )}
+
               {formError && (
                 <p className="text-xs text-rose-300 md:col-span-2 bg-rose-500/10 border border-rose-500/30 rounded-xl p-2.5">
                   {formError}
@@ -546,9 +578,52 @@ export default function LeadsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
+              {canManage && selected.length > 0 && (
+                <div role="region" aria-label="Bulk actions" className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-xs">
+                  <span className="font-semibold text-white">{selected.length} selected</span>
+                  <select
+                    aria-label="Assign selected leads to"
+                    disabled={bulkBusy}
+                    value=""
+                    onChange={(e) => e.target.value && runBulk({ action: 'assign', assignedToId: e.target.value === 'none' ? '' : e.target.value })}
+                    className="rounded-lg border border-white/10 bg-ink-900 px-2 py-1.5 text-white"
+                  >
+                    <option value="">Assign to…</option>
+                    <option value="none">Unassigned</option>
+                    {users.map((u) => <option key={u.id} value={u.id}>{u.name || u.email}</option>)}
+                  </select>
+                  <select
+                    aria-label="Move selected leads to stage"
+                    disabled={bulkBusy}
+                    value=""
+                    onChange={(e) => e.target.value && runBulk({ action: 'stage', stage: e.target.value })}
+                    className="rounded-lg border border-white/10 bg-ink-900 px-2 py-1.5 text-white"
+                  >
+                    <option value="">Move to stage…</option>
+                    {pipelineStages.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
+                  </select>
+                  <button onClick={() => runBulk({ action: 'delete' })} disabled={bulkBusy} className="rounded-lg border border-rose-400/40 px-3 py-1.5 font-semibold text-rose-300 hover:bg-rose-500/10 disabled:opacity-50">
+                    Delete
+                  </button>
+                  <button onClick={() => setSelected([])} className="ml-auto font-semibold text-slate-400 hover:text-white">Clear</button>
+                </div>
+              )}
               <table className="w-full min-w-[980px] text-xs">
                 <thead>
                   <tr className="text-left uppercase tracking-wider text-slate-400 border-b border-white/10">
+                    {canManage && (
+                      <th className="pb-3 pr-3 w-8">
+                        <input
+                          type="checkbox"
+                          aria-label="Select all leads on this page"
+                          checked={paginatedLeads.length > 0 && paginatedLeads.every((l) => selected.includes(l.id))}
+                          onChange={(e) => {
+                            const pageIds = paginatedLeads.map((l) => l.id);
+                            setSelected((cur) => (e.target.checked ? Array.from(new Set([...cur, ...pageIds])) : cur.filter((id) => !pageIds.includes(id))));
+                          }}
+                        />
+                      </th>
+                    )}
                     <th className="pb-3 pr-4 font-semibold">Contact</th>
                     <th className="pb-3 pr-4 font-semibold">Company</th>
                     <th className="pb-3 pr-4 font-semibold">Location</th>
@@ -564,6 +639,16 @@ export default function LeadsPage() {
                       key={lead.id}
                       className="hover:bg-white/[0.03] transition-colors group"
                     >
+                      {canManage && (
+                        <td className="py-3.5 pr-3">
+                          <input
+                            type="checkbox"
+                            aria-label={`Select ${lead.contactName}`}
+                            checked={selected.includes(lead.id)}
+                            onChange={(e) => setSelected((cur) => (e.target.checked ? [...cur, lead.id] : cur.filter((id) => id !== lead.id)))}
+                          />
+                        </td>
+                      )}
                       <td className="py-3.5 pr-4">
                         <Link
                           href={`/leads/${lead.id}`}
@@ -583,7 +668,7 @@ export default function LeadsPage() {
                       <td className="py-3.5 pr-4">
                         <div className="flex items-center gap-2">
                           <span
-                            className={`px-2.5 py-1 rounded-md text-[10px] font-semibold whitespace-nowrap border ${
+                            className={`px-2.5 py-1 rounded-md text-[11px] font-semibold whitespace-nowrap border ${
                               stageMap.get(lead.pipelineStage)?.colorStyle ||
                               STAGE_COLORS[lead.pipelineStage] ||
                               'bg-white/10 text-slate-300 border-white/15'

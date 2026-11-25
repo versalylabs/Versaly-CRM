@@ -451,7 +451,7 @@ export default function Dashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4">
           <div>
             <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Zap className="h-4.5 w-4.5 text-amber-400" />
+              <Zap className="h-[18px] w-[18px] text-amber-400" />
               <span>High Priority Actions</span>
               <span className="rounded-full bg-amber-500/20 border border-amber-500/30 px-2 py-0.5 text-xs font-semibold text-amber-300">
                 Action Required
@@ -572,7 +572,7 @@ export default function Dashboard() {
                         {task.lead ? leadLabel(task.lead) : 'Internal Task'}
                       </p>
                     </div>
-                    <span className="shrink-0 rounded-md bg-gray-100 px-2 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
+                    <span className="shrink-0 rounded-md bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-300">
                       {shortDate(task.dueDate)}
                     </span>
                   </div>
@@ -626,7 +626,7 @@ export default function Dashboard() {
                           </span>
                           <div>
                             <p className="font-semibold text-gray-900 dark:text-white">{user.name}</p>
-                            <p className="text-[10px] text-gray-500">{user.role}</p>
+                            <p className="text-[11px] text-gray-500">{user.role}</p>
                           </div>
                         </div>
                       </td>

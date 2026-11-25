@@ -161,7 +161,7 @@ export default function CommandPalette() {
                     <span className="block truncate text-sm font-medium text-gray-900">{item.title}</span>
                     {item.subtitle && <span className="block truncate text-xs text-gray-500">{item.subtitle}</span>}
                   </span>
-                  <span className="hidden rounded bg-gray-100 px-2 py-1 text-[10px] font-medium text-gray-500 sm:block">{item.type}</span>
+                  <span className="hidden rounded bg-gray-100 px-2 py-1 text-[11px] font-medium text-gray-500 sm:block">{item.type}</span>
                 </button>
               ))}
 

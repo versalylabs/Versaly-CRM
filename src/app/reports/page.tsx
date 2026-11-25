@@ -447,7 +447,7 @@ export default function ReportsPage() {
                         x={padLeft - 6}
                         y={y + 3}
                         textAnchor="end"
-                        className="fill-gray-400 text-[10px] font-medium dark:fill-gray-500"
+                        className="fill-gray-400 text-[11px] font-medium dark:fill-gray-500"
                       >
                         {tick}
                       </text>
@@ -469,7 +469,7 @@ export default function ReportsPage() {
                       x={x}
                       y={svgH - 8}
                       textAnchor="middle"
-                      className="fill-gray-500 text-[10px] font-medium dark:fill-gray-400"
+                      className="fill-gray-500 text-[11px] font-medium dark:fill-gray-400"
                     >
                       {t.label}
                     </text>
@@ -762,7 +762,7 @@ export default function ReportsPage() {
                         </span>
                         <div>
                           <p className="font-semibold text-gray-900 dark:text-white">{agent.name}</p>
-                          <p className="text-[10px] text-gray-500">{agent.role}</p>
+                          <p className="text-[11px] text-gray-500">{agent.role}</p>
                         </div>
                       </div>
                     </td>

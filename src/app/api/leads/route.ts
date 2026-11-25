@@ -1,4 +1,5 @@
 import { blockIfReadOnly, leadLimitError } from '../../../../lib/subscription';
+import { validateCustomValues } from '@/lib/customFields';
 import { getStageGroups } from '@/lib/stages';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -91,6 +92,10 @@ export async function POST(req: NextRequest) {
     const limit = await leadLimitError(session.user.organizationId);
     if (limit) return NextResponse.json({ error: limit }, { status: 403 });
 
+    const fieldDefs = await prisma.customField.findMany({ where: { organizationId: session.user.organizationId } });
+    const custom = validateCustomValues(fieldDefs, body.customFields);
+    if ('error' in custom) return NextResponse.json({ error: custom.error }, { status: 400 });
+
     const lead = await prisma.lead.create({
       data: {
         organizationId: session.user.organizationId,
@@ -110,6 +115,7 @@ export async function POST(req: NextRequest) {
         outreachStatus: body.outreachStatus || 'PENDING',
         dealValue,
         notes: body.notes || null,
+        customFields: fieldDefs.length ? custom.values : undefined,
         assignedToId: body.assignedToId || null,
       },
     });

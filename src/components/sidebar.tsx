@@ -141,62 +141,53 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
   const pathname = usePathname();
 
   // Define categorized navigation groups
+  // Twelve destinations in four groups. Older pages (Outreach, Email, WhatsApp, Activity,
+  // Notifications, Integrations, Users) still work; they are reached from the Inbox and Settings.
   const navGroups: NavGroup[] = [
     {
       id: 'overview',
       label: 'Overview',
       collapsible: false,
-      items: [
-        { href: '/dashboard', label: 'Dashboard', icon: Icons.dashboard },
-      ],
+      items: [{ href: '/dashboard', label: 'Dashboard', icon: Icons.dashboard }],
     },
     {
-      id: 'sales',
-      label: 'Sales & Pipeline',
+      id: 'sell',
+      label: 'Sell',
       collapsible: true,
       items: [
         { href: '/leads', label: 'Leads', icon: Icons.leads },
-        { href: '/pipeline', label: 'Deals Pipeline', icon: Icons.pipeline },
-        { href: '/copilot', label: 'AI Deal Copilot', icon: Icons.copilot },
+        { href: '/pipeline', label: 'Pipeline', icon: Icons.pipeline },
         { href: '/proposals', label: 'Proposals', icon: Icons.proposals },
+        { href: '/copilot', label: 'Deal Insights', icon: Icons.copilot },
       ],
     },
     {
-      id: 'communications',
-      label: 'Communications',
+      id: 'engage',
+      label: 'Engage',
       collapsible: true,
       items: [
-        { href: '/inbox', label: 'Unified Inbox', icon: Icons.inbox },
-        { href: '/outreach', label: 'Outreach', icon: Icons.outreach },
-        { href: '/email', label: 'Email', icon: Icons.email },
-        { href: '/whatsapp', label: 'WhatsApp', icon: Icons.whatsapp },
+        { href: '/inbox', label: 'Inbox', icon: Icons.inbox },
         { href: '/calendar', label: 'Calendar', icon: Icons.calendar },
+        { href: '/tasks', label: 'Tasks', icon: Icons.tasks },
       ],
     },
     {
-      id: 'operations',
-      label: 'Operations & Growth',
+      id: 'grow',
+      label: 'Grow',
       collapsible: true,
       items: [
-        { href: '/tasks', label: 'Tasks', icon: Icons.tasks },
-        { href: '/activity', label: 'Activity Feed', icon: Icons.activity },
-        { href: '/customer-success', label: 'Customer Success', icon: Icons.customerSuccess },
-        { href: '/automation', label: 'Automation', icon: Icons.automation },
+        { href: '/automation', label: 'Automations', icon: Icons.automation },
         { href: '/reports', label: 'Reports', icon: Icons.reports },
+        { href: '/customer-success', label: 'Customer Success', icon: Icons.customerSuccess },
       ],
     },
     {
       id: 'workspace',
-      label: 'Workspace & Config',
-      collapsible: true,
+      label: 'Workspace',
+      collapsible: false,
       items: [
-        { href: '/integrations', label: 'Integrations', icon: Icons.integrations },
-        { href: '/notifications', label: 'Notifications', icon: Icons.notifications },
         { href: '/settings', label: 'Settings', icon: Icons.settings },
-        ...(session?.user?.role === 'ADMIN'
-          ? [{ href: '/admin/users', label: 'Users & Roles', icon: Icons.users }]
-          : []),
-        { href: '/support', label: 'Support Desk', icon: Icons.support },
+        { href: '/support', label: 'Help & Support', icon: Icons.support },
       ],
     },
   ];
@@ -204,10 +195,10 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
   // Accordion state: track which categories are open
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     overview: true,
-    sales: true,
-    communications: true,
-    operations: false,
-    workspace: false,
+    sell: true,
+    engage: true,
+    grow: true,
+    workspace: true,
   });
 
   // Real subscription state for the plan box (same source as the trial banner).
@@ -226,7 +217,11 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
     Boolean(GATED[href]) && !session?.user?.isPlatformAdmin && !planHasFeature(session?.user?.plan, GATED[href]);
 
   const isActive = (href: string) => {
-    return pathname === href || pathname.startsWith(`${href}/`);
+    const under = (p: string) => pathname === p || pathname.startsWith(`${p}/`);
+    // Team, developer API and notifications live under Settings in the navigation.
+    if (href === '/settings') return ['/settings', '/admin/users', '/integrations', '/notifications'].some(under);
+    if (href === '/inbox') return ['/inbox', '/outreach', '/email', '/whatsapp'].some(under);
+    return under(href);
   };
 
   // Auto-expand category when user navigates to a nested page
@@ -262,7 +257,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
             <span className="block truncate text-sm font-bold text-white leading-tight">
               {session?.user?.organizationName || 'VersalyLabs CRM'}
             </span>
-            <span className="block text-[10px] font-semibold text-brand-orange">
+            <span className="block text-[11px] font-semibold text-brand-orange">
               Cloud CRM Platform
             </span>
           </div>
@@ -383,7 +378,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
         {/* Platform Owner Section (Restricted strictly to isPlatformAdmin) */}
         {Boolean(session?.user?.isPlatformAdmin) && (
           <div className="pt-2 mt-2 border-t border-white/10 space-y-1">
-            <span className="block px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
+            <span className="block px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-400">
               Platform Admin
             </span>
             <Link
@@ -396,7 +391,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
               }`}
             >
               <span className="text-emerald-400">
-                <svg className="h-4.5 w-4.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+                <svg className="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </span>
@@ -410,7 +405,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
               className="group flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/10 hover:text-emerald-200 transition-all"
             >
               <span className="text-emerald-400">
-                <svg className="h-4.5 w-4.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
+                <svg className="h-[18px] w-[18px] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.75">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
               </span>
@@ -423,7 +418,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
       {/* Liquid Glass SaaS Subscription Plan Callout */}
       <div className="my-2 rounded-xl bg-gradient-to-br from-amber-500/20 via-ink-700/90 to-ink-900/95 p-3 text-white border border-brand-orange/20 backdrop-blur-md shadow-sm">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-brand-orange">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-brand-orange">
             {session?.user?.isPlatformAdmin
               ? 'Platform Master'
               : session?.user?.plan
@@ -431,12 +426,12 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
               : 'Growth Pro'}
           </span>
           {(session?.user?.isPlatformAdmin || planStatus) && (
-            <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${statusHealthy ? 'bg-emerald-400/20 text-emerald-300' : 'bg-amber-400/20 text-amber-300'}`}>
+            <span className={`rounded-full px-1.5 py-0.5 text-[11px] font-semibold ${statusHealthy ? 'bg-emerald-400/20 text-emerald-300' : 'bg-amber-400/20 text-amber-300'}`}>
               {session?.user?.isPlatformAdmin ? 'Lifetime' : STATUS_LABELS[planStatus!.status] || planStatus!.status}
             </span>
           )}
         </div>
-        <p className="mt-1 text-[10px] text-gray-300 leading-snug">
+        <p className="mt-1 text-[11px] text-gray-300 leading-snug">
           {session?.user?.isPlatformAdmin
             ? 'System Owner Account · Full Platform Rights'
             : planStatus?.status === 'trialing'
@@ -467,7 +462,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
                   <p className="truncate text-xs font-bold text-white leading-tight">
                     {session.user.name || 'User'}
                   </p>
-                  <p className="truncate text-[10px] text-gray-400 leading-tight">
+                  <p className="truncate text-[11px] text-gray-400 leading-tight">
                     {session.user.email}
                   </p>
                 </div>

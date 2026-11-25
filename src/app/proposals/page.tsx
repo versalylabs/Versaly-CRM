@@ -296,11 +296,11 @@ export default function ProposalsPage() {
                         <span className="truncate">{tmpl.title}</span>
                         <div className="flex items-center gap-1.5 shrink-0 ml-2">
                           {existing && (
-                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-400/30">
+                            <span className="text-[11px] font-medium px-1.5 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-400/30">
                               Active
                             </span>
                           )}
-                          <span className="text-[10px] text-emerald-400 font-bold">{fmt(tmpl.value)}</span>
+                          <span className="text-[11px] text-emerald-400 font-bold">{fmt(tmpl.value)}</span>
                         </div>
                       </div>
                       <p className="text-[11px] text-slate-400 truncate mt-0.5">{tmpl.description}</p>
@@ -492,7 +492,7 @@ export default function ProposalsPage() {
                               {p.title}
                             </h3>
                             {isBeingEdited && (
-                              <span className="rounded-md border border-cyan-400/40 bg-cyan-500/20 px-2 py-0.5 text-[10px] font-bold text-cyan-200 uppercase tracking-wider animate-pulse">
+                              <span className="rounded-md border border-cyan-400/40 bg-cyan-500/20 px-2 py-0.5 text-[11px] font-bold text-cyan-200 uppercase tracking-wider animate-pulse">
                                 Editing
                               </span>
                             )}

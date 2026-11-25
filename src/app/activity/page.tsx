@@ -256,7 +256,7 @@ export default function ActivityPage() {
                             )}
                             <div className="mt-2 flex items-center gap-2">
                               <span
-                                className={`inline-block rounded-md border px-2 py-0.5 text-[10px] font-semibold ${style.badge}`}
+                                className={`inline-block rounded-md border px-2 py-0.5 text-[11px] font-semibold ${style.badge}`}
                               >
                                 {style.label}
                               </span>

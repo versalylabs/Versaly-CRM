@@ -20,6 +20,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith('/landing') ||
     pathname === '/privacy' ||
     pathname === '/terms' ||
+    pathname === '/help' ||
     pathname === '/';
 
   if (isPublicPage) {

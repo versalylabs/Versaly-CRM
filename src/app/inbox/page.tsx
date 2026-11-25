@@ -430,7 +430,7 @@ export default function InboxPage() {
                     if (m.isInternal) {
                       return (
                         <div key={m.id} className="mx-auto max-w-[85%] rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-xs text-amber-100">
-                          <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-300">Private note · {m.senderName || 'Team'}</p>
+                          <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-300">Private note · {m.senderName || 'Team'}</p>
                           <p className="whitespace-pre-wrap">{m.content}</p>
                         </div>
                       );
@@ -440,7 +440,7 @@ export default function InboxPage() {
                       <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm ${mine ? 'rounded-br-md bg-sky-600 text-white' : 'rounded-bl-md bg-white/8 bg-slate-800 text-slate-100'}`}>
                           <p className="whitespace-pre-wrap break-words">{m.content}</p>
-                          <p className={`mt-1 text-[10px] ${mine ? 'text-sky-100/80' : 'text-slate-500'}`}>
+                          <p className={`mt-1 text-[11px] ${mine ? 'text-sky-100/80' : 'text-slate-500'}`}>
                             {new Date(m.sentAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                             {mine && m.deliveryStatus === 'FAILED' ? ' · failed' : ''}
                           </p>
@@ -491,7 +491,7 @@ export default function InboxPage() {
                       {sending ? 'Sending…' : mode === 'note' ? 'Add note' : 'Send'}
                     </button>
                   </div>
-                  <p className="mt-1 text-[10px] text-slate-600">Ctrl + Enter to send</p>
+                  <p className="mt-1 text-[11px] text-slate-600">Ctrl + Enter to send</p>
                 </div>
               </div>
 

@@ -74,15 +74,15 @@ export function BentoGridFeatures() {
               
               <div className="mt-3 space-y-2 text-xs">
                 <div className="max-w-[80%] rounded-xl rounded-tl-sm bg-ink-600 p-3 text-sky-100 border border-sky-500/20">
-                  <p className="font-medium text-sky-300 text-[10px]">Sent from the team inbox</p>
+                  <p className="font-medium text-sky-300 text-[11px]">Sent from the team inbox</p>
                   <p className="mt-0.5">Hi Kevin! We noticed you checked our Growth Pro pricing. Would you like a 10-minute walkthrough tailored for Safari Logistics?</p>
-                  <span className="mt-1 block text-[9px] text-sky-400 text-right">09:14 AM · Sent</span>
+                  <span className="mt-1 block text-[11px] text-sky-400 text-right">09:14 AM · Sent</span>
                 </div>
 
                 <div className="ml-auto max-w-[80%] rounded-xl rounded-tr-sm bg-sky-600/90 p-3 text-white shadow-sm">
-                  <p className="font-medium text-white/80 text-[10px]">Kevin Mwangi · Safari Logistics</p>
+                  <p className="font-medium text-white/80 text-[11px]">Kevin Mwangi · Safari Logistics</p>
                   <p className="mt-0.5">Yes please! Does Thursday 2 PM work? Also, can we onboard 8 team seats right away?</p>
-                  <span className="mt-1 block text-[9px] text-sky-200 text-right">09:17 AM</span>
+                  <span className="mt-1 block text-[11px] text-sky-200 text-right">09:17 AM</span>
                 </div>
               </div>
             </div>
@@ -119,7 +119,7 @@ export function BentoGridFeatures() {
             <div className="mt-5 rounded-2xl border border-white/10 bg-ink-900/80 p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400">Account Health Index</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-sky-400">Account Health Index</span>
                   <div className="mt-1 text-2xl font-black text-white">96.4 <span className="text-sm font-medium text-emerald-400">/ 100</span></div>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-emerald-400 bg-emerald-950/40 text-xs font-black text-emerald-400">
@@ -206,19 +206,19 @@ export function BentoGridFeatures() {
 
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="rounded-xl border border-white/10 bg-ink-900/80 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
-                <p className="text-[10px] font-bold uppercase text-sky-400">Auto Task Dispatch</p>
+                <p className="text-[11px] font-bold uppercase text-sky-400">Auto Task Dispatch</p>
                 <p className="mt-1 text-sm font-bold text-white">Reply within 24h</p>
-                <p className="mt-0.5 text-[10px] text-sky-200/60">Task created for each new lead</p>
+                <p className="mt-0.5 text-[11px] text-sky-200/60">Task created for each new lead</p>
               </div>
               <div className="rounded-xl border border-white/10 bg-ink-900/80 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
-                <p className="text-[10px] font-bold uppercase text-amber-400">Inactive Lead Alert</p>
+                <p className="text-[11px] font-bold uppercase text-amber-400">Inactive Lead Alert</p>
                 <p className="mt-1 text-sm font-bold text-white">Follow-up reminder</p>
-                <p className="mt-0.5 text-[10px] text-sky-200/60">After the days you choose</p>
+                <p className="mt-0.5 text-[11px] text-sky-200/60">After the days you choose</p>
               </div>
               <div className="rounded-xl border border-white/10 bg-ink-900/80 p-3.5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
-                <p className="text-[10px] font-bold uppercase text-emerald-400">Workload Balance</p>
+                <p className="text-[11px] font-bold uppercase text-emerald-400">Workload Balance</p>
                 <p className="mt-1 text-sm font-bold text-white">Fair Lead Rotation</p>
-                <p className="mt-0.5 text-[10px] text-sky-200/60">Least-busy rep gets the lead</p>
+                <p className="mt-0.5 text-[11px] text-sky-200/60">Least-busy rep gets the lead</p>
               </div>
             </div>
           </motion.div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import SettingsTabs from '@/components/SettingsTabs';
 import Link from 'next/link';
 
 type NotificationItem = {
@@ -53,6 +54,7 @@ export default function NotificationsPage() {
   return (
     <div className="min-h-screen bg-ink-850 text-slate-100">
       <div className="container-custom py-8 space-y-8">
+        <SettingsTabs />
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

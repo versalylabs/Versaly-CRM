@@ -52,7 +52,7 @@ export function LandingNav() {
           <VersalyLabsLogo size={40} className="shrink-0 shadow-lg shadow-brand-orange/25 transition-transform group-hover:scale-105 rounded-2xl" />
           <div>
             <Wordmark className="block text-xl leading-tight" />
-            <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-sky-300/70">
+            <span className="block text-[11px] font-bold uppercase tracking-[0.2em] text-sky-300/70">
               CRM
             </span>
           </div>

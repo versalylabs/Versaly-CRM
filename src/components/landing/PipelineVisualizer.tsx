@@ -176,7 +176,7 @@ export function PipelineVisualizer() {
                 <span className="text-xs font-bold uppercase tracking-wider text-white">
                   {stage.title}
                 </span>
-                <span className="rounded-full bg-sky-950/70 px-2 py-0.5 text-[10px] font-semibold text-sky-300">
+                <span className="rounded-full bg-sky-950/70 px-2 py-0.5 text-[11px] font-semibold text-sky-300">
                   {stageDeals.length} active
                 </span>
               </div>
@@ -200,7 +200,7 @@ export function PipelineVisualizer() {
                       >
                         <div className="flex items-start justify-between gap-2">
                           <div>
-                            <span className="inline-block rounded-md bg-sky-950/60 px-2 py-0.5 text-[10px] font-medium text-sky-300">
+                            <span className="inline-block rounded-md bg-sky-950/60 px-2 py-0.5 text-[11px] font-medium text-sky-300">
                               {deal.tag}
                             </span>
                             <h4 className="mt-1 text-xs font-bold text-white line-clamp-1">
@@ -208,7 +208,7 @@ export function PipelineVisualizer() {
                             </h4>
                             <p className="text-[11px] text-sky-200/70">{deal.contact}</p>
                           </div>
-                          <span className="rounded-md bg-emerald-950/50 px-2 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
+                          <span className="rounded-md bg-emerald-950/50 px-2 py-0.5 text-[11px] font-bold text-emerald-400 border border-emerald-500/30">
                             {deal.health}% CS
                           </span>
                         </div>
@@ -217,13 +217,13 @@ export function PipelineVisualizer() {
                           <span className="text-xs font-extrabold text-white">
                             {deal.value}
                           </span>
-                          <span className="text-[10px] text-sky-300/80">
+                          <span className="text-[11px] text-sky-300/80">
                             Owner: {deal.owner}
                           </span>
                         </div>
 
                         {/* Stage Action status */}
-                        <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-ink-950 px-2 py-1 text-[10px] text-sky-300">
+                        <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-ink-950 px-2 py-1 text-[11px] text-sky-300">
                           <Clock className="h-3 w-3 shrink-0 text-sky-400" />
                           <span className="truncate">{deal.action}</span>
                         </div>
@@ -258,7 +258,7 @@ export function PipelineVisualizer() {
             <DollarSign className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] uppercase font-semibold text-sky-300/70">Active Pipeline</p>
+            <p className="text-[11px] uppercase font-semibold text-sky-300/70">Active Pipeline</p>
             <p className="text-sm font-bold text-white sm:text-base">KES 10,320,000</p>
           </div>
         </div>
@@ -268,7 +268,7 @@ export function PipelineVisualizer() {
             <TrendingUp className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] uppercase font-semibold text-sky-300/70">Win Rate</p>
+            <p className="text-[11px] uppercase font-semibold text-sky-300/70">Win Rate</p>
             <p className="text-sm font-bold text-emerald-400 sm:text-base">38.4% (+6.2%)</p>
           </div>
         </div>
@@ -278,7 +278,7 @@ export function PipelineVisualizer() {
             <MessageSquare className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] uppercase font-semibold text-sky-300/70">Outreach Response</p>
+            <p className="text-[11px] uppercase font-semibold text-sky-300/70">Outreach Response</p>
             <p className="text-sm font-bold text-cyan-300 sm:text-base">84% WhatsApp</p>
           </div>
         </div>
@@ -288,7 +288,7 @@ export function PipelineVisualizer() {
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] uppercase font-semibold text-sky-300/70">Retention Score</p>
+            <p className="text-[11px] uppercase font-semibold text-sky-300/70">Retention Score</p>
             <p className="text-sm font-bold text-indigo-300 sm:text-base">96.8 / 100</p>
           </div>
         </div>

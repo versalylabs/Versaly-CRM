@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { validateCustomValues } from '@/lib/customFields';
 import prisma from '@/lib/prisma';
 import { getOrgContext, isManagerRole, unauthorized } from '@/lib/tenant';
 import { blockIfReadOnly } from '@/lib/subscription';
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
   if (!isManagerRole(ctx.role)) return NextResponse.json({ error: 'Only admins and managers can import leads.' }, { status: 403 });
 
   const body = await req.json().catch(() => ({}));
-  const rows: ImportedLead[] = Array.isArray(body.leads) ? body.leads : [];
+  const rows: (ImportedLead & { custom?: Record<string, string> })[] = Array.isArray(body.leads) ? body.leads : [];
   if (!rows.length) return NextResponse.json({ error: 'No rows to import.' }, { status: 400 });
   if (rows.length > MAX_ROWS) return NextResponse.json({ error: `Import up to ${MAX_ROWS} rows at a time. Split the file and try again.` }, { status: 400 });
 
@@ -28,14 +29,17 @@ export async function POST(req: NextRequest) {
   const seenEmails = new Set(existing.map((l) => l.email?.toLowerCase()).filter(Boolean) as string[]);
   const seenPhones = new Set(existing.map((l) => l.phone).filter(Boolean) as string[]);
 
+  const fieldDefs = await prisma.customField.findMany({ where: { organizationId: ctx.orgId } });
   const skipped: { row: number; reason: string }[] = [];
-  const toCreate: CleanLead[] = [];
+  const toCreate: (CleanLead & { customFields?: object })[] = [];
   let room = Math.max(0, org.leadLimit - org._count.leads);
   rows.forEach((row, i) => {
     const result = cleanImportedLead(row);
     const rowNumber = i + 2; // spreadsheet row, after the header
     if ('error' in result) return void skipped.push({ row: rowNumber, reason: result.error });
-    const { lead } = result;
+    const custom = fieldDefs.length ? validateCustomValues(fieldDefs, row.custom || {}) : { values: {} };
+    if ('error' in custom) return void skipped.push({ row: rowNumber, reason: custom.error });
+    const lead = fieldDefs.length ? { ...result.lead, customFields: custom.values } : result.lead;
     if ((lead.email && seenEmails.has(lead.email)) || (lead.phone && seenPhones.has(lead.phone))) {
       return void skipped.push({ row: rowNumber, reason: 'Already in your CRM' });
     }

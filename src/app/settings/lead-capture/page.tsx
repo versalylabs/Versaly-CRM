@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import SettingsTabs from '@/components/SettingsTabs';
 import { normalizePhone } from '@/lib/phone';
 
 function CopyBox({ label, value, rows = 1 }: { label: string; value: string; rows?: number }) {
@@ -71,8 +71,8 @@ document.getElementById('vl-lead-form').addEventListener('submit', async functio
   return (
     <div className="mx-auto max-w-4xl space-y-6 pb-16">
       <div>
-        <Link href="/settings" className="text-sm font-semibold text-sky-400 hover:underline">← Settings</Link>
-        <h1 className="mt-2 text-2xl font-bold text-white">Lead capture</h1>
+        <SettingsTabs />
+        <h1 className=" text-2xl font-bold text-white">Lead capture</h1>
         <p className="mt-1 text-sm text-gray-400">Turn website visitors and WhatsApp chats into leads automatically.</p>
       </div>
 

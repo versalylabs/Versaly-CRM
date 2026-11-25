@@ -1,4 +1,5 @@
 import { blockIfReadOnly } from '../../../../../lib/subscription';
+import { validateCustomValues } from '@/lib/customFields';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../lib/auth';
@@ -50,7 +51,7 @@ export async function PATCH(
   const body = await req.json();
   const existing = await prisma.lead.findUnique({
     where: { id: params.id },
-    select: { id: true, contactName: true, assignedToId: true, pipelineStage: true, organizationId: true }
+    select: { id: true, contactName: true, assignedToId: true, pipelineStage: true, organizationId: true, customFields: true }
   });
   if (!existing || !session.user?.organizationId || existing.organizationId !== session.user.organizationId) {
     return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
@@ -102,6 +103,13 @@ export async function PATCH(
 
   if ('nextFollowUp' in body) {
     data.nextFollowUp = body.nextFollowUp ? new Date(body.nextFollowUp) : null;
+  }
+
+  if (body.customFields && typeof body.customFields === 'object') {
+    const fieldDefs = await prisma.customField.findMany({ where: { organizationId: existing.organizationId! } });
+    const custom = validateCustomValues(fieldDefs, body.customFields, true);
+    if ('error' in custom) return NextResponse.json({ error: custom.error }, { status: 400 });
+    data.customFields = { ...((existing.customFields as object) || {}), ...custom.values };
   }
 
   try {

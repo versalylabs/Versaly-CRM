@@ -102,7 +102,7 @@ export function ContactSection() {
                     <Mail className="h-5 w-5" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-sky-300/70">Direct Email</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-sky-300/70">Direct Email</span>
                     <p className="text-sm font-semibold text-white group-hover:text-cyan-300 transition-colors">
                       versalylabs@gmail.com
                     </p>
@@ -116,7 +116,7 @@ export function ContactSection() {
                       <Phone className="h-5 w-5" />
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-sky-300/70">Direct Support & Sales Lines</span>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-sky-300/70">Direct Support & Sales Lines</span>
                       <div className="flex items-center gap-3 mt-0.5">
                         <a 
                           href="tel:0704611033" 
@@ -152,7 +152,7 @@ export function ContactSection() {
 
             {/* Social channels card */}
             <div className="rounded-3xl border border-sky-500/20 bg-gradient-to-br from-ink-700/60 to-ink-900/80 p-6 shadow-lg backdrop-blur-xl">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-sky-300/70 block mb-3">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-sky-300/70 block mb-3">
                 Follow & Message Our Socials
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -369,7 +369,7 @@ export function ContactSection() {
                         </>
                       )}
                     </button>
-                    <p className="mt-2 text-center text-[10px] text-sky-300/60">
+                    <p className="mt-2 text-center text-[11px] text-sky-300/60">
                       We never share your information. Messages go directly to our team.
                     </p>
                   </div>

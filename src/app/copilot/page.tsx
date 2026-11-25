@@ -735,7 +735,7 @@ function CopilotPageContent() {
                         <span className="text-xs font-bold text-gray-900 dark:text-white">
                           {m.title}
                         </span>
-                        <span className="text-[10px] text-gray-400">
+                        <span className="text-[11px] text-gray-400">
                           {new Date(m.createdAt).toLocaleDateString()}
                         </span>
                       </div>
@@ -807,7 +807,7 @@ function CopilotPageContent() {
                               {item.title}
                             </span>
                           </div>
-                          <span className="rounded bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold text-sky-700 dark:text-cyan-300">
+                          <span className="rounded bg-sky-500/10 px-2 py-0.5 text-[11px] font-bold text-sky-700 dark:text-cyan-300">
                             {item.priority}
                           </span>
                         </div>
@@ -1015,7 +1015,7 @@ function CopilotPageContent() {
                   <div className="mt-5 space-y-4">
                     {generatedDraft.channel === 'EMAIL' && (
                       <div className="rounded-xl border border-gray-200/60 bg-gray-50/70 p-3.5 dark:border-white/10 dark:bg-ink-850/60">
-                        <span className="block text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-400">
                           Subject Line
                         </span>
                         <p className="mt-1 text-sm font-bold text-gray-900 dark:text-white">
@@ -1025,7 +1025,7 @@ function CopilotPageContent() {
                     )}
 
                     <div className="rounded-xl border border-gray-200/60 bg-gray-50/70 p-4 dark:border-white/10 dark:bg-ink-850/60">
-                      <span className="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-2">
+                      <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">
                         Message Body
                       </span>
                       <p className="whitespace-pre-wrap text-xs leading-relaxed text-gray-800 dark:text-gray-200 font-sans">
@@ -1086,19 +1086,19 @@ function CopilotPageContent() {
                 {/* Score & Risk Summary Banner */}
                 <div className="grid grid-cols-3 gap-3 rounded-xl border border-gray-100 bg-gray-50 p-3.5 dark:border-white/5 dark:bg-ink-850">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-gray-400">Win Probability</span>
+                    <span className="text-[11px] uppercase font-bold text-gray-400">Win Probability</span>
                     <p className="mt-1 text-xl font-black text-emerald-600 dark:text-emerald-400">
                       {inspectedLead.insight.winProbability}%
                     </p>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-gray-400">Sentiment Score</span>
+                    <span className="text-[11px] uppercase font-bold text-gray-400">Sentiment Score</span>
                     <p className="mt-1 text-xl font-black text-sky-600 dark:text-cyan-400">
                       {inspectedLead.insight.sentimentScore}/100
                     </p>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-gray-400">Churn Risk</span>
+                    <span className="text-[11px] uppercase font-bold text-gray-400">Churn Risk</span>
                     <p className="mt-1 text-xl font-black text-rose-600 dark:text-rose-400">
                       {inspectedLead.insight.churnRisk}
                     </p>
@@ -1172,9 +1172,9 @@ function CopilotPageContent() {
                       >
                         <div>
                           <p className="font-bold text-gray-900 dark:text-white">{act.action}</p>
-                          <p className="text-[10px] text-gray-400">Timeframe: {act.timeframe}</p>
+                          <p className="text-[11px] text-gray-400">Timeframe: {act.timeframe}</p>
                         </div>
-                        <span className="rounded bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold text-sky-700 dark:text-cyan-300">
+                        <span className="rounded bg-sky-500/10 px-2 py-0.5 text-[11px] font-bold text-sky-700 dark:text-cyan-300">
                           {act.priority}
                         </span>
                       </div>

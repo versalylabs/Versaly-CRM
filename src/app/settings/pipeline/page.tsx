@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import SettingsTabs from '@/components/SettingsTabs';
 import Link from 'next/link';
 import {
   Target,
@@ -272,33 +273,7 @@ export default function PipelineSettingsPage() {
           </div>
         </div>
 
-        {/* Settings Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 border-b border-white/10 pb-3">
-          <Link
-            href="/settings"
-            className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 border border-transparent transition"
-          >
-            👤 Profile & Security
-          </Link>
-          <Link
-            href="/settings/pipeline"
-            className="rounded-xl px-4 py-2 text-xs font-bold bg-sky-500/20 text-cyan-300 border border-sky-400/30 transition"
-          >
-            🎯 Pipeline Stages
-          </Link>
-          <Link
-            href="/settings/billing"
-            className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 border border-transparent transition"
-          >
-            ⚡ Subscription & Plans
-          </Link>
-          <Link
-            href="/settings/integrations"
-            className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 border border-transparent transition"
-          >
-            💬 Communication Channels
-          </Link>
-        </div>
+        <SettingsTabs />
 
         {/* Messages */}
         {error && (
@@ -426,11 +401,11 @@ export default function PipelineSettingsPage() {
                         <div>
                           <div className="flex items-center gap-2">
                             <h3 className="font-bold text-sm text-white">{stage.label}</h3>
-                            <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${style.badgeColor}`}>
+                            <span className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${style.badgeColor}`}>
                               {stage.probability}% Win Prob
                             </span>
                             {stage.category !== 'ACTIVE' && (
-                              <span className="rounded-md bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-slate-300">
+                              <span className="rounded-md bg-white/10 px-2 py-0.5 text-[11px] font-semibold text-slate-300">
                                 {stage.category === 'WON' ? 'Closed Won' : 'Closed Lost'}
                               </span>
                             )}
@@ -448,7 +423,7 @@ export default function PipelineSettingsPage() {
                         <span className="text-xs font-semibold text-white">
                           {leadInfo.count} {leadInfo.count === 1 ? 'deal' : 'deals'}
                         </span>
-                        <p className="text-[10px] text-slate-400">Active in stage</p>
+                        <p className="text-[11px] text-slate-400">Active in stage</p>
                       </div>
 
                       <button
@@ -539,7 +514,7 @@ export default function PipelineSettingsPage() {
                   onChange={(e) => setFormProbability(Number(e.target.value))}
                   className="w-full accent-cyan-400 cursor-pointer"
                 />
-                <div className="flex justify-between text-[10px] text-slate-500 mt-1">
+                <div className="flex justify-between text-[11px] text-slate-500 mt-1">
                   <span>0% (Cold)</span>
                   <span>50% (Mid-Funnel)</span>
                   <span>100% (Guaranteed)</span>

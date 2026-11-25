@@ -235,7 +235,7 @@ export function PricingSection() {
                 />
               )}
               <span className="relative z-10">Annual Billing</span>
-              <span className="relative z-10 rounded-full bg-emerald-400/25 px-2 py-0.5 text-[10px] font-black text-emerald-300 border border-emerald-400/40 shadow-sm">
+              <span className="relative z-10 rounded-full bg-emerald-400/25 px-2 py-0.5 text-[11px] font-black text-emerald-300 border border-emerald-400/40 shadow-sm">
                 SAVE UP TO 20%
               </span>
             </button>

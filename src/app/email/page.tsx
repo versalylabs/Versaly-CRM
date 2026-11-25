@@ -375,7 +375,7 @@ export default function EmailPage() {
                           </p>
                           <p className="mt-1 truncate text-[11px] text-slate-400">{template.subject}</p>
                           {template.category && (
-                            <span className="mt-2 inline-block rounded-md border border-cyan-400/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-300">
+                            <span className="mt-2 inline-block rounded-md border border-cyan-400/30 bg-cyan-500/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-300">
                               {template.category}
                             </span>
                           )}

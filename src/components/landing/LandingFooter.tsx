@@ -103,6 +103,7 @@ export function LandingFooter() {
             <h4 className="text-xs font-bold uppercase tracking-wider text-white">Legal</h4>
             <ul className="mt-4 space-y-2.5 text-xs text-sky-200/70">
               <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/help" className="hover:text-white transition-colors">Help centre</Link></li>
               <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
             </ul>
           </div>

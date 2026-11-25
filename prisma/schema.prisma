@@ -83,6 +83,7 @@ model Lead {
   lastContact        DateTime?
   nextFollowUp       DateTime?
   notes              String?
+  customFields       Json?       // values keyed by CustomField.key
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt
 
@@ -382,6 +383,7 @@ model Organization {
   @@index([slug])
   @@index([suspendedAt])
   invoices    Invoice[]
+  customFields CustomField[]
 }
 
 model PipelineStageConfig {
@@ -726,4 +728,21 @@ model Invoice {
   createdAt      DateTime     @default(now())
 
   @@index([organizationId, createdAt])
+}
+
+/// A workspace-defined lead field (e.g. "Budget range", "Plot size").
+model CustomField {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  key            String       // stable key used in Lead.customFields
+  label          String
+  type           String       // text, number, date, select, checkbox, phone
+  options        Json?        // choices for "select"
+  required       Boolean      @default(false)
+  order          Int          @default(0)
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, key])
+  @@index([organizationId, order])
 }

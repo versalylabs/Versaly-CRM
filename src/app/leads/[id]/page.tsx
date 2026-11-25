@@ -4,6 +4,7 @@ import { formatCurrency } from '@/lib/currency';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import CustomFieldInputs, { useCustomFields, type CustomValues } from '@/components/CustomFieldInputs';
 
 type User = { id: string; name: string | null; email: string; role?: string };
 type Task = { id: string; title: string; description?: string | null; completed: boolean; priority: string; dueDate?: string | null; createdAt?: string; assignedTo?: User | null };
@@ -14,7 +15,7 @@ type Lead = {
   id: string; companyName: string | null; contactName: string; jobTitle: string | null; email: string; phone: string | null; website: string | null; location: string | null;
   businessType: string | null; instagram: string | null; linkedin: string | null; facebook: string | null; leadSource: string; pipelineStage: string; outreachStatus: string;
   dealValue: number | null; notes: string | null; createdAt: string; dateAdded?: string; lastContact?: string | null; nextFollowUp?: string | null;
-  assignedToId?: string | null; assignedTo?: User | null; tasks: Task[]; proposals: Proposal[]; outreachLogs: Outreach[];
+  assignedToId?: string | null; assignedTo?: User | null; tasks: Task[]; proposals: Proposal[]; outreachLogs: Outreach[]; customFields?: CustomValues | null;
 };
 
 const DEFAULT_PIPELINE_STAGES = [
@@ -43,6 +44,7 @@ export default function LeadDetailPage() {
   const params = useParams(); const router = useRouter(); const id = params.id as string;
   const [lead, setLead] = useState<Lead | null>(null); const [form, setForm] = useState<Partial<Lead>>({}); const [users, setUsers] = useState<User[]>([]);
   const [pipelineStages, setPipelineStages] = useState(DEFAULT_PIPELINE_STAGES);
+  const customFields = useCustomFields();
   const [activity, setActivity] = useState<Activity[]>([]); const [tab, setTab] = useState<Tab>('Overview'); const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [error, setError] = useState(''); const [saved, setSaved] = useState('');
   const [copilotInsight, setCopilotInsight] = useState<any | null>(null); const [copilotLoading, setCopilotLoading] = useState(false);
   const [showOutreach, setShowOutreach] = useState(false); const [showTask, setShowTask] = useState(false); const [showProposal, setShowProposal] = useState(false);
@@ -133,6 +135,7 @@ export default function LeadDetailPage() {
           <Field label="Pipeline Stage"><select className={input} value={form.pipelineStage || 'NEW_LEAD'} onChange={(e) => update('pipelineStage', e.target.value)}>{pipelineStages.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}</select></Field><Field label="Outreach Status"><select className={input} value={form.outreachStatus || 'PENDING'} onChange={(e) => update('outreachStatus', e.target.value)}>{OUTREACH_STATUSES.map((s) => <option key={s}>{s}</option>)}</select></Field><Field label="Lead Source"><select className={input} value={form.leadSource || 'REFERRAL'} onChange={(e) => update('leadSource', e.target.value)}>{LEAD_SOURCES.map((s) => <option key={s}>{s}</option>)}</select></Field><Field label="Assigned To"><select className={input} value={form.assignedToId || ''} onChange={(e) => update('assignedToId', e.target.value)}><option value="">Unassigned</option>{users.map((u) => <option key={u.id} value={u.id}>{u.name || u.email}</option>)}</select></Field><Field label="Next Follow-up"><input type="date" className={input} value={form.nextFollowUp ? String(form.nextFollowUp).slice(0,10) : ''} onChange={(e) => update('nextFollowUp', e.target.value)} /></Field><Field label="Last Contact"><input type="date" className={input} value={form.lastContact ? String(form.lastContact).slice(0,10) : ''} onChange={(e) => update('lastContact', e.target.value)} /></Field></div>
         </section>
         <section className="rounded-xl bg-white p-6 shadow-soft"><h2 className="mb-4 font-semibold text-gray-900">Online Presence</h2><div className="grid gap-4 md:grid-cols-3"><Field label="Instagram"><input className={input} value={form.instagram || ''} onChange={(e) => update('instagram', e.target.value)} /></Field><Field label="LinkedIn"><input className={input} value={form.linkedin || ''} onChange={(e) => update('linkedin', e.target.value)} /></Field><Field label="Facebook"><input className={input} value={form.facebook || ''} onChange={(e) => update('facebook', e.target.value)} /></Field></div></section>
+        {customFields.length > 0 && <section className="rounded-xl bg-white p-6 shadow-soft"><h2 className="mb-4 font-semibold text-gray-900">More details</h2><div className="grid gap-4 md:grid-cols-2"><CustomFieldInputs fields={customFields} values={form.customFields || {}} inputClass={input} labelClass="mb-1 block text-sm font-medium text-gray-700" onChange={(key, value) => update('customFields', { ...(form.customFields || {}), [key]: value })} /></div></section>}
       </form>
       <aside className="space-y-6"><section className="rounded-xl bg-white p-6 shadow-soft"><h2 className="mb-4 font-semibold text-gray-900">Quick Actions</h2><div className="space-y-2"><Link href="/inbox" className="block w-full rounded-lg border border-sky-300 bg-sky-50 px-3 py-3 text-left text-sm font-semibold text-sky-800 hover:bg-sky-100">💬 Open Unified Inbox Thread</Link><Link href={`/email?leadId=${id}`} className="block w-full rounded-lg border px-3 py-3 text-left text-sm hover:bg-gray-50">✉ Send email</Link><Link href={`/whatsapp?leadId=${id}`} className="block w-full rounded-lg border px-3 py-3 text-left text-sm hover:bg-gray-50">💬 Send WhatsApp</Link><button onClick={() => setShowOutreach(true)} className="w-full rounded-lg border px-3 py-3 text-left text-sm hover:bg-gray-50">✎ Log a conversation</button><button onClick={() => setShowTask(true)} className="w-full rounded-lg border px-3 py-3 text-left text-sm hover:bg-gray-50">✓ Create a follow-up task</button><button onClick={() => setShowProposal(true)} className="w-full rounded-lg border px-3 py-3 text-left text-sm hover:bg-gray-50">▣ Create a proposal</button></div></section><section className="rounded-xl bg-white p-6 shadow-soft"><h2 className="mb-4 font-semibold text-gray-900">Relationship Snapshot</h2><div className="space-y-3 text-sm"><Row label="Added" value={date(lead?.dateAdded || lead?.createdAt)} /><Row label="Last Contact" value={dateTime(lead?.lastContact)} /><Row label="Follow-up" value={date(lead?.nextFollowUp)} /><Row label="Tasks" value={`${lead?.tasks.filter((x) => x.completed).length || 0}/${lead?.tasks.length || 0} completed`} /><Row label="Proposals" value={String(lead?.proposals.length || 0)} /><Row label="Outreach" value={String(lead?.outreachLogs.length || 0)} /></div></section></aside>
     </div>}
@@ -141,19 +144,19 @@ export default function LeadDetailPage() {
       <div className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-xl border border-gray-100 bg-gray-50/80 p-4">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Win Probability</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Win Probability</span>
             <p className="mt-1 text-2xl font-black text-emerald-600">{copilotInsight.winProbability}%</p>
             <div className="mt-2 h-1.5 w-full rounded-full bg-gray-200 overflow-hidden">
               <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${copilotInsight.winProbability}%` }} />
             </div>
           </div>
           <div className="rounded-xl border border-gray-100 bg-gray-50/80 p-4">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Sentiment Score</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Sentiment Score</span>
             <p className="mt-1 text-2xl font-black text-sky-600">{copilotInsight.sentimentScore}/100</p>
             <p className="mt-1 text-xs font-semibold text-gray-600">Verdict: {copilotInsight.sentimentLabel}</p>
           </div>
           <div className="rounded-xl border border-gray-100 bg-gray-50/80 p-4">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Churn / Stall Risk</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">Churn / Stall Risk</span>
             <p className={`mt-1 text-2xl font-black ${copilotInsight.churnRisk === 'HIGH' ? 'text-rose-600' : copilotInsight.churnRisk === 'MEDIUM' ? 'text-amber-600' : 'text-emerald-600'}`}>
               {copilotInsight.churnRisk}
             </p>
@@ -207,10 +210,10 @@ export default function LeadDetailPage() {
               <div key={idx} className="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3 text-xs">
                 <div>
                   <p className="font-semibold text-gray-900">{act.action}</p>
-                  <p className="text-gray-400 text-[10px]">Timeframe: {act.timeframe}</p>
+                  <p className="text-gray-400 text-[11px]">Timeframe: {act.timeframe}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-700">{act.priority}</span>
+                  <span className="rounded bg-sky-100 px-2 py-0.5 text-[11px] font-bold text-sky-700">{act.priority}</span>
                   <Link href={`/copilot`} className="rounded bg-white border border-gray-200 px-2.5 py-1 text-[11px] font-semibold text-gray-700 hover:bg-gray-50">
                     Take Action
                   </Link>

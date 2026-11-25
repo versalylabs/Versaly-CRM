@@ -396,7 +396,7 @@ export default function TasksPage() {
                           {t.title}
                         </p>
                         <span
-                          className={`rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                          className={`rounded-md border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
                             priorityStyles[t.priority] || 'bg-white/10 text-slate-300 border-white/15'
                           }`}
                         >
@@ -434,7 +434,7 @@ export default function TasksPage() {
                             <span>📅</span>
                             <span>{new Date(t.dueDate).toLocaleString()}</span>
                             {overdue && (
-                              <span className="rounded bg-rose-500/20 px-1 py-0.2 text-[10px] font-bold text-rose-300">
+                              <span className="rounded bg-rose-500/20 px-1 py-0.2 text-[11px] font-bold text-rose-300">
                                 Overdue
                               </span>
                             )}

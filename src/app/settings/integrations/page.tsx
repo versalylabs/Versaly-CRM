@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import SettingsTabs from '@/components/SettingsTabs';
 
 interface ChannelStatus {
   channel: string;
@@ -214,39 +214,7 @@ export default function CommunicationChannelsSettingsPage() {
           </p>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex border-b border-white/10 gap-2">
-          <Link
-            href="/settings"
-            className="px-4 py-2.5 text-xs font-medium text-slate-400 hover:text-white transition"
-          >
-            👤 Profile & Security
-          </Link>
-          <Link
-            href="/settings/pipeline"
-            className="px-4 py-2.5 text-xs font-medium text-slate-400 hover:text-white transition"
-          >
-            🎯 Pipeline Stages
-          </Link>
-          <Link
-            href="/settings/billing"
-            className="px-4 py-2.5 text-xs font-medium text-slate-400 hover:text-white transition"
-          >
-            ⚡ Subscription & Plans
-          </Link>
-          <Link
-            href="/settings/integrations"
-            className="border-b-2 border-sky-400 px-4 py-2.5 text-xs font-bold text-sky-400"
-          >
-            💬 Communication Channels
-          </Link>
-          <Link
-            href="/integrations"
-            className="px-4 py-2.5 text-xs font-medium text-slate-400 hover:text-white transition"
-          >
-            🔌 Developer API & Webhooks
-          </Link>
-        </div>
+        <SettingsTabs />
 
         {/* Channels Grid */}
         {loading ? (
@@ -340,7 +308,7 @@ export default function CommunicationChannelsSettingsPage() {
                           {copiedUrl === chan.channel ? '✓ Copied!' : 'Copy URL'}
                         </button>
                       </div>
-                      <div className="font-mono text-[10px] bg-ink-950 text-slate-400 p-2 rounded-lg truncate select-all border border-white/5">
+                      <div className="font-mono text-[11px] bg-ink-950 text-slate-400 p-2 rounded-lg truncate select-all border border-white/5">
                         {webhookUrl}
                       </div>
                     </div>

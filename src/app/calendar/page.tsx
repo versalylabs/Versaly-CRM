@@ -809,7 +809,7 @@ export default function CalendarPage() {
                               e.stopPropagation();
                               openScheduleForDate(cell.date);
                             }}
-                            className="opacity-0 group-hover:opacity-100 transition h-5 w-5 rounded bg-white/10 hover:bg-cyan-500 hover:text-white flex items-center justify-center text-[10px] text-slate-300"
+                            className="opacity-0 group-hover:opacity-100 transition h-5 w-5 rounded bg-white/10 hover:bg-cyan-500 hover:text-white flex items-center justify-center text-[11px] text-slate-300"
                             title="Add event on this date"
                           >
                             +
@@ -848,7 +848,7 @@ export default function CalendarPage() {
                                 e.stopPropagation();
                                 setSelectedDate(cell.date);
                               }}
-                              className="text-[10px] font-semibold text-slate-400 hover:text-cyan-300 pl-1 block transition"
+                              className="text-[11px] font-semibold text-slate-400 hover:text-cyan-300 pl-1 block transition"
                             >
                               +{dayEvents.length - 3} more
                             </button>
@@ -913,7 +913,7 @@ export default function CalendarPage() {
                               className={`w-full text-left rounded-lg p-2 text-xs border-l-4 transition ${colors.border} ${colors.badgeBg}`}
                             >
                               <p className="font-semibold truncate">{ev.title}</p>
-                              <p className="text-[10px] text-slate-400 mt-0.5">
+                              <p className="text-[11px] text-slate-400 mt-0.5">
                                 {formatTimeOnly(ev.startAt)}
                               </p>
                             </button>
@@ -976,7 +976,7 @@ export default function CalendarPage() {
                           <p className="text-xs text-slate-300 mt-2">{ev.description}</p>
                         )}
                       </div>
-                      <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold ${colors.pill}`}>
+                      <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${colors.pill}`}>
                         {colors.tag}
                       </span>
                     </div>
@@ -1090,7 +1090,7 @@ export default function CalendarPage() {
                     O
                   </div>
                   {/* Apple / iCal Icon */}
-                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-500 text-white shadow-sm font-bold text-[10px]">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-500 text-white shadow-sm font-bold text-[11px]">
                     CAL
                   </div>
                   {/* Slack / Calendly Icon */}
@@ -1126,7 +1126,7 @@ export default function CalendarPage() {
               {selectedDate && (
                 <button
                   onClick={() => setSelectedDate(null)}
-                  className="text-[10px] font-semibold text-cyan-400 hover:text-cyan-300"
+                  className="text-[11px] font-semibold text-cyan-400 hover:text-cyan-300"
                 >
                   Show All
                 </button>
@@ -1166,7 +1166,7 @@ export default function CalendarPage() {
                     <div className="mt-2.5 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div
-                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm ${colors.avatarBg}`}
+                          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white shadow-sm ${colors.avatarBg}`}
                         >
                           {initials}
                         </div>
@@ -1175,14 +1175,14 @@ export default function CalendarPage() {
                         </span>
                       </div>
 
-                      <span className="text-[10px] font-medium text-slate-400 shrink-0">
+                      <span className="text-[11px] font-medium text-slate-400 shrink-0">
                         {formatTimeOnly(ev.startAt)}
                       </span>
                     </div>
 
                     {/* Attached Lead pill if available */}
                     {ev.lead && (
-                      <div className="mt-2 pt-2 border-t border-white/5 flex items-center gap-1.5 text-[10px] text-cyan-300">
+                      <div className="mt-2 pt-2 border-t border-white/5 flex items-center gap-1.5 text-[11px] text-cyan-300">
                         <UserIcon className="h-3 w-3" />
                         <span className="truncate">{ev.lead.contactName}</span>
                       </div>
@@ -1386,7 +1386,7 @@ export default function CalendarPage() {
                   {getEventColor(activeEvent).tag}
                 </span>
                 {activeEvent.completed && (
-                  <span className="rounded-md bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+                  <span className="rounded-md bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 text-[11px] font-bold text-emerald-300">
                     Completed
                   </span>
                 )}
@@ -1433,7 +1433,7 @@ export default function CalendarPage() {
                 <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
                   {activeEvent.lead && (
                     <div className="rounded-xl border border-white/10 bg-ink-900/60 p-3">
-                      <p className="text-[10px] uppercase font-bold text-slate-400">Attached Prospect</p>
+                      <p className="text-[11px] uppercase font-bold text-slate-400">Attached Prospect</p>
                       <Link
                         href={`/leads/${activeEvent.lead.id}`}
                         className="mt-1 font-semibold text-cyan-400 hover:underline flex items-center gap-1"
@@ -1448,7 +1448,7 @@ export default function CalendarPage() {
                   )}
 
                   <div className="rounded-xl border border-white/10 bg-ink-900/60 p-3">
-                    <p className="text-[10px] uppercase font-bold text-slate-400">Assigned Team Member</p>
+                    <p className="text-[11px] uppercase font-bold text-slate-400">Assigned Team Member</p>
                     <p className="mt-1 font-semibold text-white">
                       {activeEvent.assignedTo?.name || activeEvent.assignedTo?.email || session?.user?.name || 'Assigned'}
                     </p>

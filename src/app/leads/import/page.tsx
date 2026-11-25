@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { parseCsv, toCsv } from '@/lib/csv';
 import { IMPORT_FIELDS, guessField, type ImportField, type ImportedLead } from '@/lib/leadImport';
@@ -8,12 +8,20 @@ import { IMPORT_FIELDS, guessField, type ImportField, type ImportedLead } from '
 type Result = { created: number; skipped: { row: number; reason: string }[] };
 
 const FIELD_KEYS = Object.keys(IMPORT_FIELDS) as ImportField[];
+const norm = (s: string) => s.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+// Column targets: a built-in lead field, or a custom field as "cf:<key>".
+type Target = ImportField | `cf:${string}` | '';
 
 export default function ImportLeadsPage() {
   const [fileName, setFileName] = useState('');
   const [header, setHeader] = useState<string[]>([]);
   const [rows, setRows] = useState<string[][]>([]);
-  const [mapping, setMapping] = useState<(ImportField | '')[]>([]);
+  const [mapping, setMapping] = useState<Target[]>([]);
+  const [customFields, setCustomFields] = useState<{ key: string; label: string }[]>([]);
+
+  useEffect(() => {
+    fetch('/api/custom-fields').then((r) => (r.ok ? r.json() : { fields: [] })).then((d) => setCustomFields(d.fields || []));
+  }, []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState<Result | null>(null);
@@ -34,7 +42,7 @@ export default function ImportLeadsPage() {
     setFileName(file.name);
     setHeader(parsed[0]);
     setRows(parsed.slice(1));
-    setMapping(parsed[0].map(guessField));
+    setMapping(parsed[0].map((h): Target => guessField(h) || (customFields.find((f) => norm(f.label) === norm(h)) ? `cf:${customFields.find((f) => norm(f.label) === norm(h))!.key}` : '')));
   }
 
   const mapped = new Set(mapping.filter(Boolean));
@@ -44,10 +52,12 @@ export default function ImportLeadsPage() {
     setBusy(true);
     setError('');
     try {
-      const leads: ImportedLead[] = rows.map((r) => {
-        const lead: ImportedLead = {};
+      const leads = rows.map((r) => {
+        const lead: ImportedLead & { custom: Record<string, string> } = { custom: {} };
         mapping.forEach((field, i) => {
-          if (field && r[i] !== undefined) lead[field] = r[i];
+          if (!field || r[i] === undefined) return;
+          if (field.startsWith('cf:')) lead.custom[field.slice(3)] = r[i];
+          else lead[field as ImportField] = r[i];
         });
         return lead;
       });
@@ -98,12 +108,15 @@ export default function ImportLeadsPage() {
                 <span className="truncate text-gray-300" title={h}>{h || `Column ${i + 1}`}</span>
                 <select
                   value={mapping[i]}
-                  onChange={(e) => setMapping((m) => m.map((v, j) => (j === i ? (e.target.value as ImportField | '') : v)))}
+                  onChange={(e) => setMapping((m) => m.map((v, j) => (j === i ? (e.target.value as Target) : v)))}
                   className="w-48 rounded-lg border border-gray-600 px-2 py-1.5 text-sm"
                 >
                   <option value="">Don&apos;t import</option>
                   {FIELD_KEYS.map((f) => (
                     <option key={f} value={f}>{IMPORT_FIELDS[f].label}</option>
+                  ))}
+                  {customFields.map((f) => (
+                    <option key={f.key} value={`cf:${f.key}`}>{f.label} (custom)</option>
                   ))}
                 </select>
               </label>

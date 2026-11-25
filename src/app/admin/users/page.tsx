@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
+import SettingsTabs from '@/components/SettingsTabs';
 import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -303,6 +304,7 @@ export default function UserManagementPage() {
       className="min-h-screen bg-gray-50 dark:bg-ink-850"
     >
       <div className="container-custom py-8">
+        <SettingsTabs />
         
         {/* Header with Organization & Actions */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -310,7 +312,7 @@ export default function UserManagementPage() {
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400">
               <span>{workspace?.organizationName || 'Workspace'} Team</span>
               <span className="text-gray-300 dark:text-gray-700">·</span>
-              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-800 dark:bg-sky-950 dark:text-sky-300">
+              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-bold text-sky-800 dark:bg-sky-950 dark:text-sky-300">
                 {workspace?.plan.replace('_', ' ') || 'Growth Pro'}
               </span>
             </div>
@@ -501,7 +503,7 @@ export default function UserManagementPage() {
                                   {user.name || 'Unnamed Member'}
                                 </span>
                                 {isSelf && (
-                                  <span className="rounded-full bg-sky-100 px-2 py-0.2 text-[9px] font-bold text-sky-700 dark:bg-sky-950 dark:text-sky-300">
+                                  <span className="rounded-full bg-sky-100 px-2 py-0.2 text-[11px] font-bold text-sky-700 dark:bg-sky-950 dark:text-sky-300">
                                     You
                                   </span>
                                 )}
@@ -612,7 +614,7 @@ export default function UserManagementPage() {
               <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
-                    <Mail className="h-4.5 w-4.5" />
+                    <Mail className="h-[18px] w-[18px]" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-gray-900 dark:text-white">
@@ -684,7 +686,7 @@ export default function UserManagementPage() {
               ) : (
                 <div className="mt-4 space-y-4">
                   <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
-                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
                       <Check className="h-3 w-3" />
                       <span>Invitation Link Ready</span>
                     </span>
@@ -741,7 +743,7 @@ export default function UserManagementPage() {
               <div className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
-                    <UserPlus className="h-4.5 w-4.5" />
+                    <UserPlus className="h-[18px] w-[18px]" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-gray-900 dark:text-white">
