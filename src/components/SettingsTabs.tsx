@@ -13,6 +13,7 @@ const TABS: { href: string; label: string; adminOnly?: boolean }[] = [
   { href: '/settings/lead-capture', label: 'Lead capture' },
   { href: '/settings/integrations', label: 'Email & WhatsApp' },
   { href: '/settings/messaging', label: 'Messaging & SMS' },
+  { href: '/settings/invoicing', label: 'Invoicing' },
   { href: '/integrations', label: 'Developer API' },
   { href: '/notifications', label: 'Notifications' },
   { href: '/settings/billing', label: 'Billing' },

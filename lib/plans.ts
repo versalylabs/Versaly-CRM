@@ -45,6 +45,7 @@ export const FEATURES = {
   mpesa_reconciliation: { label: 'M-Pesa auto-reconciliation for your Paybill or Till', minPlan: 'STARTER' },
   instalment_plans: { label: 'Instalment plans, payment reminders & debtor ageing', minPlan: 'GROWTH_PRO' },
   sms: { label: 'Bulk SMS & SMS reminders (prepaid credits)', minPlan: 'STARTER' },
+  invoicing: { label: 'Invoices with M-Pesa pay links & KRA eTIMS', minPlan: 'GROWTH_PRO' },
   sms_sender_id: { label: 'Your own SMS sender name', minPlan: 'ENTERPRISE' },
   email_inbox: { label: 'Team inbox for your own email address', minPlan: 'STARTER' },
   automations: { label: 'Workflow automations', minPlan: 'STARTER' },
@@ -117,7 +118,7 @@ export const PLANS: Record<PlanKey, PlanDetails> = {
     description: 'For sales and collections teams that run on WhatsApp and need automation without limits.',
     popular: true,
     features: ['Everything in Starter', ...limitLines('GROWTH_PRO'), ...featuresFor('GROWTH_PRO'), 'Priority email & WhatsApp support'],
-    comingSoon: ['KRA eTIMS invoicing', 'AI reply assistant'],
+    comingSoon: ['AI reply assistant'],
   },
   ENTERPRISE: {
     key: 'ENTERPRISE',

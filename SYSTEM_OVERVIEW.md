@@ -108,6 +108,11 @@ Quality tooling: `npm run qa:final` (structural checks), `npm run qa:smoke` (liv
 - Activity feed: unified chronological feed of lead, outreach, task and proposal events.
 - Reports: pipeline, conversion, source performance, revenue and team metrics with CSV export and print/PDF.
 
+### 4.12c Quotes, invoices and KRA eTIMS (`/proposals`, `/invoices`, Settings → Invoicing)
+- Quotes with line items, discounts and VAT per line; the client opens a link to view, download (print to PDF) and accept or decline online. Accepting moves the deal to Won and notifies the team.
+- Invoices (Growth Pro+) from an accepted quote or from scratch; the customer link shows the invoice and a "Pay with M-Pesa" button. M-Pesa payments mark invoices part-paid or paid automatically (also when the invoice number is typed as the Paybill account number). Overdue is worked out from the due date.
+- Credit notes and void; eTIMS transmission (OSCU) adds the KRA control-unit number, signature and QR code to the invoice.
+
 ### 4.12b WhatsApp, SMS and team inbox (Settings → Messaging & SMS)
 - WhatsApp: delivery ticks, photos/documents/voice notes from customers, the 24-hour reply rule (after it, only Meta-approved templates can be sent; the composer offers them), template creation for Meta review, and a monthly usage + cost estimate. One-click "Connect with Facebook" (Embedded Signup) switches on once VersalyLabs is a Meta Tech Provider; until then WhatsApp is connected with a phone number ID and token.
 - Team inbox: optional round-robin assignment of new conversations and a reply-time target; overdue conversations become urgent, notify the owner and managers, and run the "Customer waiting past reply-time target" automation.

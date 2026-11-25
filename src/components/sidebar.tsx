@@ -9,7 +9,7 @@ import { LogOut, Lock } from 'lucide-react';
 import { planHasFeature, type Feature } from '@/lib/plans';
 
 // Nav items whose feature is not in every plan; they show a lock when the plan lacks it.
-const GATED: Record<string, Feature> = { '/customer-success': 'customer_success', '/copilot': 'deal_insights', '/integrations': 'developer_api', '/whatsapp': 'whatsapp', '/automation': 'automations' };
+const GATED: Record<string, Feature> = { '/customer-success': 'customer_success', '/copilot': 'deal_insights', '/integrations': 'developer_api', '/whatsapp': 'whatsapp', '/automation': 'automations', '/invoices': 'invoicing' };
 import VersalyLabsLogo from '@/components/VersalyLabsLogo';
 
 // Clean, monochrome SVG outline icons (stroke="currentColor", fill="none")
@@ -163,7 +163,8 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
         { href: '/leads', label: 'Leads', icon: Icons.leads },
         { href: '/pipeline', label: 'Pipeline', icon: Icons.pipeline },
         { href: '/payments', label: 'Payments', icon: Icons.payments },
-        { href: '/proposals', label: 'Proposals', icon: Icons.proposals },
+        { href: '/proposals', label: 'Quotes', icon: Icons.proposals },
+        { href: '/invoices', label: 'Invoices', icon: Icons.proposals },
         { href: '/copilot', label: 'Deal Insights', icon: Icons.copilot },
       ],
     },

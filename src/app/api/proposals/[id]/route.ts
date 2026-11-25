@@ -1,10 +1,9 @@
 import { blockIfReadOnly } from '../../../../../lib/subscription';
-import { advanceStage, getStageGroups } from '@/lib/stages';
 import { NextResponse } from 'next/server';
 import prisma from '../../../../../lib/prisma';
-import { logLeadActivity } from '../../../../../lib/automation';
-import { getManagerIds, notifyMany, proposalHref } from '../../../../../lib/notifications';
 import { getOrgContext, unauthorized } from '../../../../../lib/tenant';
+import { afterProposalStatusChange, newShareToken, nextSequence, totalsFrom } from '@/lib/documents';
+import { docNumber } from '@/lib/quotes';
 import { assertSubscriptionWriteAccess } from '../../../../../lib/subscription';
 
 type Params = { params: { id: string } };
@@ -35,32 +34,34 @@ export async function PATCH(request: Request, { params }: Params) {
       if (!lead) return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
       data.leadId = lead.id;
     }
-    if (body.value !== undefined) {
+    if (body.value !== undefined && body.items === undefined) {
       const value = body.value === '' || body.value == null ? null : Number(body.value);
       if (value !== null && (!Number.isFinite(value) || value < 0)) {
         return NextResponse.json({ error: 'Proposal value must be a valid positive number' }, { status: 400 });
       }
       data.value = value;
     }
+    if (body.items !== undefined) {
+      if (existing.acceptedAt) return NextResponse.json({ error: 'This quote was accepted by the client. Create a new quote to change it.' }, { status: 409 });
+      try {
+        const t = totalsFrom(body.items);
+        Object.assign(data, { items: t.items, subtotal: t.subtotal, vatTotal: t.vatTotal, value: t.total });
+      } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 400 });
+      }
+      if (!existing.number) data.number = docNumber('Q', await nextSequence(ctx.orgId, 'quote'));
+      if (!existing.shareToken) data.shareToken = newShareToken();
+    }
+    if (body.validUntil !== undefined) data.validUntil = body.validUntil ? new Date(body.validUntil) : null;
+    if (data.validUntil && Number.isNaN(data.validUntil.getTime())) return NextResponse.json({ error: 'Invalid "valid until" date.' }, { status: 400 });
+    if (body.terms !== undefined) data.terms = String(body.terms || '').slice(0, 4000) || null;
     // Compare against the stored status, never a client-supplied "previousStatus".
     const changed = data.status !== undefined && data.status !== existing.status;
     if (changed && data.status === 'sent') data.sentAt = new Date();
     if (changed && ['accepted', 'rejected'].includes(data.status)) data.respondedAt = new Date();
 
     const proposal = await prisma.proposal.update({ where: { id: existing.id }, data, include: { lead: true } });
-    const stages = await getStageGroups(proposal.lead?.organizationId);
-    const stageFor = (status: string) => (status === 'sent' ? (stages.all.includes('PROPOSAL') ? 'PROPOSAL' : undefined) : status === 'accepted' ? stages.won[0] : status === 'rejected' ? stages.lost[0] : undefined);
-    await prisma.$transaction(async (tx) => {
-      if (changed && data.status === 'sent') await tx.lead.update({ where: { id: proposal.leadId }, data: { pipelineStage: stageFor('sent'), lastContact: new Date() } });
-      if (changed && data.status === 'accepted') await tx.lead.update({ where: { id: proposal.leadId }, data: { pipelineStage: stageFor('accepted'), lastContact: new Date() } });
-      if (changed && data.status === 'rejected') await tx.lead.update({ where: { id: proposal.leadId }, data: { pipelineStage: stageFor('rejected'), lastContact: new Date() } });
-      if (changed) await logLeadActivity(tx, proposal.leadId, 'PROPOSAL', `Proposal ${data.status}`, { proposalId: proposal.id, title: proposal.title, value: proposal.value });
-    });
-    if (changed && ['sent', 'accepted', 'rejected'].includes(data.status)) {
-      const managers = await getManagerIds(ctx.orgId);
-      const label = data.status === 'accepted' ? 'Proposal accepted' : data.status === 'rejected' ? 'Proposal rejected' : 'Proposal sent';
-      await notifyMany([proposal.lead?.assignedToId, ...managers], { type: `PROPOSAL_${String(data.status).toUpperCase()}`, title: label, message: `"${proposal.title}" was ${data.status}.`, href: proposalHref(), category: 'proposal' });
-    }
+    if (changed) await afterProposalStatusChange(proposal.id, data.status);
     return NextResponse.json(proposal);
   } catch (error) {
     console.error('Failed to update proposal:', error);

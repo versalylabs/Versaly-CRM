@@ -377,7 +377,11 @@ Customer Success, Copilot and the Activity feed move into contact pages or Repor
 
 ---
 
-## Phase 8: Quotes, proposals and eTIMS invoicing (M–L) — needs A8
+## Phase 8: Quotes, proposals and eTIMS invoicing (M–L) — needs A8 ✅ BUILT (25 Nov 2026, awaiting your review)
+
+**What shipped:** quotes with line items, discounts and per-line VAT (16%, 8%, zero-rated, exempt, no VAT), numbered Q-0001; a client link (`/q/<token>`) to view, print/PDF and accept with name + timestamp or decline (moves the deal stage and notifies the team); quote → invoice; standalone invoices (INV-0001) with due dates, a customer link (`/i/<token>`) to view, print/PDF and pay by M-Pesa; payments (pay links, STK, Paybill with the invoice number as account) mark invoices part-paid/paid; overdue is derived; credit notes (CN-0001) and void; KRA eTIMS via OSCU (device initialisation, item registration, sale transmission, CU number/signature/QR on the document); Settings → Invoicing for business details, KRA PIN and eTIMS. Production schema change: `prisma/manual/2026-11-25-phase8-invoicing.sql` (additive only).
+
+**Not verified:** the eTIMS calls are built to KRA's OSCU spec but untested until you have KRA sandbox credentials (A8). The old client-side 4-proposal limit is gone.
 
 **Goal:** go from a quote to a paid, KRA-compliant invoice without leaving the CRM.
 

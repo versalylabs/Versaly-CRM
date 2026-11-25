@@ -127,7 +127,11 @@ export async function afterPaymentMatched(paymentId: string) {
     amount: p.amount,
   });
   await prisma.lead.update({ where: { id: lead.id }, data: { lastContact: new Date() } });
-  await applyToPlans(p.organizationId, lead.id, p.amount);
+  // Each shilling is applied once: the invoice it was requested for, then instalment plans, then other open invoices.
+  let left = p.amount;
+  if (p.salesInvoiceId) left = await applyToInvoices(p.organizationId, lead.id, left, p.salesInvoiceId);
+  left = await applyToPlans(p.organizationId, lead.id, left);
+  if (left > 0) await applyToInvoices(p.organizationId, lead.id, left);
   const recipients = lead.assignedToId ? [lead.assignedToId] : await getManagerIds(p.organizationId);
   await Promise.all(recipients.map((userId) => createNotification({ userId, type: 'PAYMENT_RECEIVED', title: 'Payment received', message: `${lead.contactName} paid KES ${p.amount.toLocaleString('en-US')} via M-Pesa.`, href: leadHref(lead.id) })));
   await executeAutomationWorkflows({ organizationId: p.organizationId, triggerType: 'PAYMENT_RECEIVED', leadId: lead.id, eventId: `payment:${p.id}` }).catch((e) => console.error('PAYMENT_RECEIVED workflow failed', e));
@@ -139,8 +143,31 @@ async function notifyUnmatched(organizationId: string, amount: number) {
   await Promise.all(managers.map((userId) => createNotification({ userId, type: 'PAYMENT_UNMATCHED', title: 'Payment needs a customer', message: `KES ${amount.toLocaleString('en-US')} arrived on M-Pesa and could not be matched automatically.`, href: '/payments?tab=unmatched' })));
 }
 
-/** Applies a payment to the customer's active instalment plans, oldest instalment first. */
-export async function applyToPlans(organizationId: string, leadId: string, amount: number) {
+/** Applies money to the customer's open invoices (one invoice only when `onlyInvoiceId` is given), oldest first. Returns what is left. */
+export async function applyToInvoices(organizationId: string, leadId: string, amount: number, onlyInvoiceId?: string) {
+  const invoices = await prisma.salesInvoice.findMany({
+    where: { organizationId, leadId, kind: 'INVOICE', status: { in: ['SENT', 'DRAFT'] }, ...(onlyInvoiceId ? { id: onlyInvoiceId } : {}) },
+    orderBy: [{ dueDate: 'asc' }, { issueDate: 'asc' }],
+  });
+  let left = amount;
+  for (const inv of invoices) {
+    if (left <= 0) break;
+    const due = Math.max(0, inv.total - inv.amountPaid);
+    if (due <= 0) continue;
+    const pay = Math.min(due, left);
+    left -= pay;
+    const paidOff = inv.amountPaid + pay >= inv.total - 0.005;
+    await prisma.salesInvoice.update({
+      where: { id: inv.id },
+      data: { amountPaid: { increment: pay }, ...(paidOff ? { status: 'PAID', paidAt: new Date() } : inv.status === 'DRAFT' ? { status: 'SENT' } : {}) },
+    });
+    if (paidOff) await logLeadActivity(prisma, leadId, 'PAYMENT', `Invoice ${inv.number} paid in full`, { invoiceId: inv.id });
+  }
+  return left;
+}
+
+/** Applies a payment to the customer's active instalment plans, oldest instalment first. Returns what is left. */
+export async function applyToPlans(organizationId: string, leadId: string, amount: number): Promise<number> {
   const plans = await prisma.paymentPlan.findMany({
     where: { organizationId, leadId, status: 'ACTIVE' },
     include: { installments: { orderBy: { dueDate: 'asc' } } },
@@ -159,6 +186,7 @@ export async function applyToPlans(organizationId: string, leadId: string, amoun
       await executeAutomationWorkflows({ organizationId, triggerType: 'PLAN_COMPLETED', leadId, eventId: `plan-completed:${plan.id}` }).catch(() => undefined);
     }
   }
+  return left;
 }
 
 /** Handles the STK result Safaricom posts back. Only payments sent from this account are touched. */
@@ -201,9 +229,14 @@ export async function recordC2BPayment(account: Account, c: C2BPayment) {
   if (existing) return existing;
   const orgId = account.organizationId;
 
-  const byReference = c.billRef
-    ? (await prisma.lead.findMany({ where: { organizationId: orgId, paymentRef: c.billRef.toUpperCase() }, select: { id: true } })).map((l) => l.id)
-    : [];
+  const ref = c.billRef.toUpperCase();
+  // The account number can be the customer's reference or an invoice number (e.g. INV-0012).
+  const invoice = ref ? await prisma.salesInvoice.findFirst({ where: { organizationId: orgId, number: ref, kind: 'INVOICE' }, select: { id: true, leadId: true } }) : null;
+  const byReference = invoice
+    ? [invoice.leadId]
+    : ref
+      ? (await prisma.lead.findMany({ where: { organizationId: orgId, paymentRef: ref }, select: { id: true } })).map((l) => l.id)
+      : [];
   // Safaricom often masks or hashes the payer's number in C2B; only a full number is used.
   const fullPhone = /^254\d{9}$/.test(c.phone) ? c.phone : null;
   const byPhone = fullPhone
@@ -228,7 +261,7 @@ export async function recordC2BPayment(account: Account, c: C2BPayment) {
   if (openRequest) return markPaid(openRequest.id, paid);
 
   const created = await prisma.payment.create({
-    data: { organizationId: orgId, mpesaAccountId: account.id, source: 'C2B', status: 'PENDING', amount: c.amount, accountRef: c.billRef || null, description: 'Paid to Paybill/Till' },
+    data: { organizationId: orgId, mpesaAccountId: account.id, source: 'C2B', status: 'PENDING', amount: c.amount, accountRef: c.billRef || null, description: 'Paid to Paybill/Till', salesInvoiceId: invoice?.id || null },
   });
   return markPaid(created.id, paid);
 }
@@ -294,4 +327,19 @@ async function sendInstalmentReminder(inst: any, remaining: number, stage: strin
   }
   await logLeadActivity(prisma, lead.id, 'PAYMENT', `Payment reminder could not be sent (${stage.toLowerCase()}): connect email or WhatsApp, or buy SMS credits`, { installmentId: inst.id });
   return false;
+}
+
+/** The M-Pesa pay link for an invoice's balance (reuses an open one). Throws when M-Pesa is not connected. */
+export async function invoicePayLink(invoice: { id: string; organizationId: string; leadId: string; number: string; total: number; amountPaid: number }) {
+  const balance = Math.ceil(Math.max(0, invoice.total - invoice.amountPaid));
+  if (balance < 1) throw new Error('This invoice is already paid.');
+  const account = await getCollectionAccount(invoice.organizationId);
+  if (!account) throw new Error('This business has not connected M-Pesa yet.');
+  const open = await prisma.payment.findFirst({ where: { salesInvoiceId: invoice.id, status: { in: ['REQUESTED', 'FAILED', 'CANCELLED'] }, linkToken: { not: null }, amount: balance } });
+  if (open?.linkToken) return payLinkUrl(open.linkToken);
+  const token = newSecretToken();
+  await prisma.payment.create({
+    data: { organizationId: invoice.organizationId, mpesaAccountId: account.id, leadId: invoice.leadId, salesInvoiceId: invoice.id, source: 'LINK', status: 'REQUESTED', amount: balance, description: `Invoice ${invoice.number}`, accountRef: invoice.number, linkToken: token },
+  });
+  return payLinkUrl(token);
 }

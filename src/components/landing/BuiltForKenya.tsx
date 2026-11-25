@@ -28,7 +28,7 @@ const POINTS = [
   },
 ];
 
-const COMING_NEXT = ['KRA eTIMS invoices', 'AI reply assistant', 'Installable mobile app'];
+const COMING_NEXT = ['AI reply assistant', 'Installable mobile app', 'Multi-branch workspaces'];
 
 export function BuiltForKenya() {
   return (

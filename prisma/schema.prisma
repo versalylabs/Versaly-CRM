@@ -101,6 +101,7 @@ model Lead {
   channelIdentities ContactChannelIdentity[]
   payments          Payment[]
   paymentPlans      PaymentPlan[]
+  salesInvoices     SalesInvoice[]
   assignedToId       String?
   assignedTo         User?       @relation("LeadAssignee", fields: [assignedToId], references: [id])
   organizationId     String?
@@ -191,6 +192,17 @@ model Proposal {
   respondedAt DateTime?
   organizationId String?
   organization   Organization? @relation(fields: [organizationId], references: [id])
+  // Phase 8: a proposal with line items is a quote. `value` holds the quote total (VAT included).
+  number       String?   // Q-0001, per workspace
+  items        Json?     // [{ description, quantity, unitPrice (excl. VAT), discountPct, taxType }]
+  subtotal     Float?
+  vatTotal     Float?
+  validUntil   DateTime?
+  terms        String?
+  shareToken   String?   @unique // public /q/<token> link for the client
+  acceptedName String?
+  acceptedAt   DateTime?
+  invoice      SalesInvoice?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -364,6 +376,18 @@ model Organization {
   inboxSlaMinutes Int?    // reply-time target; overdue conversations escalate
   smsCredits      Int     @default(0)     // prepaid SMS balance (1 credit = 1 SMS segment)
   smsSenderId     String? // approved Africa's Talking sender ID (Enterprise)
+  // Phase 8: quotes, invoices and KRA eTIMS
+  quoteCounter      Int     @default(0)
+  invoiceCounter    Int     @default(0)
+  legalName         String? // shown on quotes and invoices
+  kraPin            String?
+  businessAddress   String?
+  invoiceFooter     String? // payment terms / bank details printed on documents
+  etimsEnv          String? // sandbox or production; null = eTIMS off
+  etimsBranchId     String? @default("00")
+  etimsDeviceSerial String?
+  etimsCmcKey       String? // encrypted communication key returned when the device is initialised
+  etimsItems        Json?   // item codes registered with KRA, by tax type
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -396,6 +420,7 @@ model Organization {
   payments      Payment[]
   paymentPlans  PaymentPlan[]
   smsLedger     SmsCreditLedger[]
+  salesInvoices SalesInvoice[]
 }
 
 model PipelineStageConfig {
@@ -794,6 +819,8 @@ model Payment {
   mpesaAccount      MpesaAccount? @relation(fields: [mpesaAccountId], references: [id], onDelete: SetNull)
   leadId            String?       // null = unmatched, waiting for someone to assign it
   lead              Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  salesInvoiceId    String?       // invoice this payment was requested for (pay link or invoice number)
+  salesInvoice      SalesInvoice? @relation(fields: [salesInvoiceId], references: [id], onDelete: SetNull)
   source            String        // STK, C2B or LINK
   status            String        // REQUESTED (link not used yet), PENDING (prompt sent), PAID, FAILED, CANCELLED
   amount            Int           // whole KES (M-Pesa has no cents)
@@ -865,4 +892,53 @@ model SmsCreditLedger {
   createdAt      DateTime     @default(now())
 
   @@index([organizationId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Phase 8: invoices a workspace sends its own customers (with KRA eTIMS)
+// (The `Invoice` model above is VersalyLabs' own subscription billing.)
+// ---------------------------------------------------------------------------
+
+model SalesInvoice {
+  id                String         @id @default(uuid())
+  organizationId    String
+  organization      Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leadId            String
+  lead              Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  proposalId        String?        @unique
+  proposal          Proposal?      @relation(fields: [proposalId], references: [id], onDelete: SetNull)
+  kind              String         @default("INVOICE") // INVOICE or CREDIT_NOTE
+  originalId        String?        // credit note: the invoice it reverses
+  original          SalesInvoice?  @relation("CreditNotes", fields: [originalId], references: [id], onDelete: SetNull)
+  creditNotes       SalesInvoice[] @relation("CreditNotes")
+  number            String         // INV-0001 / CN-0001, per workspace
+  sequence          Int            // numeric part, sent to eTIMS
+  items             Json           // same line format as quotes
+  subtotal          Float
+  vatTotal          Float
+  total             Float
+  amountPaid        Float          @default(0)
+  status            String         @default("DRAFT") // DRAFT, SENT, PAID, VOID (part-paid and overdue are derived)
+  issueDate         DateTime       @default(now())
+  dueDate           DateTime?
+  notes             String?
+  shareToken        String         @unique // public /i/<token> link
+  sentAt            DateTime?
+  paidAt            DateTime?
+  etimsStatus       String         @default("NOT_SENT") // NOT_SENT, SUBMITTED, FAILED
+  etimsReceiptNo    String?        // control unit invoice number
+  etimsSignature    String?
+  etimsInternalData String?
+  etimsSdcId        String?
+  etimsMrcNo        String?
+  etimsDateTime     String?
+  etimsError        String?
+  createdById       String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  payments          Payment[]
+
+  @@unique([organizationId, number])
+  @@index([organizationId, status, dueDate])
+  @@index([leadId])
 }
