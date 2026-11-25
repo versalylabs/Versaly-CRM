@@ -1,4 +1,5 @@
 import { blockIfReadOnly, leadLimitError } from '../../../../../../../lib/subscription';
+import { getStageGroups } from '@/lib/stages';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -55,7 +56,7 @@ export async function POST(
         tiktok: conversation.channel === 'TIKTOK' ? conversation.contactHandle : body.tiktok || null,
         xHandle: conversation.channel === 'X' ? conversation.contactHandle : body.xHandle || null,
         leadSource: 'SOCIAL_MEDIA',
-        pipelineStage: 'NEW_LEAD',
+        pipelineStage: (await getStageGroups(organizationId)).active[0] || 'NEW_LEAD',
         outreachStatus: 'REPLIED',
         notes: `Converted from Unified Inbox conversation (${conversation.channel})`,
         assignedToId: session.user.id,

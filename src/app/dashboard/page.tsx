@@ -105,6 +105,18 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [lastRefreshed, setLastRefreshed] = useState<string>('Just now');
+  const router = useRouter();
+
+  // New, empty workspaces start with the setup wizard (admins only; finishing or skipping it ends this).
+  useEffect(() => {
+    if (status !== 'authenticated' || session?.user?.role !== 'ADMIN') return;
+    fetch('/api/onboarding', { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((s) => {
+        if (s?.needed) router.replace('/welcome');
+      })
+      .catch(() => {});
+  }, [status, session?.user?.role, router]);
 
   const load = useCallback(async () => {
     if (status !== 'authenticated' || !session?.user) return;

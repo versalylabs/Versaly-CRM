@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { PLANS, PLAN_ORDER, UNLIMITED, normalizePlan, type PlanKey } from '@/lib/plans';
+import { INDUSTRY_TEMPLATES } from '@/lib/industryTemplates';
 import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -17,6 +18,8 @@ function SignUpForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [currency, setCurrency] = useState('KES');
+  const [phone, setPhone] = useState('');
+  const [industry, setIndustry] = useState('general');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -45,6 +48,8 @@ function SignUpForm() {
           password,
           currency,
           plan,
+          phone,
+          industry,
         }),
       });
 
@@ -188,16 +193,50 @@ function SignUpForm() {
                   onChange={(e) => setCurrency(e.target.value)}
                   className="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-xs font-medium text-gray-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                 >
+                  <option value="KES">KES (Ksh)</option>
                   <option value="USD">USD ($)</option>
                   <option value="EUR">EUR (€)</option>
                   <option value="GBP">GBP (£)</option>
-                  <option value="KES">KES (Ksh)</option>
                   <option value="ZAR">ZAR (R)</option>
                   <option value="CAD">CAD ($)</option>
                   <option value="AUD">AUD ($)</option>
                 </select>
               </div>
             </div>
+
+            {/* Phone & industry */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="phone" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Phone / WhatsApp <span className="font-normal text-gray-400">(optional)</span>
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  placeholder="0712 345 678"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-xs text-gray-900 placeholder-gray-400 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                />
+              </div>
+              <div>
+                <label htmlFor="industry" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Industry
+                </label>
+                <select
+                  id="industry"
+                  value={industry}
+                  onChange={(e) => setIndustry(e.target.value)}
+                  className="w-full rounded-xl border border-gray-300 px-3 py-2.5 text-xs font-medium text-gray-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                >
+                  {INDUSTRY_TEMPLATES.map((t) => (
+                    <option key={t.key} value={t.key}>{t.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <p className="-mt-2 text-[11px] text-gray-400">We set up your pipeline stages for your industry. You can change them any time.</p>
 
             {/* Password */}
             <div>

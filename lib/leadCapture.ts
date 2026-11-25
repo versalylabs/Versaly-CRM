@@ -3,6 +3,7 @@ import { getStageGroups } from '@/lib/stages';
 import prisma from './prisma';
 import { logLeadActivity } from './automation';
 import { leadLimitError } from './subscription';
+import { normalizePhone } from './phone';
 
 type CaptureInput = Record<string, any>;
 
@@ -24,11 +25,15 @@ function smtpConfigured() {
 async function selectAssignee(tx: any, organizationId: string) {
   const stages = await getStageGroups(organizationId);
   if (String(process.env.AUTO_ASSIGN_EXTERNAL_LEADS || 'true').toLowerCase() === 'false') return null;
-  const users = await tx.user.findMany({
+  // Sales roles first; a one-person business only has its admin, who then gets the lead.
+  let users = await tx.user.findMany({
     where: { isActive: true, role: { in: ['AGENT', 'MANAGER'] }, organizationId },
     include: { _count: { select: { assignedLeads: { where: { pipelineStage: { in: stages.active } } } } } },
     orderBy: [{ createdAt: 'asc' }],
   });
+  if (!users.length) {
+    users = await tx.user.findMany({ where: { isActive: true, role: 'ADMIN', organizationId }, include: { _count: { select: { assignedLeads: true } } }, orderBy: [{ createdAt: 'asc' }] });
+  }
   if (!users.length) return null;
   users.sort((a: any, b: any) => a._count.assignedLeads - b._count.assignedLeads || a.createdAt.getTime() - b.createdAt.getTime());
   return users[0].id;
@@ -58,7 +63,7 @@ export function normalizeCaptureInput(input: CaptureInput, defaultSource = 'WEBS
   const rawSource = String(value(input, 'leadSource') || value(input, 'source') || defaultSource).toUpperCase();
   return {
     contactName: String(contactName || '').trim(), email, companyName: value(input, 'companyName') || value(input, 'company') || null,
-    phone: value(input, 'phone') || null, website: value(input, 'website') || null, location: value(input, 'location') || null,
+    phone: normalizePhone(value(input, 'phone')) || value(input, 'phone') || null, website: value(input, 'website') || null, location: value(input, 'location') || null,
     jobTitle: value(input, 'jobTitle') || null, notes: value(input, 'notes') || value(input, 'message') || null,
     leadSource: sourceMap[rawSource] || defaultSource, externalSource: value(input, 'externalSource') || rawSource,
   };
@@ -84,13 +89,14 @@ export async function captureLead(input: CaptureInput, options: { defaultSource?
   const limit = await leadLimitError(options.organizationId);
   if (limit) return { ok: false, status: 403, error: limit };
 
+  const stages = await getStageGroups(options.organizationId);
   const result = await prisma.$transaction(async (tx) => {
     const assignedToId = await selectAssignee(tx, options.organizationId);
     const lead = await tx.lead.create({ data: {
       contactName: data.contactName, email: data.email || null, companyName: data.companyName, phone: data.phone, website: data.website,
       location: data.location, jobTitle: data.jobTitle, notes: data.notes, leadSource: data.leadSource as any,
       organizationId: options.organizationId,
-      pipelineStage: 'NEW_LEAD', assignedToId,
+      pipelineStage: stages.active[0] || 'NEW_LEAD', assignedToId,
     } });
     await logLeadActivity(tx, lead.id, 'LEAD_CAPTURE', 'External lead captured', { channel: options.channel, externalSource: data.externalSource, autoAssigned: Boolean(assignedToId) });
     const task = await tx.task.create({ data: {

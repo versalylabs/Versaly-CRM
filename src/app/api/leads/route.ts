@@ -1,4 +1,5 @@
 import { blockIfReadOnly, leadLimitError } from '../../../../lib/subscription';
+import { getStageGroups } from '@/lib/stages';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
@@ -105,7 +106,7 @@ export async function POST(req: NextRequest) {
         linkedin: body.linkedin || null,
         facebook: body.facebook || null,
         leadSource: body.leadSource,
-        pipelineStage: body.pipelineStage || 'NEW_LEAD',
+        pipelineStage: body.pipelineStage || (await getStageGroups(session.user.organizationId)).active[0] || 'NEW_LEAD',
         outreachStatus: body.outreachStatus || 'PENDING',
         dealValue,
         notes: body.notes || null,

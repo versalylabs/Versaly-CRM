@@ -6,11 +6,17 @@ import { initializeWorkspaceOnboarding } from '../../../../../lib/onboarding';
 import { sendWelcomeEmail } from '../../../../../lib/email';
 import { createAccountToken, VERIFY_TTL_MS } from '../../../../../lib/accountTokens';
 import { PLAN_LIMITS, normalizePlan } from '../../../../../lib/plans';
+import { normalizePhone } from '../../../../../lib/phone';
+import { applyIndustryTemplate } from '../../../../../lib/industryTemplates';
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, companyName, password, currency, plan: rawPlan } = body;
+    const { name, email, companyName, password, currency, plan: rawPlan, industry } = body;
+    const phone = body.phone ? normalizePhone(body.phone) : null;
+    if (body.phone && !phone) {
+      return NextResponse.json({ error: 'Enter a valid phone number, for example 0712 345 678' }, { status: 400 });
+    }
     const plan = normalizePlan(rawPlan);
     const planLimits = PLAN_LIMITS[plan];
 
@@ -75,7 +81,7 @@ export async function POST(req: NextRequest) {
           leadLimit: planLimits.leadLimit,
           seatLimit: planLimits.seatLimit,
           automationRunLimit: planLimits.automationRunLimit,
-          currency: currency && typeof currency === 'string' ? currency.toUpperCase() : 'USD',
+          currency: currency && typeof currency === 'string' ? currency.toUpperCase() : 'KES',
         },
       });
 
@@ -84,10 +90,13 @@ export async function POST(req: NextRequest) {
           name: name.trim(),
           email: cleanEmail,
           password: hashedPassword,
+          phone,
           role: 'ADMIN',
           organizationId: organization.id,
         },
       });
+
+      if (industry) await applyIndustryTemplate(tx, organization.id, String(industry));
 
       await initializeWorkspaceOnboarding(tx, {
         organizationId: organization.id,
@@ -97,7 +106,7 @@ export async function POST(req: NextRequest) {
       });
 
       return { organization, user };
-    });
+    }, { maxWait: 10000, timeout: 20000 }); // signup does several writes; allow for slower databases
 
     // Email delivery is intentionally outside the transaction: a temporary SMTP failure must never roll back a paid/trial signup.
     const appUrl = (process.env.NEXTAUTH_URL || new URL(req.url).origin).replace(/\/$/, '');
@@ -127,7 +136,7 @@ export async function POST(req: NextRequest) {
           slug: result.organization.slug,
           plan: result.organization.plan,
         },
-        onboarding: { sampleLeads: 3, checklistTasks: 5, welcomeEmail },
+        onboarding: { checklistTasks: 5, welcomeEmail },
         user: {
           id: result.user.id,
           name: result.user.name,
@@ -138,19 +147,9 @@ export async function POST(req: NextRequest) {
     );
   } catch (error: any) {
     console.error('Registration error:', error);
-    const rawMessage = error?.message || '';
-    let userMessage = 'An unexpected error occurred while creating your workspace. Please try again.';
-
-    if (rawMessage.includes('Can\'t reach database') || rawMessage.includes('connect to database') || rawMessage.includes('connection refused')) {
-      userMessage = 'Database connection failed. Please verify that your DATABASE_URL or PRISMA_DATABASE_URL is active in Vercel settings.';
-    } else if (rawMessage.includes('does not exist') || rawMessage.includes('relation') || rawMessage.includes('Table')) {
-      userMessage = 'Database schema has not been synchronized yet. Running schema push...';
-    } else if (rawMessage) {
-      userMessage = `Workspace setup error: ${rawMessage.slice(0, 160)}`;
-    }
-
+    // Never show database internals to the visitor; details are in the server log above.
     return NextResponse.json(
-      { error: userMessage, details: rawMessage || undefined },
+      { error: 'We could not create your workspace just now. Please try again in a moment.' },
       { status: 500 }
     );
   }

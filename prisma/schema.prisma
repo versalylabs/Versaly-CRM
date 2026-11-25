@@ -307,6 +307,7 @@ model User {
   email         String   @unique
   emailVerified DateTime?
   image         String?
+  phone         String?
   password      String   // hashed password
   role          String   @default("AGENT") // ADMIN, MANAGER, AGENT
   isActive      Boolean  @default(true)
@@ -352,6 +353,8 @@ model Organization {
   seatLimit   Int      @default(10)
   automationRunLimit Int @default(1000)
   currency    String   @default("KES")
+  industry    String?
+  onboardedAt DateTime? // set when the setup wizard is finished or skipped
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

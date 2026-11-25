@@ -33,9 +33,12 @@ if (activeDbUrl) {
   process.env.DATABASE_URL = activeDbUrl;
 }
 
-const clientOptions = activeDbUrl
-  ? { datasources: { db: { url: activeDbUrl } } }
-  : {};
+const clientOptions = {
+  ...(activeDbUrl ? { datasources: { db: { url: activeDbUrl } } } : {}),
+  // Prisma's 5 s default is too short for multi-step writes (signup, lead capture) on a remote
+  // database with cold connections; a timed-out transaction rolls back and the user sees an error.
+  transactionOptions: { maxWait: 10000, timeout: 20000 },
+};
 
 let prisma: PrismaClient
 

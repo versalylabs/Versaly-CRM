@@ -3,6 +3,7 @@
 import { formatCurrency } from '../../../lib/currency';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import {
   PipelineStageItem,
   DEFAULT_PIPELINE_STAGES,
@@ -104,6 +105,7 @@ const glassInput =
   'w-full rounded-xl bg-ink-900 border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 transition';
 
 export default function LeadsPage() {
+  const { data: session } = useSession();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [pipelineStages, setPipelineStages] = useState<PipelineStageItem[]>(DEFAULT_PIPELINE_STAGES);
@@ -292,15 +294,27 @@ export default function LeadsPage() {
               Manage prospective clients from initial point-of-contact to closed contracts.
             </p>
           </div>
-          <button
-            onClick={() => {
-              setShowForm((visible) => !visible);
-              setFormError('');
-            }}
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 text-white font-bold text-xs shadow-lg shadow-sky-500/20 transition whitespace-nowrap"
-          >
-            {showForm ? '✕ Close Form' : '+ Add Lead'}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            {['ADMIN', 'MANAGER'].includes(session?.user?.role || '') && (
+              <>
+                <Link href="/leads/import" className="rounded-xl border border-white/15 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/10">
+                  Import CSV
+                </Link>
+                <a href="/api/leads/export" className="rounded-xl border border-white/15 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/10">
+                  Export CSV
+                </a>
+              </>
+            )}
+            <button
+              onClick={() => {
+                setShowForm((visible) => !visible);
+                setFormError('');
+              }}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 to-cyan-500 hover:from-sky-500 hover:to-cyan-400 text-white font-bold text-xs shadow-lg shadow-sky-500/20 transition whitespace-nowrap"
+            >
+              {showForm ? '✕ Close Form' : '+ Add Lead'}
+            </button>
+          </div>
         </div>
 
         {/* Top Summary Cards (React Bits Liquid Glass) */}

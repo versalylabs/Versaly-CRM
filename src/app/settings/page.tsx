@@ -130,6 +130,12 @@ export default function SettingsPage() {
             🎯 Pipeline Stages
           </Link>
           <Link
+            href="/settings/lead-capture"
+            className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 border border-transparent transition"
+          >
+            🧲 Lead Capture
+          </Link>
+          <Link
             href="/settings/billing"
             className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 border border-transparent transition"
           >
