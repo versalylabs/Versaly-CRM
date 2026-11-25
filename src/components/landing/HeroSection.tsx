@@ -22,7 +22,7 @@ export function HeroSection() {
   const [activeMockTab, setActiveMockTab] = useState<'pipeline' | 'retention' | 'activity'>('pipeline');
 
   return (
-    <section id="hero" className="relative overflow-hidden pt-24 pb-10 sm:pt-28 lg:pt-32 lg:pb-12">
+    <section id="hero" className="relative overflow-hidden pt-28 pb-10 sm:pt-32 lg:pt-36 lg:pb-12">
       {/* Relatable Team / Business Operator Background with Darker Contrast */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         {/* Modern business/tech team collaborating in workspace */}
@@ -52,28 +52,12 @@ export function HeroSection() {
       <Spotlight className="top-1/3 right-0 md:right-20" fill="#ff6b01" fillOpacity={0.03} />
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 lg:px-8">
-        {/* Top Announcement Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex justify-center"
-        >
-          <div className="inline-flex items-center gap-2.5 rounded-full border border-sky-400/35 bg-ink-800/85 px-4 py-1.5 text-xs font-semibold text-sky-200 shadow-[0_4px_20px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] backdrop-blur-md">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-bold text-white">VersalyLabs CRM</span>
-            <span className="text-sky-400/60">|</span>
-            <span className="text-sky-300">Intelligent Pipeline & Retention Operating System</span>
-            <ArrowRight className="h-3 w-3 text-sky-400" />
-          </div>
-        </motion.div>
-
         {/* Shorter & Catchier Hero Title */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="mx-auto mt-6 max-w-4xl text-center"
+          className="mx-auto max-w-4xl text-center"
         >
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-6xl sm:leading-[1.12] lg:text-7xl">
             Close deals faster.<br />
