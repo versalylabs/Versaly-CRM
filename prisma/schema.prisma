@@ -336,7 +336,7 @@ model Organization {
   id          String   @id @default(uuid())
   name        String
   slug        String   @unique
-  plan        String   @default("GROWTH_PRO") // STARTER, GROWTH_PRO, ENTERPRISE
+  plan        String   @default("GROWTH_PRO") // SOLO, STARTER, GROWTH_PRO, ENTERPRISE
   planStatus  String   @default("trialing") // trialing, active, past_due, canceled, incomplete
   stripeCustomerId     String?  @unique
   stripeSubscriptionId String?  @unique
@@ -344,6 +344,8 @@ model Organization {
   billingInterval      String?  // month, year
   currentPeriodEnd     DateTime?
   cancelAtPeriodEnd    Boolean  @default(false)
+  paystackCustomerCode String?
+  paystackCard         String?  // encrypted JSON: reusable card authorization for renewals
   suspendedAt     DateTime?
   suspensionReason String?
   leadLimit   Int      @default(500)
@@ -376,6 +378,7 @@ model Organization {
 
   @@index([slug])
   @@index([suspendedAt])
+  invoices    Invoice[]
 }
 
 model PipelineStageConfig {
@@ -702,5 +705,22 @@ model ConnectedChannelAccount {
   @@index([webhookSecret])
 }
 
+/// A payment for a plan period (Paystack). One row per successful charge; `reference` is Paystack's.
+model Invoice {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  number         String       @unique
+  reference      String       @unique
+  plan           String
+  interval       String       // month, year
+  amountKes      Int
+  status         String       @default("paid")
+  channel        String?      // card, mobile_money
+  periodStart    DateTime
+  periodEnd      DateTime
+  paidAt         DateTime?
+  createdAt      DateTime     @default(now())
 
-
+  @@index([organizationId, createdAt])
+}

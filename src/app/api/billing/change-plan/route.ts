@@ -10,8 +10,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // SECURITY: this endpoint switches a plan WITHOUT any payment. In production, plan changes must
-  // only happen through Stripe Checkout / the Billing Portal (the signed webhook updates the plan).
+  // SECURITY: development tool that switches a plan WITHOUT payment. In production, plans change only
+  // through a confirmed Paystack payment (lib/billing.ts applyPaystackCharge).
   if (process.env.NODE_ENV === 'production' && process.env.ALLOW_UNPAID_PLAN_CHANGE !== 'true') {
     return NextResponse.json(
       { error: 'Plan changes are handled through billing checkout.' },
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     const targetConfig = (PLAN_LIMITS as Record<string, (typeof PLAN_LIMITS)[PlanKey]>)[plan];
     if (!targetConfig) {
       return NextResponse.json(
-        { error: 'Invalid plan selected. Must be STARTER, GROWTH_PRO, or ENTERPRISE.' },
+        { error: 'Invalid plan selected. Must be SOLO, STARTER, GROWTH_PRO or ENTERPRISE.' },
         { status: 400 }
       );
     }

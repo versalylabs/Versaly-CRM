@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCronSecret } from '../../../../../lib/env';
 import { runInactiveLeadWorkflows } from '../../../../../lib/workflows';
 import { syncAllMailboxes } from '../../../../../lib/emailSync';
+import { runBillingCycle } from '../../../../../lib/billing';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -24,7 +25,8 @@ async function handle(request: NextRequest) {
   try {
     const result = await runInactiveLeadWorkflows();
     const mail = await syncAllMailboxes().catch((e) => ({ accounts: 0, imported: 0, error: String(e?.message || e) }));
-    return NextResponse.json({ ok: true, ...result, mail, executedAt: new Date().toISOString() });
+    const billing = await runBillingCycle(new Date(), process.env.NEXTAUTH_URL || request.nextUrl.origin).catch((e) => ({ error: String(e?.message || e) }));
+    return NextResponse.json({ ok: true, ...result, mail, billing, executedAt: new Date().toISOString() });
   } catch (error) {
     console.error('Scheduled automation run failed', error);
     return NextResponse.json({ error: 'Scheduled automation run failed.' }, { status: 500 });

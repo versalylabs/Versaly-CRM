@@ -22,7 +22,12 @@ type BillingData = {
     seatLimit: number;
     seatUsed: number;
     seatPercentage: number;
+    billingInterval: 'month' | 'year' | null;
+    currentPeriodEnd: string | null;
+    autoRenew: boolean;
+    card: { brand: string; last4: string; exp: string } | null;
   };
+  paymentsEnabled: boolean;
   plans: {
     id: string;
     name: string;
@@ -46,15 +51,24 @@ type BillingData = {
   };
   invoices: {
     id: string;
+    number: string;
     date: string;
     amount: number;
     currency: string;
     status: string;
     plan: string;
+    interval: string;
   }[];
 };
 
 const kes = (amount: number) => `KES ${amount.toLocaleString('en-US')}`;
+const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+const PAYMENT_MESSAGES: Record<string, { message: string; type: 'success' | 'error' }> = {
+  success: { message: 'Payment received. Your plan is active. A receipt is listed below.', type: 'success' },
+  failed: { message: 'The payment did not go through, so nothing was charged. Please try again.', type: 'error' },
+  pending: { message: 'We are still confirming your payment with Paystack. Refresh this page in a minute.', type: 'error' },
+  missing: { message: 'We could not find that payment. If money left your account, contact support.', type: 'error' },
+};
 
 export default function BillingPage() {
   const { data: session } = useSession();
@@ -63,6 +77,13 @@ export default function BillingPage() {
   const [error, setError] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [interval, setInterval] = useState<'month' | 'year'>('year');
+
+  // Result of a Paystack payment (set by /api/billing/verify when Paystack sends the customer back).
+  useEffect(() => {
+    const result = new URLSearchParams(window.location.search).get('payment');
+    if (result && PAYMENT_MESSAGES[result]) setNotification(PAYMENT_MESSAGES[result]);
+  }, []);
 
   const loadBilling = useCallback(async () => {
     setLoading(true);
@@ -83,33 +104,38 @@ export default function BillingPage() {
     loadBilling();
   }, [loadBilling]);
 
-  const handlePlanChange = async (planId: string) => {
-    if (actionLoading || data?.organization.plan === planId) return;
+  // Opens Paystack's payment page, where the customer chooses M-Pesa or card.
+  const handlePay = async (planId: string) => {
+    if (actionLoading) return;
     setActionLoading(planId);
     setNotification(null);
     try {
-      const res = await fetch('/api/billing/create-checkout', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: planId, interval: 'month' }),
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planId, interval }),
       });
       const body = await res.json();
-      if (!res.ok) throw new Error(body.error || 'Unable to start secure checkout');
+      if (!res.ok) throw new Error(body.error || 'Unable to start the payment');
       window.location.href = body.url;
     } catch (err: any) {
-      setNotification({ message: err.message || 'Unable to start checkout', type: 'error' });
+      setNotification({ message: err.message || 'Unable to start the payment', type: 'error' });
       setActionLoading(null);
     }
   };
 
-  const handleManageBilling = async () => {
-    setActionLoading('portal');
+  const handleAutoRenew = async (enabled: boolean) => {
+    if (!enabled && !window.confirm('Turn off automatic renewal? Your plan stays active until the end of the paid period, and we will forget your saved card.')) return;
+    setActionLoading('autorenew');
     try {
-      const res = await fetch('/api/billing/create-portal-session', { method: 'POST' });
+      const res = await fetch('/api/billing/auto-renew', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled }) });
       const body = await res.json();
-      if (!res.ok) throw new Error(body.error || 'Unable to open billing portal');
-      window.location.href = body.url;
+      if (!res.ok) throw new Error(body.error || 'Could not update automatic renewal');
+      setNotification({ message: enabled ? 'Automatic renewal is on.' : 'Automatic renewal is off. Your plan stays active until the end of the paid period.', type: 'success' });
+      await loadBilling();
     } catch (err: any) {
-      setNotification({ message: err.message || 'Unable to open billing portal', type: 'error' });
+      setNotification({ message: err.message, type: 'error' });
+    } finally {
       setActionLoading(null);
     }
   };
@@ -245,7 +271,9 @@ export default function BillingPage() {
                     ? 'Platform Master Access'
                     : org.isTrialing
                     ? '14-Day Free Trial'
-                    : 'Active Monthly Subscription'}
+                    : org.planStatus === 'active'
+                    ? `${data.currentPlan.name} plan`
+                    : 'Payment needed'}
                 </span>
                 <span
                   className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
@@ -260,7 +288,9 @@ export default function BillingPage() {
                     ? 'Lifetime Unlimited'
                     : org.isTrialing
                     ? `${org.trialDaysRemaining} Days Remaining`
-                    : 'Active'}
+                    : org.planStatus === 'active'
+                    ? 'Active'
+                    : 'Read-only'}
                 </span>
               </div>
               <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
@@ -268,7 +298,11 @@ export default function BillingPage() {
                   ? 'System Owner account with trial exemption, unlimited platform resources, and full administrative rights.'
                   : org.isTrialing
                   ? `Your trial gives full access to all ${data.currentPlan.name} features. Choose a plan below to keep uninterrupted access.`
-                  : `Subscribed to ${data.currentPlan.name} (${kes(data.currentPlan.priceMonthly)}/mo). Renews automatically next billing cycle.`}
+                  : org.planStatus !== 'active'
+                  ? 'Your workspace is read-only until the next payment. Your data is safe; pay below to switch everything back on.'
+                  : org.currentPeriodEnd
+                  ? `Paid ${org.billingInterval === 'month' ? 'monthly' : 'annually'} until ${fmtDate(org.currentPeriodEnd)}. ${org.autoRenew ? 'Renews automatically on your saved card.' : 'We will email you a reminder to renew by M-Pesa or card.'}`
+                  : `Subscribed to ${data.currentPlan.name}.`}
               </p>
             </div>
           </div>
@@ -345,28 +379,53 @@ export default function BillingPage() {
           </div>
           <div className="mt-3">
             <span className="text-2xl font-black text-gray-900 dark:text-white">
-              {kes(data.currentPlan.priceMonthly)} <span className="text-xs font-semibold text-gray-400">/ month</span>
+              {kes(org.billingInterval === 'month' ? data.currentPlan.priceMonthly : data.currentPlan.priceAnnual)}{' '}
+              <span className="text-xs font-semibold text-gray-400">/ month</span>
             </span>
           </div>
           <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-            Or {kes(data.currentPlan.priceAnnual)} / month billed annually
+            {org.currentPeriodEnd
+              ? `Billed ${org.billingInterval === 'month' ? 'monthly' : 'annually'} · ${org.autoRenew ? 'renews' : 'ends'} ${fmtDate(org.currentPeriodEnd)}`
+              : `Or ${kes(data.currentPlan.priceAnnual)} / month billed annually`}
           </p>
         </div>
       </section>
 
       {/* 3-Tier Interactive Pricing Comparison Matrix */}
       <section id="pricing-tiers" className="space-y-4 pt-4">
-        <div>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Select a Plan Tier</h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Upgrade or switch tiers at any time. Changes take effect immediately.
-          </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">Choose a plan</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Pay by M-Pesa or card through Paystack. A new plan starts as soon as the payment is confirmed.
+            </p>
+          </div>
+          <div role="group" aria-label="Billing period" className="inline-flex rounded-xl border border-gray-200 p-1 dark:border-gray-700">
+            {(['month', 'year'] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={interval === value}
+                onClick={() => setInterval(value)}
+                className={`rounded-lg px-4 py-1.5 text-xs font-bold transition ${interval === value ? 'bg-brand-orange text-brand-ink' : 'text-gray-400 hover:text-white'}`}
+              >
+                {value === 'month' ? 'Monthly' : 'Annual (save up to 20%)'}
+              </button>
+            ))}
+          </div>
         </div>
+        {!data.paymentsEnabled && (
+          <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-200">
+            Online payment is not switched on yet. To subscribe now, contact us on WhatsApp or email and we will set up your plan.
+          </p>
+        )}
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {data.plans.map((plan) => {
             const isCurrent = org.plan === plan.id;
+            const isPaidCurrent = isCurrent && org.planStatus === 'active' && org.billingInterval === interval;
             const isUpgrading = actionLoading === plan.id;
+            const monthlyPrice = interval === 'month' ? plan.priceMonthly : plan.priceAnnual;
 
             return (
               <div
@@ -396,11 +455,16 @@ export default function BillingPage() {
 
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 leading-snug">{plan.description}</p>
 
-                  <div className="mt-4 flex items-baseline gap-1 border-b border-gray-100 pb-4 dark:border-gray-800">
-                    <span className="whitespace-nowrap text-3xl xl:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
-                      {kes(plan.priceMonthly)}
-                    </span>
-                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">/ month</span>
+                  <div className="mt-4 border-b border-gray-100 pb-4 dark:border-gray-800">
+                    <div className="flex items-baseline gap-1">
+                      <span className="whitespace-nowrap text-3xl xl:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                        {kes(monthlyPrice)}
+                      </span>
+                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">/ month</span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-gray-400">
+                      {interval === 'year' ? `${kes(plan.priceAnnual * 12)} paid once a year` : 'Paid monthly'}
+                    </p>
                   </div>
 
                   <ul className="mt-5 space-y-2.5 text-xs text-gray-600 dark:text-gray-300">
@@ -427,30 +491,26 @@ export default function BillingPage() {
                 </div>
 
                 <div className="mt-8 pt-4 border-t border-gray-100 dark:border-gray-800">
-                  {isCurrent ? (
-                    <button
-                      disabled
-                      className="w-full rounded-xl border border-sky-300 bg-sky-50 py-2.5 text-xs font-bold text-sky-700 dark:border-sky-800 dark:bg-sky-950/60 dark:text-sky-300"
-                    >
-                      ✓ Active Workspace Tier
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handlePlanChange(plan.id)}
-                      disabled={!isAdmin || Boolean(actionLoading)}
-                      className="w-full rounded-xl bg-gradient-to-r from-sky-600 to-sky-700 py-2.5 text-xs font-bold text-white shadow transition hover:from-sky-500 hover:to-sky-600 disabled:opacity-50"
-                    >
-                      {isUpgrading ? (
-                        'Updating...'
-                      ) : !isAdmin ? (
-                        'Admin Only'
-                      ) : plan.id === 'ENTERPRISE' ? (
-                        'Upgrade to Scale →'
-                      ) : (
-                        `Switch to ${plan.name}`
-                      )}
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handlePay(plan.id)}
+                    disabled={!isAdmin || !data.paymentsEnabled || Boolean(actionLoading)}
+                    className={`w-full rounded-xl py-2.5 text-xs font-bold shadow transition disabled:opacity-50 ${
+                      isCurrent
+                        ? 'border border-sky-500/50 bg-transparent text-sky-300 hover:bg-sky-500/10'
+                        : 'bg-gradient-to-r from-sky-600 to-sky-700 text-white hover:from-sky-500 hover:to-sky-600'
+                    }`}
+                  >
+                    {isUpgrading
+                      ? 'Opening payment…'
+                      : !isAdmin
+                      ? 'Admin only'
+                      : isPaidCurrent
+                      ? 'Renew early'
+                      : isCurrent
+                      ? `Pay for ${plan.name}`
+                      : `Switch to ${plan.name}`}
+                  </button>
+                  <p className="mt-2 text-center text-[11px] text-gray-500">M-Pesa or card</p>
                 </div>
               </div>
             );
@@ -474,17 +534,31 @@ export default function BillingPage() {
         {/* Payment Method Card */}
         <div className="rounded-2xl border border-gray-200/80 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900 space-y-4">
           <div>
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Payment Method</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Used for your recurring subscription charges</p>
-          {isAdmin && (
-            <button onClick={handleManageBilling} disabled={Boolean(actionLoading)} className="mt-3 rounded-xl border border-gray-200 px-4 py-2 text-xs font-bold hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 disabled:opacity-50">
-              {actionLoading === 'portal' ? 'Opening…' : 'Open billing portal →'}
-            </button>
-          )}
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white">Payment & renewal</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">How your plan renews</p>
           </div>
 
-          <p className="rounded-xl border border-dashed border-gray-200 p-4 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
-            Card details are stored by our payment provider, never by VersalyLabs. Once you subscribe, use the billing portal to view or update your payment method.
+          {org.card ? (
+            <div className="rounded-xl border border-gray-700 p-4 text-xs">
+              <p className="font-bold text-white">
+                {org.card.brand} •••• {org.card.last4} <span className="font-normal text-gray-400">expires {org.card.exp}</span>
+              </p>
+              <p className="mt-1 text-gray-400">
+                {org.autoRenew ? 'Charged automatically at each renewal.' : 'Automatic renewal is off.'}
+              </p>
+              {isAdmin && org.autoRenew && (
+                <button onClick={() => handleAutoRenew(false)} disabled={Boolean(actionLoading)} className="mt-3 text-xs font-semibold text-red-300 underline disabled:opacity-50">
+                  Turn off automatic renewal (cancel)
+                </button>
+              )}
+            </div>
+          ) : (
+            <p className="rounded-xl border border-dashed border-gray-200 p-4 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
+              No saved card. If you pay by M-Pesa, we email a reminder 7, 3 and 1 days before your plan ends so you can renew. Pay by card once to renew automatically.
+            </p>
+          )}
+          <p className="text-[11px] text-gray-500">
+            Card and M-Pesa details are handled by Paystack. VersalyLabs never sees your card number or M-Pesa PIN.
           </p>
         </div>
 
@@ -510,17 +584,24 @@ export default function BillingPage() {
                     <th className="pb-3 font-semibold">Date</th>
                     <th className="pb-3 font-semibold">Amount</th>
                     <th className="pb-3 font-semibold">Status</th>
+                    <th className="pb-3 font-semibold text-right">Receipt</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {data.invoices.map((inv) => (
                     <tr key={inv.id}>
-                      <td className="py-3 font-semibold text-gray-900 dark:text-white">{inv.id}</td>
-                      <td className="py-3 text-gray-500">{inv.date}</td>
-                      <td className="py-3 font-bold text-gray-900 dark:text-white">
-                        {inv.currency} {inv.amount.toLocaleString('en-US')}
+                      <td className="py-3 font-semibold text-gray-900 dark:text-white">
+                        {inv.number}
+                        <span className="block text-[11px] font-normal text-gray-500">{inv.plan} · {inv.interval === 'month' ? 'monthly' : 'annual'}</span>
                       </td>
-                      <td className="py-3">{inv.status}</td>
+                      <td className="py-3 text-gray-500">{fmtDate(inv.date)}</td>
+                      <td className="py-3 font-bold text-gray-900 dark:text-white">{kes(inv.amount)}</td>
+                      <td className="py-3 capitalize">{inv.status}</td>
+                      <td className="py-3 text-right">
+                        <Link href={`/settings/billing/receipt/${inv.id}`} className="font-semibold text-sky-400 hover:underline">
+                          View / print
+                        </Link>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
