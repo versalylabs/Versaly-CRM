@@ -13,6 +13,7 @@ declare module 'next-auth' {
     organizationName?: string | null
     plan?: string | null
     isPlatformAdmin?: boolean
+    emailVerified?: boolean
   }
 
   interface Session {
@@ -26,6 +27,7 @@ declare module 'next-auth' {
       organizationName?: string | null
       plan?: string | null
       isPlatformAdmin?: boolean
+      emailVerified?: boolean
     }
   }
 }
@@ -38,6 +40,7 @@ declare module 'next-auth/jwt' {
     organizationName?: string | null
     plan?: string | null
     isPlatformAdmin?: boolean
+    emailVerified?: boolean
   }
 }
 
@@ -99,6 +102,7 @@ export const authOptions: NextAuthOptions = {
           organizationId: user.organizationId,
           organizationName: user.organization?.name || 'My Workspace',
           plan: user.organization?.plan || 'GROWTH_PRO',
+          emailVerified: Boolean(user.emailVerified),
         }
       },
     }),
@@ -121,13 +125,14 @@ export const authOptions: NextAuthOptions = {
         token.organizationId = user.organizationId
         token.organizationName = user.organizationName
         token.plan = user.plan
+        token.emailVerified = Boolean(user.emailVerified)
         token.isPlatformAdmin = getPlatformAdminEmails().includes((user.email || '').toLowerCase())
       } else if (token.id && token.id !== DISABLED) {
         // Re-read role, workspace and active status on every server-side session read, so a
         // deactivated user or a role/plan change takes effect immediately rather than after 8 hours.
         const fresh = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { isActive: true, role: true, organizationId: true, organization: { select: { name: true, plan: true } } },
+          select: { isActive: true, role: true, emailVerified: true, organizationId: true, organization: { select: { name: true, plan: true } } },
         })
         if (!fresh || !fresh.isActive) {
           // Not a valid identity any more: ids that match nothing, no workspace, no admin rights.
@@ -137,6 +142,7 @@ export const authOptions: NextAuthOptions = {
         token.organizationId = fresh.organizationId
         token.organizationName = fresh.organization?.name
         token.plan = fresh.organization?.plan
+        token.emailVerified = Boolean(fresh.emailVerified)
       }
 
       return token
@@ -148,6 +154,7 @@ export const authOptions: NextAuthOptions = {
         session.user.organizationId = token.organizationId
         session.user.organizationName = token.organizationName
         session.user.plan = token.plan
+        session.user.emailVerified = Boolean(token.emailVerified)
         session.user.isPlatformAdmin = Boolean(
           token.isPlatformAdmin ||
           (session.user.email && getPlatformAdminEmails().includes(session.user.email.toLowerCase()))

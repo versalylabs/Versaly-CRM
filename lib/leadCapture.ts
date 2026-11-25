@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { getStageGroups } from '@/lib/stages';
 import prisma from './prisma';
 import { logLeadActivity } from './automation';
 import { leadLimitError } from './subscription';
@@ -21,10 +22,11 @@ function smtpConfigured() {
 }
 
 async function selectAssignee(tx: any, organizationId: string) {
+  const stages = await getStageGroups(organizationId);
   if (String(process.env.AUTO_ASSIGN_EXTERNAL_LEADS || 'true').toLowerCase() === 'false') return null;
   const users = await tx.user.findMany({
     where: { isActive: true, role: { in: ['AGENT', 'MANAGER'] }, organizationId },
-    include: { _count: { select: { assignedLeads: { where: { pipelineStage: { notIn: ['WON', 'LOST'] } } } } } },
+    include: { _count: { select: { assignedLeads: { where: { pipelineStage: { in: stages.active } } } } } },
     orderBy: [{ createdAt: 'asc' }],
   });
   if (!users.length) return null;
@@ -33,7 +35,7 @@ async function selectAssignee(tx: any, organizationId: string) {
 }
 
 async function sendWelcomeEmail(lead: any) {
-  if (String(process.env.AUTO_WELCOME_EMAIL || 'false').toLowerCase() !== 'true' || !smtpConfigured()) return false;
+  if (!lead.email || String(process.env.AUTO_WELCOME_EMAIL || 'false').toLowerCase() !== 'true' || !smtpConfigured()) return false;
   const port = Number(process.env.SMTP_PORT || 587);
   const secure = String(process.env.SMTP_SECURE || '').toLowerCase() === 'true' || port === 465;
   const transporter = nodemailer.createTransport({
@@ -66,11 +68,14 @@ export function normalizeCaptureInput(input: CaptureInput, defaultSource = 'WEBS
 export async function captureLead(input: CaptureInput, options: { defaultSource?: string; channel: string; organizationId: string }) {
   if (!options.organizationId) return { ok: false, status: 400, error: 'No workspace was specified for this lead.' };
   const data = normalizeCaptureInput(input, options.defaultSource || 'WEBSITE_FORM');
-  if (!data.contactName || !data.email || !/^\S+@\S+\.\S+$/.test(data.email)) {
-    return { ok: false, status: 400, error: 'A valid contactName (or name) and email are required.' };
+  if (!data.contactName || (!data.email && !data.phone) || (data.email && !/^\S+@\S+\.\S+$/.test(data.email))) {
+    return { ok: false, status: 400, error: 'A contactName (or name) and a valid email or phone are required.' };
   }
 
-  const existing = await prisma.lead.findFirst({ where: { email: data.email, organizationId: options.organizationId } });
+  // Duplicate check: same email, or same phone when there is no email.
+  const existing = await prisma.lead.findFirst({
+    where: { organizationId: options.organizationId, ...(data.email ? { email: data.email } : { phone: data.phone }) },
+  });
   if (existing) {
     await prisma.activityEvent.create({ data: { leadId: existing.id, type: 'LEAD_CAPTURE', action: 'Duplicate external lead received', metadata: { channel: options.channel, externalSource: data.externalSource } as any } });
     return { ok: true, duplicate: true, lead: existing, status: 200 };
@@ -82,7 +87,7 @@ export async function captureLead(input: CaptureInput, options: { defaultSource?
   const result = await prisma.$transaction(async (tx) => {
     const assignedToId = await selectAssignee(tx, options.organizationId);
     const lead = await tx.lead.create({ data: {
-      contactName: data.contactName, email: data.email, companyName: data.companyName, phone: data.phone, website: data.website,
+      contactName: data.contactName, email: data.email || null, companyName: data.companyName, phone: data.phone, website: data.website,
       location: data.location, jobTitle: data.jobTitle, notes: data.notes, leadSource: data.leadSource as any,
       organizationId: options.organizationId,
       pipelineStage: 'NEW_LEAD', assignedToId,

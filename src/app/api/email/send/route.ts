@@ -1,4 +1,5 @@
 import { blockIfReadOnly } from '../../../../../lib/subscription';
+import { advanceStage, getStageGroups } from '@/lib/stages';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../lib/auth';
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: sent.errorMessage || 'The email could not be sent.' }, { status: sent.requiresConnection ? 503 : 502 });
   }
 
+  const stages = await getStageGroups(lead.organizationId);
   const sentAt = new Date();
   const result = await prisma.$transaction(async (tx) => {
     const log = await tx.outreachLog.create({
@@ -62,7 +64,7 @@ export async function POST(req: NextRequest) {
       data: {
         lastContact: sentAt,
         outreachStatus: 'SENT',
-        pipelineStage: ['NEW_LEAD', 'RESEARCHING'].includes(lead.pipelineStage) ? 'CONTACTED' : undefined,
+        pipelineStage: advanceStage(stages, lead.pipelineStage, 'CONTACTED'),
       },
     });
     await logLeadActivity(tx, lead.id, 'email', 'Email sent from CRM', {

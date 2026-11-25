@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getStageGroups } from '@/lib/stages';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
 import prisma from '../../../../lib/prisma';
 
-const ACTIVE_STAGES = ['NEW_LEAD', 'RESEARCHING', 'CONTACTED', 'FOLLOW_UP', 'INTERESTED', 'PROPOSAL'];
 const MANAGER_ROLES = ['ADMIN', 'MANAGER'];
 
 function csvEscape(value: unknown) {
@@ -43,6 +43,8 @@ export async function GET(req: NextRequest) {
 
     const organizationId = session.user.organizationId;
     if (!organizationId) return NextResponse.json({ error: 'No workspace found for this user.' }, { status: 403 });
+    const stages = await getStageGroups(organizationId);
+    const ACTIVE_STAGES = stages.active;
     const orgWhere = organizationId ? { organizationId } : {};
     const leadOwnerWhere = {
       ...orgWhere,
@@ -93,8 +95,8 @@ export async function GET(req: NextRequest) {
     for (const lead of leads) {
       const current = sourceMap.get(lead.leadSource) || { source: lead.leadSource, leads: 0, won: 0, lost: 0, value: 0 };
       current.leads += 1;
-      if (lead.pipelineStage === 'WON') current.won += 1;
-      if (lead.pipelineStage === 'LOST') current.lost += 1;
+      if (stages.won.includes(lead.pipelineStage)) current.won += 1;
+      if (stages.lost.includes(lead.pipelineStage)) current.lost += 1;
       current.value += lead.dealValue || 0;
       sourceMap.set(lead.leadSource, current);
     }
@@ -103,7 +105,7 @@ export async function GET(req: NextRequest) {
       .sort((a, b) => b.leads - a.leads);
 
     const stageMap = new Map(stageGroups.map((item) => [item.pipelineStage, { count: item._count._all, value: item._sum.dealValue || 0 }]));
-    const stageOrder = ['NEW_LEAD', 'RESEARCHING', 'CONTACTED', 'FOLLOW_UP', 'INTERESTED', 'PROPOSAL', 'WON', 'LOST'];
+    const stageOrder = stages.all;
     const pipeline = stageOrder.map((stage) => ({ stage, count: stageMap.get(stage as any)?.count || 0, value: stageMap.get(stage as any)?.value || 0 }));
 
     const outreachTypes = new Map<string, number>();
@@ -139,7 +141,7 @@ export async function GET(req: NextRequest) {
       priorityMap.set(task.priority, current);
     }
 
-    const wonLeads = leads.filter((lead) => lead.pipelineStage === 'WON');
+    const wonLeads = leads.filter((lead) => stages.won.includes(lead.pipelineStage));
     const salesCycles = wonLeads.map((lead) => (lead.updatedAt.getTime() - (lead.dateAdded || lead.createdAt).getTime()) / (1000 * 60 * 60 * 24));
     const averageSalesCycleDays = salesCycles.length ? salesCycles.reduce((sum, val) => sum + val, 0) / salesCycles.length : 0;
 
@@ -149,7 +151,7 @@ export async function GET(req: NextRequest) {
       if (!trendMap.has(key)) trendMap.set(key, { key, leads: 0, won: 0, outreach: 0, proposals: 0 });
       return trendMap.get(key)!;
     };
-    leads.forEach((lead) => { const item = addTrend(lead.createdAt); item.leads += 1; if (lead.pipelineStage === 'WON') item.won += 1; });
+    leads.forEach((lead) => { const item = addTrend(lead.createdAt); item.leads += 1; if (stages.won.includes(lead.pipelineStage)) item.won += 1; });
     outreach.forEach((item) => { addTrend(item.sentAt).outreach += 1; });
     proposals.forEach((item) => { addTrend(item.createdAt).proposals += 1; });
     const trends = Array.from(trendMap.values()).sort((a, b) => a.key.localeCompare(b.key)).map((item) => ({ ...item, label: monthLabel(item.key) }));
@@ -163,7 +165,7 @@ export async function GET(req: NextRequest) {
       agents = users.map((user) => {
         const userLeads = allLeads.filter((lead) => lead.assignedToId === user.id);
         const userTasks = allTasks.filter((task) => task.assignedToId === user.id);
-        const won = userLeads.filter((lead) => lead.pipelineStage === 'WON').length;
+        const won = userLeads.filter((lead) => stages.won.includes(lead.pipelineStage)).length;
         return {
           id: user.id,
           name: user.name || user.email,
@@ -182,10 +184,10 @@ export async function GET(req: NextRequest) {
 
     const totalLeads = leads.length;
     const won = wonLeads.length;
-    const lost = leads.filter((lead) => lead.pipelineStage === 'LOST').length;
+    const lost = leads.filter((lead) => stages.lost.includes(lead.pipelineStage)).length;
     const activeValue = leads.filter((lead) => ACTIVE_STAGES.includes(lead.pipelineStage)).reduce((sum, lead) => sum + (lead.dealValue || 0), 0);
     const wonValue = wonLeads.reduce((sum, lead) => sum + (lead.dealValue || 0), 0);
-    const lostValue = leads.filter((lead) => lead.pipelineStage === 'LOST').reduce((sum, lead) => sum + (lead.dealValue || 0), 0);
+    const lostValue = leads.filter((lead) => stages.lost.includes(lead.pipelineStage)).reduce((sum, lead) => sum + (lead.dealValue || 0), 0);
     const averageDealSize = won ? wonValue / won : 0;
     const weightedForecast = pipeline.reduce((sum, item) => {
       const probability: Record<string, number> = { NEW_LEAD: 0.10, RESEARCHING: 0.15, CONTACTED: 0.25, FOLLOW_UP: 0.35, INTERESTED: 0.50, PROPOSAL: 0.70, WON: 1, LOST: 0 };

@@ -4,6 +4,7 @@ import prisma from '../../../../../lib/prisma';
 import bcrypt from 'bcryptjs';
 import { initializeWorkspaceOnboarding } from '../../../../../lib/onboarding';
 import { sendWelcomeEmail } from '../../../../../lib/email';
+import { createAccountToken, VERIFY_TTL_MS } from '../../../../../lib/accountTokens';
 import { PLAN_LIMITS, normalizePlan } from '../../../../../lib/plans';
 
 export async function POST(req: NextRequest) {
@@ -108,6 +109,7 @@ export async function POST(req: NextRequest) {
         organizationName: result.organization.name,
         plan: result.organization.plan,
         loginUrl: `${appUrl}/`,
+        verifyUrl: `${appUrl}/auth/verify-email?token=${encodeURIComponent(createAccountToken('verify', result.user.id, result.user.email, VERIFY_TTL_MS))}`,
       });
       welcomeEmail = emailResult.sent ? 'sent' : 'skipped';
     } catch (emailError) {

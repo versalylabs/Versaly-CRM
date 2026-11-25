@@ -1,4 +1,5 @@
 import { blockIfReadOnly } from '../../../../../lib/subscription';
+import { advanceStage, getStageGroups } from '@/lib/stages';
 import { NextResponse } from 'next/server';
 import prisma from '../../../../../lib/prisma';
 import { logLeadActivity } from '../../../../../lib/automation';
@@ -47,10 +48,12 @@ export async function PATCH(request: Request, { params }: Params) {
     if (changed && ['accepted', 'rejected'].includes(data.status)) data.respondedAt = new Date();
 
     const proposal = await prisma.proposal.update({ where: { id: existing.id }, data, include: { lead: true } });
+    const stages = await getStageGroups(proposal.lead?.organizationId);
+    const stageFor = (status: string) => (status === 'sent' ? (stages.all.includes('PROPOSAL') ? 'PROPOSAL' : undefined) : status === 'accepted' ? stages.won[0] : status === 'rejected' ? stages.lost[0] : undefined);
     await prisma.$transaction(async (tx) => {
-      if (changed && data.status === 'sent') await tx.lead.update({ where: { id: proposal.leadId }, data: { pipelineStage: 'PROPOSAL', lastContact: new Date() } });
-      if (changed && data.status === 'accepted') await tx.lead.update({ where: { id: proposal.leadId }, data: { pipelineStage: 'WON', lastContact: new Date() } });
-      if (changed && data.status === 'rejected') await tx.lead.update({ where: { id: proposal.leadId }, data: { pipelineStage: 'LOST', lastContact: new Date() } });
+      if (changed && data.status === 'sent') await tx.lead.update({ where: { id: proposal.leadId }, data: { pipelineStage: stageFor('sent'), lastContact: new Date() } });
+      if (changed && data.status === 'accepted') await tx.lead.update({ where: { id: proposal.leadId }, data: { pipelineStage: stageFor('accepted'), lastContact: new Date() } });
+      if (changed && data.status === 'rejected') await tx.lead.update({ where: { id: proposal.leadId }, data: { pipelineStage: stageFor('rejected'), lastContact: new Date() } });
       if (changed) await logLeadActivity(tx, proposal.leadId, 'PROPOSAL', `Proposal ${data.status}`, { proposalId: proposal.id, title: proposal.title, value: proposal.value });
     });
     if (changed && ['sent', 'accepted', 'rejected'].includes(data.status)) {

@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma';
+import { advanceStage, getStageGroups } from '@/lib/stages';
 import { decryptSecret, encryptSecret, generateWebhookSecret } from '@/lib/secretBox';
 import { providerRegistry, CommunicationChannel, SendMessageInput, InboundParsedMessage } from '@/lib/communication-providers';
 
@@ -348,7 +349,7 @@ export async function sendUnifiedMessage(params: SendUnifiedMessageParams) {
           data: {
             lastContact: sentAt,
             outreachStatus: 'SENT',
-            pipelineStage: ['NEW_LEAD', 'RESEARCHING'].includes(lead.pipelineStage) ? 'CONTACTED' : undefined,
+            pipelineStage: advanceStage(await getStageGroups(lead.organizationId), lead.pipelineStage, 'CONTACTED'),
           },
         }),
       ]);
@@ -552,9 +553,7 @@ export async function recordInboundChannelMessage(params: {
         data: {
           lastContact: sentAt,
           outreachStatus: 'REPLIED',
-          pipelineStage: ['NEW_LEAD', 'RESEARCHING', 'CONTACTED'].includes(lead.pipelineStage)
-            ? 'FOLLOW_UP'
-            : lead.pipelineStage,
+          pipelineStage: advanceStage(await getStageGroups(lead.organizationId), lead.pipelineStage, 'FOLLOW_UP'),
         },
       });
     } catch (e) {

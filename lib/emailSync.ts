@@ -94,13 +94,27 @@ export async function syncMailbox(box: WorkspaceMailbox): Promise<SyncResult> {
         uids = (await client.search({ since }, { uid: true })) || [];
       }
       uids.sort((a, b) => a - b);
-      if (uids.length > MAX_PER_SYNC) uids = uids.slice(-MAX_PER_SYNC);
+      // Incremental syncs take the OLDEST new messages first so the rest are picked up next time;
+      // only the first sync (a "recent days" window) keeps just the newest ones.
+      if (uids.length > MAX_PER_SYNC) uids = lastUid > 0 ? uids.slice(0, MAX_PER_SYNC) : uids.slice(-MAX_PER_SYNC);
 
       for (const uid of uids) {
+        let parsed: Awaited<ReturnType<typeof simpleParser>>;
         try {
           const msg = await client.fetchOne(String(uid), { source: true }, { uid: true });
-          if (!msg || !msg.source) continue;
-          const parsed = await simpleParser(msg.source);
+          if (!msg || !msg.source) {
+            lastUid = Math.max(lastUid, uid);
+            continue;
+          }
+          parsed = await simpleParser(msg.source);
+        } catch (e) {
+          // An unreadable message is skipped for good, so one bad email can't block the mailbox.
+          console.warn('Email import skipped one unreadable message:', (e as Error).message);
+          skipped++;
+          lastUid = Math.max(lastUid, uid);
+          continue;
+        }
+        try {
           const from = parsed.from?.value?.[0];
           const fromAddress = from?.address?.toLowerCase();
           if (!fromAddress || fromAddress === box.address.toLowerCase() || looksAutomated(parsed, fromAddress)) {
@@ -125,8 +139,10 @@ export async function syncMailbox(box: WorkspaceMailbox): Promise<SyncResult> {
             imported++;
           }
         } catch (e) {
-          console.warn('Email import skipped one message:', (e as Error).message);
-          skipped++;
+          // Saving failed (e.g. database error): stop here without moving the bookmark, so this
+          // message and the ones after it are retried on the next sync instead of being lost.
+          console.error('Email import failed; will retry next sync:', (e as Error).message);
+          break;
         }
         lastUid = Math.max(lastUid, uid);
       }
@@ -179,13 +195,14 @@ export async function syncWorkspaceMailbox(organizationId: string, opts: { minIn
 }
 
 export async function syncAllMailboxes() {
-  const accounts = await prisma.connectedChannelAccount.findMany({ where: { channel: 'EMAIL' } });
+  // Mailboxes in ERROR (e.g. a changed password) are skipped here; opening the inbox retries them.
+  const accounts = await prisma.connectedChannelAccount.findMany({ where: { channel: 'EMAIL', status: 'CONNECTED' } });
+  const boxes = accounts.map(readMailbox).filter((b): b is WorkspaceMailbox => Boolean(b));
   let imported = 0;
-  for (const a of accounts) {
-    const box = readMailbox(a);
-    if (!box) continue;
-    const r = await syncMailbox(box);
-    imported += r.imported;
+  // A few at a time, so many workspaces still fit inside the cron function's time limit.
+  for (let i = 0; i < boxes.length; i += 5) {
+    const results = await Promise.all(boxes.slice(i, i + 5).map(syncMailbox));
+    imported += results.reduce((sum, r) => sum + r.imported, 0);
   }
-  return { accounts: accounts.length, imported };
+  return { accounts: boxes.length, imported };
 }

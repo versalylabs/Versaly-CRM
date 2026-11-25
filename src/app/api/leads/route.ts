@@ -33,9 +33,9 @@ export async function GET(req: NextRequest) {
 
   if (search) {
     where.OR = [
-      { contactName: { contains: search } },
-      { companyName: { contains: search } },
-      { email: { contains: search } },
+      { contactName: { contains: search, mode: 'insensitive' as const } },
+      { companyName: { contains: search, mode: 'insensitive' as const } },
+      { email: { contains: search, mode: 'insensitive' as const } },
     ];
   }
 
@@ -59,11 +59,17 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
-  if (!body.contactName || !body.email || !body.leadSource) {
+  // Email is optional (WhatsApp contacts often have none), but a lead needs some way to reach them.
+  const email = typeof body.email === 'string' && body.email.trim() ? body.email.trim().toLowerCase() : null;
+  const phone = typeof body.phone === 'string' && body.phone.trim() ? body.phone.trim() : null;
+  if (!body.contactName || !body.leadSource || (!email && !phone)) {
     return NextResponse.json(
-      { error: 'contactName, email, and leadSource are required' },
+      { error: 'Contact name, lead source and an email or phone number are required' },
       { status: 400 }
     );
+  }
+  if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+    return NextResponse.json({ error: 'Enter a valid email address' }, { status: 400 });
   }
 
   const dealValue = body.dealValue === '' || body.dealValue == null
@@ -90,8 +96,8 @@ export async function POST(req: NextRequest) {
         companyName: body.companyName || null,
         contactName: body.contactName,
         jobTitle: body.jobTitle || null,
-        email: body.email,
-        phone: body.phone || null,
+        email,
+        phone,
         website: body.website || null,
         location: body.location || null,
         businessType: body.businessType || null,

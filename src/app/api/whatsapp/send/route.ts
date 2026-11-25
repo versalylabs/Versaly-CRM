@@ -1,4 +1,5 @@
 import { blockIfReadOnly } from '../../../../../lib/subscription';
+import { advanceStage, getStageGroups } from '@/lib/stages';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../lib/auth';
@@ -38,10 +39,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: sent.errorMessage || 'WhatsApp rejected the message.' }, { status: sent.requiresConnection ? 503 : 502 });
   }
 
+  const stages = await getStageGroups(lead.organizationId);
   const sentAt = new Date();
   const log = await prisma.$transaction(async (tx) => {
     const created = await tx.outreachLog.create({ data: { leadId: lead.id, type: 'WHATSAPP', content: message, status: 'SENT', sentAt } });
-    await tx.lead.update({ where: { id: lead.id }, data: { lastContact: sentAt, outreachStatus: 'SENT', pipelineStage: ['NEW_LEAD','RESEARCHING'].includes(lead.pipelineStage) ? 'CONTACTED' : undefined } });
+    await tx.lead.update({ where: { id: lead.id }, data: { lastContact: sentAt, outreachStatus: 'SENT', pipelineStage: advanceStage(stages, lead.pipelineStage, 'CONTACTED') } });
     await logLeadActivity(tx, lead.id, 'whatsapp', 'WhatsApp message sent from CRM', { recipient, outreachLogId: created.id, providerMessageId: sent.externalMessageId || null, userId: session.user.id || null });
     return created;
   });

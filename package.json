@@ -15,7 +15,8 @@
     "automation:run": "node scripts/run-automation.js",
     "qa:final": "node scripts/final-qa.js",
     "qa:smoke": "node scripts/smoke-test.js",
-    "qa:guards": "node scripts/check-route-guards.js"
+    "qa:guards": "node scripts/check-route-guards.js",
+    "test": "vitest run"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",
@@ -46,6 +47,7 @@
     "postcss": "^8.4.38",
     "prisma": "6.19.3",
     "tailwindcss": "^3.4.1",
-    "typescript": "5.5.2"
+    "typescript": "5.5.2",
+    "vitest": "^2.1.9"
   }
 }

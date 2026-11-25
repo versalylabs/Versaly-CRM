@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getStageGroups } from '@/lib/stages';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
 import prisma from '../../../../lib/prisma';
 import { getSubscriptionAccess } from '../../../../lib/subscription';
 
-const ACTIVE_STAGES = ['NEW_LEAD', 'RESEARCHING', 'CONTACTED', 'FOLLOW_UP', 'INTERESTED', 'PROPOSAL'];
 const MANAGER_ROLES = ['ADMIN', 'MANAGER'];
 
 export async function GET(req: NextRequest) {
@@ -20,6 +20,8 @@ export async function GET(req: NextRequest) {
     // Multi-tenant organization scoping
     const organizationId = session.user.organizationId;
     if (!organizationId) return NextResponse.json({ error: 'No workspace found for this user.' }, { status: 403 });
+    const stageGroups = await getStageGroups(organizationId);
+    const ACTIVE_STAGES = stageGroups.active;
     const orgWhere = organizationId ? { organizationId } : {};
     const ownerWhere = {
       ...orgWhere,
@@ -64,10 +66,10 @@ export async function GET(req: NextRequest) {
     ] = await Promise.all([
       prisma.lead.count({ where: leadWhere() }),
       prisma.lead.count({ where: leadWhere({ pipelineStage: { in: ACTIVE_STAGES as any } }) }),
-      prisma.lead.count({ where: leadWhere({ pipelineStage: 'WON' }) }),
-      prisma.lead.count({ where: leadWhere({ pipelineStage: 'LOST' }) }),
+      prisma.lead.count({ where: leadWhere({ pipelineStage: { in: stageGroups.won } }) }),
+      prisma.lead.count({ where: leadWhere({ pipelineStage: { in: stageGroups.lost } }) }),
       prisma.lead.aggregate({ where: leadWhere({ pipelineStage: { in: ACTIVE_STAGES as any } }), _sum: { dealValue: true } }),
-      prisma.lead.aggregate({ where: leadWhere({ pipelineStage: 'WON' }), _sum: { dealValue: true } }),
+      prisma.lead.aggregate({ where: leadWhere({ pipelineStage: { in: stageGroups.won } }), _sum: { dealValue: true } }),
       prisma.task.count({ where: taskWhere({ completed: false, dueDate: { lt: startOfToday } }) }),
       prisma.task.count({ where: taskWhere({ completed: false, dueDate: { gte: startOfToday, lte: endOfToday } }) }),
       prisma.task.count({ where: taskWhere({ completed: false } ) }),

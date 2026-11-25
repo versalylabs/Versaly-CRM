@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma';
 import { getOrgContext, isManagerRole, unauthorized } from '@/lib/tenant';
 import { encryptSecret, generateWebhookSecret } from '@/lib/secretBox';
 import { guessMailSettings, type MailServerSettings } from '@/lib/emailAccount';
+import { publicHostError } from '@/lib/safeUrl';
 import { testMailboxConnection, syncWorkspaceMailbox } from '@/lib/emailSync';
 
 export const runtime = 'nodejs';
@@ -48,6 +49,10 @@ export async function POST(req: NextRequest) {
     username: adv.username ? String(adv.username).trim() : undefined,
   };
 
+  for (const host of [settings.imapHost, settings.smtpHost]) {
+    const hostError = await publicHostError(host);
+    if (hostError) return NextResponse.json({ error: `${host}: ${hostError}` }, { status: 400 });
+  }
   const problem = await testMailboxConnection(address, password, settings);
   if (problem) return NextResponse.json({ error: problem }, { status: 422 });
 

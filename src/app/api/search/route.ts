@@ -47,13 +47,13 @@ export async function GET(req: NextRequest) {
   }
 
   const term = q.toLowerCase();
-  const contains = { contains: q };
+  const contains = { contains: q, mode: 'insensitive' as const };
 
   try {
     const [leads, tasks, proposals, events, outreach, users] = await Promise.all([
       prisma.lead.findMany({
         where: { organizationId: orgId, OR: [{ contactName: contains }, { companyName: contains }, { email: contains }] },
-        select: { id: true, contactName: true, companyName: true, email: true, assignedToId: true },
+        select: { id: true, contactName: true, companyName: true, email: true, phone: true, assignedToId: true },
         take: 8,
         orderBy: { updatedAt: 'desc' },
       }),
@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
         id: `lead-${lead.id}`,
         type: 'Lead',
         title: lead.companyName ? `${lead.contactName} — ${lead.companyName}` : lead.contactName,
-        subtitle: lead.email,
+        subtitle: lead.email || lead.phone || undefined,
         href: `/leads/${lead.id}`,
         icon: '👥',
       });

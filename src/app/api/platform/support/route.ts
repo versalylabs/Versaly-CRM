@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   const q = url.searchParams.get('q')?.trim().toLowerCase();
   const where: any = {};
   if (status && status !== 'ALL') where.status = status;
-  if (q) where.OR = [{ subject: { contains: q } }, { organization: { name: { contains: q } } }, { requester: { email: { contains: q } } }];
+  if (q) where.OR = [{ subject: { contains: q, mode: 'insensitive' as const } }, { organization: { name: { contains: q, mode: 'insensitive' as const } } }, { requester: { email: { contains: q, mode: 'insensitive' as const } } }];
   const tickets = await prisma.supportTicket.findMany({ where, include: { organization: { select: { id: true, name: true, slug: true, plan: true, planStatus: true, suspendedAt: true, suspensionReason: true } }, requester: { select: { id: true, name: true, email: true } }, messages: { orderBy: { createdAt: 'asc' }, include: { authorUser: { select: { name: true, email: true } } } } }, orderBy: { updatedAt: 'desc' }, take: 100 });
   const counts = await prisma.supportTicket.groupBy({ by: ['status'], _count: { _all: true } });
   return NextResponse.json({ tickets, counts: Object.fromEntries(counts.map(x => [x.status, x._count._all])) });

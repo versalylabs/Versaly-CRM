@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getStageGroups } from '@/lib/stages';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../../lib/auth';
 import prisma from '../../../../../lib/prisma';
@@ -10,6 +11,7 @@ export async function POST() {
 
   const now = new Date();
   const userId = session.user.id;
+  const stages = await getStageGroups(session.user.organizationId);
   const created: string[] = [];
 
   const add = async (type: string, title: string, message: string, href: string, category: any) => {
@@ -32,7 +34,7 @@ export async function POST() {
   }
 
   const dueFollowUps = await prisma.lead.findMany({
-    where: { assignedToId: userId, nextFollowUp: { not: null, lte: now }, pipelineStage: { notIn: ['WON', 'LOST'] } },
+    where: { assignedToId: userId, nextFollowUp: { not: null, lte: now }, pipelineStage: { in: stages.active } },
     take: 10,
     orderBy: { nextFollowUp: 'asc' },
   });
@@ -52,7 +54,7 @@ export async function POST() {
 
   const isManager = session.user.role === 'ADMIN' || session.user.role === 'MANAGER';
   if (isManager) {
-    const unassignedLeads = await prisma.lead.count({ where: { organizationId: session.user.organizationId || '__none__', assignedToId: null, pipelineStage: { notIn: ['WON', 'LOST'] } } });
+    const unassignedLeads = await prisma.lead.count({ where: { organizationId: session.user.organizationId || '__none__', assignedToId: null, pipelineStage: { in: stages.active } } });
     if (unassignedLeads > 0) await add('UNASSIGNED_LEADS', 'Unassigned leads', `${unassignedLeads} active lead(s) are currently unassigned.`, '/leads', 'lead');
     const unassignedTasks = await prisma.task.count({ where: { organizationId: session.user.organizationId || '__none__', assignedToId: null, completed: false } });
     if (unassignedTasks > 0) await add('UNASSIGNED_TASKS', 'Unassigned tasks', `${unassignedTasks} open task(s) are currently unassigned.`, '/tasks', 'task');

@@ -1,10 +1,11 @@
 import { blockIfReadOnly } from '../../../../lib/subscription';
+import { advanceStage, getStageGroups } from '@/lib/stages';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/auth';
 import { assertSubscriptionWriteAccess } from '../../../../lib/subscription';
 import prisma from '../../../../lib/prisma';
-import { createAutomaticFollowUpTask, logLeadActivity, isActiveStage } from '../../../../lib/automation';
+import { createAutomaticFollowUpTask, logLeadActivity } from '../../../../lib/automation';
 import { executeAutomationWorkflows } from '../../../../lib/workflows';
 import { createNotification, outreachHref } from '../../../../lib/notifications';
 
@@ -47,11 +48,11 @@ export async function GET(req: NextRequest) {
   if (status) where.status = status;
   if (search) {
     where.OR = [
-      { subject: { contains: search } },
-      { content: { contains: search } },
-      { lead: { is: { contactName: { contains: search } } } },
-      { lead: { is: { companyName: { contains: search } } } },
-      { lead: { is: { email: { contains: search } } } },
+      { subject: { contains: search, mode: 'insensitive' as const } },
+      { content: { contains: search, mode: 'insensitive' as const } },
+      { lead: { is: { contactName: { contains: search, mode: 'insensitive' as const } } } },
+      { lead: { is: { companyName: { contains: search, mode: 'insensitive' as const } } } },
+      { lead: { is: { email: { contains: search, mode: 'insensitive' as const } } } },
     ];
   }
 
@@ -95,6 +96,7 @@ export async function POST(req: NextRequest) {
     }
 
     const lead = await prisma.lead.findFirst({ where: { id: body.leadId, organizationId: session.user?.organizationId || '__none__' } });
+    const stages = await getStageGroups(lead?.organizationId);
     if (!lead) return NextResponse.json({ error: 'Lead not found.' }, { status: 404 });
 
     const sentAt = body.sentAt ? new Date(body.sentAt) : new Date();
@@ -139,7 +141,7 @@ export async function POST(req: NextRequest) {
         data: {
           lastContact: sentAt,
           outreachStatus: outreachStatusForLead(status) as any,
-          ...(nextFollowUp ? { nextFollowUp, ...(isActiveStage(lead.pipelineStage) && lead.pipelineStage !== 'PROPOSAL' ? { pipelineStage: 'FOLLOW_UP' as any } : {}) } : {}),
+          ...(nextFollowUp ? { nextFollowUp, ...(advanceStage(stages, lead.pipelineStage, 'FOLLOW_UP') ? { pipelineStage: 'FOLLOW_UP' } : {}) } : {}),
         },
       });
 

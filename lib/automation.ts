@@ -1,4 +1,3 @@
-export const ACTIVE_PIPELINE_STAGES = ['NEW_LEAD', 'RESEARCHING', 'CONTACTED', 'FOLLOW_UP', 'INTERESTED', 'PROPOSAL'] as const;
 const AUTO_FOLLOW_UP_MARKER = '[AUTO_FOLLOW_UP]';
 
 export async function logLeadActivity(
@@ -41,6 +40,3 @@ export async function createAutomaticFollowUpTask(
   return { task, created: true };
 }
 
-export function isActiveStage(stage: string) {
-  return (ACTIVE_PIPELINE_STAGES as readonly string[]).includes(stage);
-}

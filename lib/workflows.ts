@@ -1,4 +1,5 @@
 import prisma from './prisma';
+import { getStageGroups } from '@/lib/stages';
 import { providerRegistry } from './communication-providers';
 
 export const WORKFLOW_TRIGGERS = ['LEAD_CREATED','LEAD_STAGE_CHANGED','TASK_CREATED','TASK_COMPLETED','LEAD_UPDATED','ACTIVITY_CREATED','OUTREACH_SENT','OUTREACH_REPLIED','LEAD_INACTIVE'] as const;
@@ -66,7 +67,7 @@ export async function executeAutomationWorkflows(input:{ organizationId:string; 
           message='Created a follow-up task.';
         }
       } else if(workflow.actionType==='UPDATE_STAGE') {
-        if(!lead) throw new Error('This action requires a lead.'); const stage=normalize(cfg.stage); const allowed=['NEW_LEAD','RESEARCHING','CONTACTED','FOLLOW_UP','INTERESTED','PROPOSAL','WON','LOST']; if(!allowed.includes(stage)) throw new Error('Invalid pipeline stage.');
+        if(!lead) throw new Error('This action requires a lead.'); const stage=normalize(cfg.stage); const allowed=(await getStageGroups(input.organizationId)).all; if(!allowed.includes(stage)) throw new Error('That pipeline stage does not exist in this workspace.');
         await prisma.lead.update({where:{id:lead.id},data:{pipelineStage:stage as any}}); message=`Moved lead to ${stage.replaceAll('_',' ')}.`;
       } else if(workflow.actionType==='ASSIGN_USER') {
         if(!lead) throw new Error('This action requires a lead.'); const user=await prisma.user.findFirst({where:{id:String(cfg.userId||''),organizationId:input.organizationId,isActive:true}}); if(!user) throw new Error('Assigned user was not found in this workspace.');
@@ -89,6 +90,6 @@ export async function executeAutomationWorkflows(input:{ organizationId:string; 
 
 export async function runInactiveLeadWorkflows(organizationId?:string){
   const orgs=organizationId?[{id:organizationId}]:await prisma.organization.findMany({select:{id:true}}); let executed=0;
-  for(const org of orgs){ const workflows=await prisma.automationWorkflow.findMany({where:{organizationId:org.id,isActive:true,triggerType:'LEAD_INACTIVE'}}); if(!workflows.length) continue; const min=Math.min(...workflows.map(w=>Math.max(1,Number(parseObject(w.triggerConfig).inactiveDays??7)))); const cutoff=new Date(Date.now()-min*86400000); const leads=await prisma.lead.findMany({where:{organizationId:org.id,pipelineStage:{in:['NEW_LEAD','RESEARCHING','CONTACTED','FOLLOW_UP','INTERESTED','PROPOSAL'] as any},OR:[{lastContact:null},{lastContact:{lt:cutoff}}]},select:{id:true},take:500}); for(const lead of leads){const r=await executeAutomationWorkflows({organizationId:org.id,triggerType:'LEAD_INACTIVE',leadId:lead.id,manual:true,eventId:`inactive:${lead.id}:${cutoff.toISOString().slice(0,10)}`}); executed+=r.executed;}}
+  for(const org of orgs){ const workflows=await prisma.automationWorkflow.findMany({where:{organizationId:org.id,isActive:true,triggerType:'LEAD_INACTIVE'}}); if(!workflows.length) continue; const min=Math.min(...workflows.map(w=>Math.max(1,Number(parseObject(w.triggerConfig).inactiveDays??7)))); const cutoff=new Date(Date.now()-min*86400000); const leads=await prisma.lead.findMany({where:{organizationId:org.id,pipelineStage:{in:(await getStageGroups(org.id)).active},OR:[{lastContact:null},{lastContact:{lt:cutoff}}]},select:{id:true},orderBy:{lastContact:{sort:'asc',nulls:'first'}},take:100}); /* shortcut: each lead runs the full workflow lookup, so cap a run at the 100 longest-idle leads; batch the lookups if workspaces grow past that */ for(const lead of leads){const r=await executeAutomationWorkflows({organizationId:org.id,triggerType:'LEAD_INACTIVE',leadId:lead.id,manual:true,eventId:`inactive:${lead.id}:${cutoff.toISOString().slice(0,10)}`}); executed+=r.executed;}}
   return {executed};
 }

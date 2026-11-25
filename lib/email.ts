@@ -24,11 +24,47 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char] || char));
 }
 
-export async function sendWelcomeEmail(input: { to: string; name: string; organizationName: string; plan: string; loginUrl: string }) {
+export async function sendWelcomeEmail(input: { to: string; name: string; organizationName: string; plan: string; loginUrl: string; verifyUrl?: string }) {
   const subject = `Welcome to ${input.organizationName} on VersalyLabs CRM`;
-  const text = `Hi ${input.name},\n\nWelcome to VersalyLabs CRM! Your ${input.organizationName} workspace is ready on the ${input.plan.replace('_', ' ')} plan. We've added a starter pipeline, sample leads, and an onboarding checklist so you can explore the workspace immediately.\n\nOpen your workspace: ${input.loginUrl}\n\n— VersalyLabs CRM`;
-  const html = `<p>Hi ${escapeHtml(input.name)},</p><p>Welcome to <strong>VersalyLabs CRM</strong>! Your <strong>${escapeHtml(input.organizationName)}</strong> workspace is ready.</p><p>We've added a starter pipeline, sample leads, and an onboarding checklist so the workspace is ready to explore.</p><p><a href="${escapeHtml(input.loginUrl)}">Open your workspace</a></p><p>— VersalyLabs CRM</p>`;
+  const verifyText = input.verifyUrl ? `
+
+Please confirm your email address: ${input.verifyUrl}` : '';
+  const text = `Hi ${input.name},
+
+Welcome to VersalyLabs CRM! Your ${input.organizationName} workspace is ready on the ${input.plan.replace('_', ' ')} plan, with a starter pipeline and a short checklist to help you get set up.${verifyText}
+
+Open your workspace: ${input.loginUrl}
+
+— VersalyLabs CRM`;
+  const verifyHtml = input.verifyUrl ? `<p><a href="${escapeHtml(input.verifyUrl)}">Confirm your email address</a></p>` : '';
+  const html = `<p>Hi ${escapeHtml(input.name)},</p><p>Welcome to <strong>VersalyLabs CRM</strong>! Your <strong>${escapeHtml(input.organizationName)}</strong> workspace is ready, with a starter pipeline and a short checklist to help you get set up.</p>${verifyHtml}<p><a href="${escapeHtml(input.loginUrl)}">Open your workspace</a></p><p>— VersalyLabs CRM</p>`;
   return sendEmail({ to: input.to, subject, text, html });
+}
+
+export async function sendVerificationEmail(input: { to: string; name: string; verifyUrl: string }) {
+  const text = `Hi ${input.name},
+
+Please confirm your email address for VersalyLabs CRM:
+${input.verifyUrl}
+
+This link expires in 3 days.
+
+— VersalyLabs CRM`;
+  const html = `<p>Hi ${escapeHtml(input.name)},</p><p>Please confirm your email address for VersalyLabs CRM.</p><p><a href="${escapeHtml(input.verifyUrl)}">Confirm my email</a></p><p>This link expires in 3 days.</p><p>— VersalyLabs CRM</p>`;
+  return sendEmail({ to: input.to, subject: 'Confirm your email for VersalyLabs CRM', text, html });
+}
+
+export async function sendPasswordResetEmail(input: { to: string; name: string; resetUrl: string }) {
+  const text = `Hi ${input.name},
+
+We received a request to reset your VersalyLabs CRM password. Choose a new one here:
+${input.resetUrl}
+
+This link expires in 1 hour and works once. If you didn't ask for this, you can ignore this email.
+
+— VersalyLabs CRM`;
+  const html = `<p>Hi ${escapeHtml(input.name)},</p><p>We received a request to reset your VersalyLabs CRM password.</p><p><a href="${escapeHtml(input.resetUrl)}">Choose a new password</a></p><p>This link expires in 1 hour and works once. If you didn't ask for this, you can ignore this email.</p><p>— VersalyLabs CRM</p>`;
+  return sendEmail({ to: input.to, subject: 'Reset your VersalyLabs CRM password', text, html });
 }
 
 export async function sendInviteEmail(input: { to: string; organizationName: string; role: string; inviteUrl: string; expiresAt: Date }) {

@@ -127,7 +127,7 @@ export default function PipelinePage() {
         const query = search.toLowerCase();
         const matchesName = lead.contactName.toLowerCase().includes(query);
         const matchesCompany = (lead.companyName || '').toLowerCase().includes(query);
-        const matchesEmail = lead.email.toLowerCase().includes(query);
+        const matchesEmail = (lead.email || "").toLowerCase().includes(query);
         const matchesLocation = (lead.location || '').toLowerCase().includes(query);
         if (!matchesName && !matchesCompany && !matchesEmail && !matchesLocation) {
           return false;

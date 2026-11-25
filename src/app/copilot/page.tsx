@@ -233,7 +233,7 @@ export default function CopilotPage() {
       const matchQuery =
         item.contactName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.companyName && item.companyName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        item.email.toLowerCase().includes(searchQuery.toLowerCase());
+        (item.email || "").toLowerCase().includes(searchQuery.toLowerCase());
       const matchRisk = riskFilter === 'ALL' || item.insight.churnRisk === riskFilter;
       const matchSentiment = sentimentFilter === 'ALL' || item.insight.sentimentLabel === sentimentFilter;
       return matchQuery && matchRisk && matchSentiment;

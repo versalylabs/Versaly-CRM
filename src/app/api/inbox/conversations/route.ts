@@ -80,15 +80,15 @@ export async function GET(req: NextRequest) {
       where.AND = [
         {
           OR: [
-            { contactName: { contains: query, mode: 'insensitive' } },
-            { contactEmail: { contains: query, mode: 'insensitive' } },
-            { contactPhone: { contains: query } },
-            { contactHandle: { contains: query, mode: 'insensitive' } },
-            { subject: { contains: query, mode: 'insensitive' } },
-            { lastMessageSnippet: { contains: query, mode: 'insensitive' } },
-            { lead: { contactName: { contains: query, mode: 'insensitive' } } },
-            { lead: { companyName: { contains: query, mode: 'insensitive' } } },
-            { lead: { email: { contains: query, mode: 'insensitive' } } },
+            { contactName: { contains: query, mode: 'insensitive' as const } },
+            { contactEmail: { contains: query, mode: 'insensitive' as const } },
+            { contactPhone: { contains: query, mode: 'insensitive' as const } },
+            { contactHandle: { contains: query, mode: 'insensitive' as const } },
+            { subject: { contains: query, mode: 'insensitive' as const } },
+            { lastMessageSnippet: { contains: query, mode: 'insensitive' as const } },
+            { lead: { contactName: { contains: query, mode: 'insensitive' as const } } },
+            { lead: { companyName: { contains: query, mode: 'insensitive' as const } } },
+            { lead: { email: { contains: query, mode: 'insensitive' as const } } },
           ],
         },
       ];

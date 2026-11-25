@@ -65,7 +65,7 @@ model Lead {
   companyName        String?
   contactName        String
   jobTitle           String?
-  email              String
+  email              String?  // optional: WhatsApp/social contacts often have no email
   phone              String?
   website            String?
   location           String?
@@ -105,12 +105,13 @@ model Lead {
   @@index([assignedToId])
   @@index([organizationId])
   @@unique([organizationId, email])
+  @@index([organizationId, pipelineStage])
 }
 
 model OutreachLog {
   id         String   @id @default(uuid())
   leadId     String
-  lead       Lead     @relation(fields: [leadId], references: [id])
+  lead       Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
   type       String   // email, call, sms, linkedin, etc.
   subject    String?
   content    String?
@@ -123,12 +124,13 @@ model OutreachLog {
   updatedAt  DateTime @updatedAt
 
   @@index([leadId])
+  @@index([sentAt])
 }
 
 model CalendarEvent {
   id            String            @id @default(uuid())
   leadId        String?
-  lead          Lead?             @relation(fields: [leadId], references: [id])
+  lead          Lead?             @relation(fields: [leadId], references: [id], onDelete: SetNull)
   title         String
   description   String?
   type          CalendarEventType @default(MEETING)
@@ -153,7 +155,7 @@ model CalendarEvent {
 model Task {
   id          String   @id @default(uuid())
   leadId      String?
-  lead        Lead?    @relation(fields: [leadId], references: [id])
+  lead        Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
   title       String
   description String?
   dueDate     DateTime?
@@ -169,12 +171,13 @@ model Task {
   @@index([leadId])
   @@index([assignedToId])
   @@index([organizationId])
+  @@index([organizationId, completed, dueDate])
 }
 
 model Proposal {
   id          String   @id @default(uuid())
   leadId      String
-  lead        Lead     @relation(fields: [leadId], references: [id])
+  lead        Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
   title       String
   description String?
   value       Float?
@@ -246,7 +249,7 @@ model AutomationExecution {
 model ActivityEvent {
   id        String   @id @default(uuid())
   leadId    String?
-  lead      Lead?    @relation(fields: [leadId], references: [id])
+  lead      Lead?    @relation(fields: [leadId], references: [id], onDelete: Cascade)
   type      String   // login, page_view, etc.
   action    String
   metadata  Json?
@@ -260,7 +263,7 @@ model Session {
   id           String   @id @default(uuid())
   sessionToken String   @unique
   userId       String
-  user         User     @relation(fields: [userId], references: [id])
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expires      DateTime
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -272,7 +275,7 @@ model Session {
 model Notification {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      String
   title     String
   message   String
@@ -287,7 +290,7 @@ model Notification {
 model NotificationPreference {
   id                     String  @id @default(uuid())
   userId                 String  @unique
-  user                   User    @relation(fields: [userId], references: [id])
+  user                   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   taskNotifications      Boolean @default(true)
   leadNotifications      Boolean @default(true)
   followUpNotifications  Boolean @default(true)
@@ -695,6 +698,8 @@ model ConnectedChannelAccount {
   @@unique([organizationId, channel, accountHandle])
   @@index([organizationId, channel])
   @@index([status])
+  @@index([channel, externalAccountId])
+  @@index([webhookSecret])
 }
 
 

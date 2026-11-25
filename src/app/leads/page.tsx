@@ -334,9 +334,8 @@ export default function LeadsPage() {
                   onChange={(e) => setForm({ ...form, contactName: e.target.value })}
                 />
               </Field>
-              <Field label="Email *">
+              <Field label="Email (or phone)">
                 <input
-                  required
                   type="email"
                   placeholder="name@company.com"
                   className={glassInput}

@@ -28,10 +28,10 @@ export async function GET(req: NextRequest) {
   if (status === 'open') where.completed = false;
   if (p) where.priority = p.toLowerCase();
   if (search) where.OR = [
-    { title: { contains: search } },
-    { description: { contains: search } },
-    { lead: { is: { contactName: { contains: search } } } },
-    { lead: { is: { companyName: { contains: search } } } },
+    { title: { contains: search, mode: 'insensitive' as const } },
+    { description: { contains: search, mode: 'insensitive' as const } },
+    { lead: { is: { contactName: { contains: search, mode: 'insensitive' as const } } } },
+    { lead: { is: { companyName: { contains: search, mode: 'insensitive' as const } } } },
   ];
   const tasks = await prisma.task.findMany({
     where,

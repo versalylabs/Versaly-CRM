@@ -39,7 +39,7 @@ export async function POST(
     if (limit) return NextResponse.json({ error: limit }, { status: 403 });
 
     const contactName = body.contactName || conversation.contactName || 'New Prospect';
-    const email = body.email || conversation.contactEmail || `lead_${Date.now()}@inbound.crm`;
+    const email = body.email || conversation.contactEmail || null; // no invented placeholder emails
     const companyName = body.companyName || null;
     const phone = body.phone || conversation.contactPhone || null;
 

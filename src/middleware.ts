@@ -10,6 +10,9 @@ const SENSITIVE_LIMITS: Record<string, { limit: number; windowMs: number }> = {
   '/api/public/lead': { limit: 30, windowMs: 15 * 60 * 1000 },
   '/api/auth/callback/credentials': { limit: 15, windowMs: 15 * 60 * 1000 },
   '/api/contact': { limit: 5, windowMs: 15 * 60 * 1000 },
+  '/api/auth/forgot-password': { limit: 5, windowMs: 15 * 60 * 1000 },
+  '/api/auth/reset-password': { limit: 10, windowMs: 15 * 60 * 1000 },
+  '/api/auth/verify-email': { limit: 10, windowMs: 15 * 60 * 1000 },
   '/api/v1/leads': { limit: 120, windowMs: 60 * 1000 },
   '/api/integrations/leads': { limit: 120, windowMs: 60 * 1000 },
 }

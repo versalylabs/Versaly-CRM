@@ -89,6 +89,9 @@ function SignInForm() {
                 <label htmlFor="password" className="block text-xs font-semibold text-gray-700 dark:text-gray-300">
                   Password
                 </label>
+                <Link href="/auth/forgot-password" className="text-xs font-semibold text-sky-400 hover:underline">
+                  Forgot password?
+                </Link>
               </div>
               <input
                 id="password"
