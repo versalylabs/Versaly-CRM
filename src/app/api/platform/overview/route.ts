@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requirePlatformAdmin } from '@/lib/platformAdmin';
+import { PLANS, PLAN_ORDER } from '@/lib/plans';
 
-const MONTHLY: Record<string, number> = { STARTER: 29, GROWTH_PRO: 79, ENTERPRISE: 199 };
+// Estimated KES per month at the annual-billing price (the actual billing interval is tracked from Phase 4b).
+const MONTHLY: Record<string, number> = Object.fromEntries(PLAN_ORDER.map((k) => [k, PLANS[k].priceKes.annual]));
 
 export async function GET() {
   const { authorized } = await requirePlatformAdmin();

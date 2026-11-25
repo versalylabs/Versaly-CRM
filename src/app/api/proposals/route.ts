@@ -1,3 +1,4 @@
+import { PLAN_QUOTAS, UNLIMITED, normalizePlan } from '../../../../lib/plans';
 import { blockIfReadOnly } from '../../../../lib/subscription';
 import { NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma';
@@ -32,6 +33,16 @@ export async function POST(request: Request) {
   try {
     const blocked = await assertSubscriptionWriteAccess(ctx.orgId);
     if (blocked) return NextResponse.json({ error: blocked.reason || 'Workspace is read-only.' }, { status: 402 });
+
+    const org = await prisma.organization.findUnique({ where: { id: ctx.orgId }, select: { plan: true } });
+    const monthly = PLAN_QUOTAS[normalizePlan(org?.plan)].proposalsPerMonth;
+    if (monthly < UNLIMITED) {
+      const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      const used = await prisma.proposal.count({ where: { organizationId: ctx.orgId, createdAt: { gte: monthStart } } });
+      if (used >= monthly) {
+        return NextResponse.json({ error: `Your plan includes ${monthly} proposals a month. Upgrade for unlimited proposals.`, upgradeRequired: true }, { status: 403 });
+      }
+    }
 
     const body = await request.json();
     if (!body.leadId || !body.title?.trim()) {

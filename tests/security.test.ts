@@ -8,7 +8,7 @@ import { isPrivateAddress, publicHostError, webhookUrlError } from '../lib/safeU
 import { advanceStage, groupStages } from '../lib/stages';
 import { checkMemoryRateLimit } from '../lib/rateLimit';
 import { createInviteToken, verifyInviteToken } from '../lib/invitationToken';
-import { PLANS, annualSavingsKes } from '../lib/plans';
+import { PLANS, PLAN_ORDER, annualSavingsKes, planHasFeature } from '../lib/plans';
 
 beforeAll(() => {
   process.env.NEXTAUTH_SECRET = 'x'.repeat(40);
@@ -96,5 +96,26 @@ describe('rate limiter fallback', () => {
 describe('plans', () => {
   it('annual saving matches the monthly/annual price gap', () => {
     expect(annualSavingsKes(PLANS.STARTER)).toBe((3900 - 3200) * 12);
+  });
+  it('each higher plan includes everything the lower ones do', () => {
+    expect(planHasFeature('SOLO', 'email_inbox')).toBe(false);
+    expect(planHasFeature('STARTER', 'email_inbox')).toBe(true);
+    expect(planHasFeature('STARTER', 'whatsapp')).toBe(false);
+    expect(planHasFeature('GROWTH_PRO', 'whatsapp')).toBe(true);
+    expect(planHasFeature('ENTERPRISE', 'developer_api')).toBe(true);
+  });
+  it('unknown plan values fall back to Growth Pro', () => {
+    expect(planHasFeature(undefined, 'whatsapp')).toBe(true);
+    expect(planHasFeature('BOGUS', 'developer_api')).toBe(true);
+  });
+  it('higher plans never have lower limits or prices', () => {
+    for (let i = 1; i < PLAN_ORDER.length; i++) {
+      const lower = PLANS[PLAN_ORDER[i - 1]];
+      const higher = PLANS[PLAN_ORDER[i]];
+      expect(higher.leadLimit).toBeGreaterThan(lower.leadLimit);
+      expect(higher.seatLimit).toBeGreaterThan(lower.seatLimit);
+      expect(higher.priceKes.annual).toBeGreaterThan(lower.priceKes.annual);
+      expect(higher.priceKes.monthly).toBeGreaterThan(higher.priceKes.annual);
+    }
   });
 });

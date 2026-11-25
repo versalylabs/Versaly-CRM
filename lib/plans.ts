@@ -1,9 +1,10 @@
 /**
- * Single source of truth for subscription plans: limits, prices and the feature copy
- * shown on the landing page and the billing page. List only features that exist in the
- * product today; anything not built yet goes in `comingSoon`.
+ * Single source of truth for subscription plans: prices, limits and which features each plan
+ * unlocks. The landing page, signup, billing page and server-side checks all read from here.
+ * Only list features that exist today in FEATURES; planned ones go in COMING_SOON.
  */
-export type PlanKey = 'STARTER' | 'GROWTH_PRO' | 'ENTERPRISE';
+export type PlanKey = 'SOLO' | 'STARTER' | 'GROWTH_PRO' | 'ENTERPRISE';
+export const PLAN_ORDER: PlanKey[] = ['SOLO', 'STARTER', 'GROWTH_PRO', 'ENTERPRISE'];
 
 export type PlanLimits = {
   name: string;
@@ -12,14 +13,52 @@ export type PlanLimits = {
   automationRunLimit: number;
 };
 
+/** Shown as "Unlimited" in the UI; a large number keeps limit checks simple. */
+export const UNLIMITED = 1_000_000;
+
 export const PLAN_LIMITS: Record<PlanKey, PlanLimits> = {
-  STARTER: { name: 'Starter', leadLimit: 1000, seatLimit: 3, automationRunLimit: 100 },
-  GROWTH_PRO: { name: 'Growth Pro', leadLimit: 5000, seatLimit: 10, automationRunLimit: 1000 },
-  ENTERPRISE: { name: 'Enterprise Scale', leadLimit: 100000, seatLimit: 50, automationRunLimit: 10000 },
+  SOLO: { name: 'Solo', leadLimit: 500, seatLimit: 1, automationRunLimit: 0 },
+  STARTER: { name: 'Starter', leadLimit: 2500, seatLimit: 3, automationRunLimit: 300 },
+  GROWTH_PRO: { name: 'Growth Pro', leadLimit: 15000, seatLimit: 10, automationRunLimit: 5000 },
+  ENTERPRISE: { name: 'Enterprise Scale', leadLimit: UNLIMITED, seatLimit: 30, automationRunLimit: 50000 },
 };
 
-/** Must match the API key limits enforced in src/app/api/developer/keys/route.ts. */
-export const API_KEY_LIMITS: Record<PlanKey, number> = { STARTER: 2, GROWTH_PRO: 10, ENTERPRISE: 50 };
+/** Other numeric limits, enforced server-side. */
+export const PLAN_QUOTAS: Record<PlanKey, { automationRules: number; apiKeys: number; proposalsPerMonth: number }> = {
+  SOLO: { automationRules: 0, apiKeys: 0, proposalsPerMonth: 5 },
+  STARTER: { automationRules: 5, apiKeys: 0, proposalsPerMonth: UNLIMITED },
+  GROWTH_PRO: { automationRules: UNLIMITED, apiKeys: 10, proposalsPerMonth: UNLIMITED },
+  ENTERPRISE: { automationRules: UNLIMITED, apiKeys: 50, proposalsPerMonth: UNLIMITED },
+};
+
+/** Backwards-compatible alias used by the developer keys route. */
+export const API_KEY_LIMITS: Record<PlanKey, number> = {
+  SOLO: PLAN_QUOTAS.SOLO.apiKeys,
+  STARTER: PLAN_QUOTAS.STARTER.apiKeys,
+  GROWTH_PRO: PLAN_QUOTAS.GROWTH_PRO.apiKeys,
+  ENTERPRISE: PLAN_QUOTAS.ENTERPRISE.apiKeys,
+};
+
+/** Features that exist today, and the lowest plan that includes each one. */
+export const FEATURES = {
+  email_inbox: { label: 'Team inbox for your own email address', minPlan: 'STARTER' },
+  automations: { label: 'Workflow automations', minPlan: 'STARTER' },
+  whatsapp: { label: 'WhatsApp Business API inbox', minPlan: 'GROWTH_PRO' },
+  customer_success: { label: 'Customer success & renewal tracking', minPlan: 'GROWTH_PRO' },
+  deal_insights: { label: 'Deal insights & suggested next steps', minPlan: 'GROWTH_PRO' },
+  developer_api: { label: 'Developer API & webhooks', minPlan: 'GROWTH_PRO' },
+} as const satisfies Record<string, { label: string; minPlan: PlanKey }>;
+
+export type Feature = keyof typeof FEATURES;
+
+export function normalizePlan(value: unknown, fallback: PlanKey = 'GROWTH_PRO'): PlanKey {
+  return PLAN_ORDER.includes(value as PlanKey) ? (value as PlanKey) : fallback;
+}
+
+/** Does this plan include the feature? Unknown plans are treated as Growth Pro (the trial default). */
+export function planHasFeature(plan: unknown, feature: Feature): boolean {
+  return PLAN_ORDER.indexOf(normalizePlan(plan)) >= PLAN_ORDER.indexOf(FEATURES[feature].minPlan);
+}
 
 export type PlanDetails = PlanLimits & {
   key: PlanKey;
@@ -27,68 +66,69 @@ export type PlanDetails = PlanLimits & {
   priceKes: { monthly: number; annual: number };
   description: string;
   popular?: boolean;
-  /** Plan-specific lines: limits and support level. */
+  /** Plan-specific lines: limits, unlocked features and support level. */
   features: string[];
   comingSoon: string[];
 };
 
-const n = (value: number) => value.toLocaleString('en-US');
+const n = (value: number) => (value >= UNLIMITED ? 'Unlimited' : value.toLocaleString('en-US'));
+const featuresFor = (key: PlanKey) =>
+  (Object.keys(FEATURES) as Feature[]).filter((f) => FEATURES[f].minPlan === key).map((f) => FEATURES[f].label);
 const limitLines = (key: PlanKey) => {
   const p = PLAN_LIMITS[key];
+  const q = PLAN_QUOTAS[key];
   return [
     `${n(p.leadLimit)} active leads`,
-    `Up to ${p.seatLimit} team members`,
-    `${n(p.automationRunLimit)} automation runs / month`,
-    `${API_KEY_LIMITS[key]} developer API keys`,
-  ];
+    p.seatLimit === 1 ? '1 user' : `Up to ${p.seatLimit} team members`,
+    q.automationRules ? `${q.automationRules >= UNLIMITED ? 'Unlimited' : q.automationRules} automation rules · ${n(p.automationRunLimit)} runs / month` : null,
+    q.proposalsPerMonth < UNLIMITED ? `${q.proposalsPerMonth} proposals / month` : 'Unlimited proposals',
+  ].filter(Boolean) as string[];
 };
 
 export const PLANS: Record<PlanKey, PlanDetails> = {
+  SOLO: {
+    key: 'SOLO',
+    ...PLAN_LIMITS.SOLO,
+    priceKes: { monthly: 1500, annual: 1200 },
+    description: 'For one-person businesses (agents, consultants, freelancers) moving out of WhatsApp chats and notebooks.',
+    features: [...limitLines('SOLO'), 'Help centre support'],
+    comingSoon: ['M-Pesa payment requests', 'CSV & Excel contact import'],
+  },
   STARTER: {
     key: 'STARTER',
     ...PLAN_LIMITS.STARTER,
     priceKes: { monthly: 3900, annual: 3200 },
-    description: 'For small teams moving their leads out of WhatsApp chats and spreadsheets.',
-    features: [...limitLines('STARTER'), 'Email support'],
-    comingSoon: ['M-Pesa payment requests', 'CSV & Excel contact import'],
+    description: 'For small teams that want every enquiry in one inbox and follow-ups that happen on their own.',
+    features: ['Everything in Solo', ...limitLines('STARTER'), ...featuresFor('STARTER'), 'Email support'],
+    comingSoon: ['M-Pesa auto-reconciliation (1 till or paybill)', 'Bulk SMS'],
   },
   GROWTH_PRO: {
     key: 'GROWTH_PRO',
     ...PLAN_LIMITS.GROWTH_PRO,
-    priceKes: { monthly: 9900, annual: 8200 },
-    description: 'For growing sales teams that need more capacity, more automation and faster support.',
+    priceKes: { monthly: 11900, annual: 9900 },
+    description: 'For sales and collections teams that run on WhatsApp and need automation without limits.',
     popular: true,
-    features: [...limitLines('GROWTH_PRO'), 'Priority email & WhatsApp support'],
-    comingSoon: ['M-Pesa auto-reconciliation', 'KRA eTIMS invoicing', 'AI reply assistant'],
+    features: ['Everything in Starter', ...limitLines('GROWTH_PRO'), ...featuresFor('GROWTH_PRO'), 'Priority email & WhatsApp support'],
+    comingSoon: ['Instalment plans & payment reminders', 'KRA eTIMS invoicing', 'AI reply assistant'],
   },
   ENTERPRISE: {
     key: 'ENTERPRISE',
     ...PLAN_LIMITS.ENTERPRISE,
-    priceKes: { monthly: 24900, annual: 19900 },
-    description: 'For large or multi-branch teams that need high volume and hands-on onboarding.',
-    features: [...limitLines('ENTERPRISE'), 'Guided onboarding & priority support'],
-    comingSoon: ['Audit log export', 'Custom fields', 'Multiple branches & WhatsApp numbers'],
+    priceKes: { monthly: 34900, annual: 29900 },
+    description: 'For multi-branch businesses that need high volume, more seats and hands-on onboarding.',
+    features: ['Everything in Growth Pro', ...limitLines('ENTERPRISE'), `${PLAN_QUOTAS.ENTERPRISE.apiKeys} developer API keys`, 'Guided onboarding & priority support'],
+    comingSoon: ['Multiple branches & WhatsApp numbers', 'Audit log export', 'Custom roles'],
   },
 };
-
-export const PLAN_ORDER: PlanKey[] = ['STARTER', 'GROWTH_PRO', 'ENTERPRISE'];
 
 /** Included in every plan. Keep to features that work today. */
 export const SHARED_FEATURES = [
   'Visual deal pipeline with custom stages',
   'Leads, tasks & calendar',
-  'Team inbox for your own email address',
-  'WhatsApp Cloud API messaging',
   'Proposals with status tracking',
-  'Workflow automations',
   'Reports with CSV export',
-  'Customer success & renewal tracking',
-  'Developer API & webhooks',
+  'Mobile-friendly workspace',
 ];
 
 /** Yearly saving in KES when paying annually instead of monthly. */
 export const annualSavingsKes = (plan: PlanDetails) => (plan.priceKes.monthly - plan.priceKes.annual) * 12;
-
-export function normalizePlan(value: unknown, fallback: PlanKey = 'GROWTH_PRO'): PlanKey {
-  return value === 'STARTER' || value === 'GROWTH_PRO' || value === 'ENTERPRISE' ? value : fallback;
-}

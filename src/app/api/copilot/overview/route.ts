@@ -1,3 +1,4 @@
+import { blockIfFeatureMissing } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -5,6 +6,8 @@ import prisma from '@/lib/prisma';
 import { analyzeLeadSentimentAndRisk } from '@/lib/aiCopilot';
 
 export async function GET(req: NextRequest) {
+  const planGate = await blockIfFeatureMissing('deal_insights');
+  if (planGate) return planGate;
   try {
     const session = await getServerSession(authOptions);
     const organizationId = session?.user?.organizationId;

@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useState } from 'react';
+import { PLANS, PLAN_ORDER, UNLIMITED, normalizePlan, type PlanKey } from '@/lib/plans';
 import { MIN_PASSWORD_LENGTH } from '@/lib/password';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -10,10 +11,7 @@ import VersalyLabsLogo from '@/components/VersalyLabsLogo';
 function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialPlan = (searchParams.get('plan') as 'STARTER' | 'GROWTH_PRO' | 'ENTERPRISE') || 'GROWTH_PRO';
-  const [plan, setPlan] = useState<'STARTER' | 'GROWTH_PRO' | 'ENTERPRISE'>(
-    initialPlan === 'STARTER' || initialPlan === 'ENTERPRISE' ? initialPlan : 'GROWTH_PRO'
-  );
+  const [plan, setPlan] = useState<PlanKey>(normalizePlan(searchParams.get('plan')));
   const [name, setName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [email, setEmail] = useState('');
@@ -22,13 +20,13 @@ function SignUpForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const planDetails = {
-    STARTER: { name: 'Starter', leads: '1,000 Leads', seats: '3 Seats', trial: '14 Days Free' },
-    GROWTH_PRO: { name: 'Growth Pro', leads: '5,000 Leads', seats: '10 Seats', trial: '14 Days Free' },
-    ENTERPRISE: { name: 'Enterprise', leads: '100,000 Leads', seats: '50 Seats', trial: '14 Days Free' },
+  const selected = PLANS[plan];
+  const currentPlan = {
+    name: selected.name,
+    trial: '14 Days Free',
+    leads: `${selected.leadLimit >= UNLIMITED ? 'Unlimited' : selected.leadLimit.toLocaleString('en-US')} Leads`,
+    seats: selected.seatLimit === 1 ? '1 User' : `${selected.seatLimit} Seats`,
   };
-
-  const currentPlan = planDetails[plan] || planDetails.GROWTH_PRO;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -95,7 +93,7 @@ function SignUpForm() {
 
         {/* Plan Selector Buttons */}
         <div className="flex rounded-xl bg-gray-200/70 p-1 dark:bg-gray-800">
-          {(['STARTER', 'GROWTH_PRO', 'ENTERPRISE'] as const).map((key) => (
+          {PLAN_ORDER.map((key) => (
             <button
               key={key}
               type="button"
@@ -106,7 +104,7 @@ function SignUpForm() {
                   : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
-              {key === 'GROWTH_PRO' ? 'Growth Pro (Popular)' : key === 'STARTER' ? 'Starter' : 'Enterprise'}
+              {key === 'ENTERPRISE' ? 'Enterprise' : PLANS[key].name}
             </button>
           ))}
         </div>

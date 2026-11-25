@@ -1,3 +1,4 @@
+import { blockIfFeatureMissing } from '@/lib/subscription';
 import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -69,6 +70,11 @@ export async function POST(req: NextRequest) {
 
     if (!accountHandle || !accountHandle.trim()) {
       return NextResponse.json({ error: 'Account handle or username is required' }, { status: 400 });
+    }
+
+    if (channel.toUpperCase() === 'WHATSAPP') {
+      const planGate = await blockIfFeatureMissing('whatsapp');
+      if (planGate) return planGate;
     }
 
     const cleanHandle = accountHandle.trim().startsWith('@') || channel.toUpperCase() === 'FACEBOOK'

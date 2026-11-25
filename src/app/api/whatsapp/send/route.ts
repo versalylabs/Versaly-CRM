@@ -1,3 +1,4 @@
+import { blockIfFeatureMissing } from '../../../../../lib/subscription';
 import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { advanceStage, getStageGroups } from '@/lib/stages';
 import { NextRequest, NextResponse } from 'next/server';
@@ -12,6 +13,8 @@ function normalizePhone(value: string) {
 }
 
 export async function POST(req: NextRequest) {
+  const planGate = await blockIfFeatureMissing('whatsapp');
+  if (planGate) return planGate;
   const readOnly = await blockIfReadOnly();
   if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);

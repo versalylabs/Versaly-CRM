@@ -1,3 +1,4 @@
+import { blockIfFeatureMissing } from '../../../../../../lib/subscription';
 import { blockIfReadOnly } from '../../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -5,6 +6,8 @@ import { authOptions } from '../../../../../../lib/auth';
 import prisma from '../../../../../../lib/prisma';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  const planGate = await blockIfFeatureMissing('customer_success');
+  if (planGate) return planGate;
   const readOnly = await blockIfReadOnly();
   if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);
@@ -19,6 +22,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const planGate = await blockIfFeatureMissing('customer_success');
+  if (planGate) return planGate;
   const readOnly = await blockIfReadOnly();
   if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);

@@ -84,50 +84,27 @@ function PricingCard({
 
         <div className="relative z-10">
           {/* Plan Header */}
-          <div className="flex items-center justify-between">
-            <h3 className="text-2xl font-black tracking-tight text-white">{plan.name}</h3>
-            {plan.popular ? (
-              <span className="rounded-full bg-sky-400/20 px-3 py-0.5 text-[11px] font-extrabold text-sky-200 border border-sky-400/40 shadow-inner">
-                14-Day Free Trial
-              </span>
-            ) : (
-              <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] font-semibold text-sky-300/80 border border-white/10">
-                14-Day Trial
-              </span>
-            )}
-          </div>
+          <h3 className="text-2xl font-black tracking-tight text-white">{plan.name}</h3>
 
-          <p className="mt-3 text-sm text-sky-100/75 leading-relaxed min-h-[44px]">
+          <p className="mt-3 text-sm text-sky-100/75 leading-relaxed min-h-[66px]">
             {plan.description}
           </p>
 
-          {/* Pricing Display */}
+          {/* Pricing Display: price on one line, billing note underneath, so four columns never squeeze */}
           <div className="mt-5 border-y border-white/10 py-4">
-            <div className="flex items-baseline gap-2">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-xl font-bold text-sky-400">KES</span>
-                <span className="text-4xl sm:text-5xl font-black tracking-tight text-white">
-                  {price.toLocaleString()}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1.5">
-                  {annual && (
-                    <span className="text-xs font-semibold text-sky-400/60 line-through">
-                      KES {originalPrice.toLocaleString()}
-                    </span>
-                  )}
-                  <span className="text-xs font-semibold text-sky-200/80">
-                    / month
-                  </span>
-                </div>
-                {annual && (
-                  <span className="text-[11px] font-bold text-emerald-300">
-                    Billed annually (Save KES {annualSavingsKes(plan).toLocaleString()}/yr)
-                  </span>
-                )}
-              </div>
+            <div className="flex flex-wrap items-baseline gap-x-1.5">
+              <span className="text-xl font-bold text-sky-400">KES</span>
+              <span className="text-4xl sm:text-5xl xl:text-4xl font-black tracking-tight text-white">{price.toLocaleString()}</span>
+              <span className="text-sm font-semibold text-sky-200/80">/ month</span>
             </div>
+            {annual ? (
+              <p className="mt-1.5 text-xs font-semibold text-emerald-300">
+                Billed annually · <span className="text-sky-400/70 line-through">KES {originalPrice.toLocaleString()}</span> monthly · save KES{' '}
+                {annualSavingsKes(plan).toLocaleString()}/yr
+              </p>
+            ) : (
+              <p className="mt-1.5 text-xs font-semibold text-sky-200/70">Billed monthly · cancel anytime</p>
+            )}
           </div>
 
           {/* Included Features Checklist */}
@@ -259,14 +236,14 @@ export function PricingSection() {
               )}
               <span className="relative z-10">Annual Billing</span>
               <span className="relative z-10 rounded-full bg-emerald-400/25 px-2 py-0.5 text-[10px] font-black text-emerald-300 border border-emerald-400/40 shadow-sm">
-                SAVE 20%
+                SAVE UP TO 20%
               </span>
             </button>
           </div>
         </div>
 
         {/* Pricing Cards Grid */}
-        <div className="mt-8 lg:mt-12 grid gap-6 lg:grid-cols-3 lg:items-stretch">
+        <div className="mt-8 lg:mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4 md:items-stretch">
           {PLANS.map((plan) => (
             <PricingCard key={plan.key} plan={plan} annual={annual} />
           ))}

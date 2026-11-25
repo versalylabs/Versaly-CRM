@@ -1,3 +1,4 @@
+import { blockIfFeatureMissing } from '../../../../../lib/subscription';
 import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -8,6 +9,8 @@ const lifecycle = ['ONBOARDING','ADOPTING','ACTIVE','AT_RISK','RENEWAL','CHURNED
 const renewalStatuses = ['NOT_SET','UPCOMING','RENEWED','AT_RISK','CHURNED'];
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const planGate = await blockIfFeatureMissing('customer_success');
+  if (planGate) return planGate;
   const readOnly = await blockIfReadOnly();
   if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);

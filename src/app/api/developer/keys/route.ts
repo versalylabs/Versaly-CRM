@@ -1,3 +1,4 @@
+import { blockIfFeatureMissing } from '../../../../../lib/subscription';
 import { blockIfReadOnly } from '../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { API_KEY_LIMITS, normalizePlan } from '@/lib/plans';
@@ -8,11 +9,15 @@ import { createApiKeySecret, hashApiKey, keyPrefix } from '../../../../../lib/in
 
 async function session() { return getServerSession(authOptions); }
 export async function GET() {
+  const planGate = await blockIfFeatureMissing('developer_api');
+  if (planGate) return planGate;
   const s = await session(); if (!s?.user?.organizationId) return NextResponse.json({ error:'Unauthorized' },{status:401});
   const keys = await prisma.apiKey.findMany({ where:{ organizationId:s.user.organizationId }, select:{id:true,name:true,keyPrefix:true,lastUsedAt:true,expiresAt:true,revokedAt:true,createdAt:true}, orderBy:{createdAt:'desc'} });
   return NextResponse.json(keys);
 }
 export async function POST(req: NextRequest) {
+  const planGate = await blockIfFeatureMissing('developer_api');
+  if (planGate) return planGate;
   const readOnly = await blockIfReadOnly();
   if (readOnly) return readOnly;
   const s=await session(); if(!s?.user?.organizationId || !['ADMIN','MANAGER'].includes(s.user.role||'')) return NextResponse.json({error:'Admin or manager access required.'},{status:403});
@@ -23,6 +28,8 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({id:key.id,name:key.name,key:secret,warning:'Copy this key now. The full secret will not be shown again.'},{status:201});
 }
 export async function DELETE(req: NextRequest) {
+  const planGate = await blockIfFeatureMissing('developer_api');
+  if (planGate) return planGate;
   const readOnly = await blockIfReadOnly();
   if (readOnly) return readOnly;
   const s=await session(); if(!s?.user?.organizationId || !['ADMIN','MANAGER'].includes(s.user.role||'')) return NextResponse.json({error:'Admin or manager access required.'},{status:403});

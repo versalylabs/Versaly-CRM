@@ -363,7 +363,7 @@ export default function BillingPage() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
           {data.plans.map((plan) => {
             const isCurrent = org.plan === plan.id;
             const isUpgrading = actionLoading === plan.id;
@@ -397,7 +397,7 @@ export default function BillingPage() {
                   <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 leading-snug">{plan.description}</p>
 
                   <div className="mt-4 flex items-baseline gap-1 border-b border-gray-100 pb-4 dark:border-gray-800">
-                    <span className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                    <span className="whitespace-nowrap text-3xl xl:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
                       {kes(plan.priceMonthly)}
                     </span>
                     <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">/ month</span>

@@ -1,3 +1,4 @@
+import { blockIfFeatureMissing } from '../../../../lib/subscription';
 import { blockIfReadOnly } from '../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -39,6 +40,8 @@ function calculateHealth(lead: any, tasks: any[], events: any[], renewalDate?: D
 }
 
 export async function GET(req: NextRequest) {
+  const planGate = await blockIfFeatureMissing('customer_success');
+  if (planGate) return planGate;
   const session = await getServerSession(authOptions);
   const organizationId = session?.user?.organizationId;
   if (!session || !organizationId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -87,6 +90,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const planGate = await blockIfFeatureMissing('customer_success');
+  if (planGate) return planGate;
   const readOnly = await blockIfReadOnly();
   if (readOnly) return readOnly;
   const session = await getServerSession(authOptions);

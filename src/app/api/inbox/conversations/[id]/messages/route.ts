@@ -1,3 +1,4 @@
+import { blockIfFeatureMissing } from '@/lib/subscription';
 import { blockIfReadOnly } from '../../../../../../../lib/subscription';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
@@ -55,6 +56,11 @@ export async function POST(
     const conversationId = params.id;
     const body = await req.json();
     const { channel = 'EMAIL', content, subject, isInternal = false, attachments, metadata } = body;
+
+    if (!isInternal && String(channel).toUpperCase() === 'WHATSAPP') {
+      const planGate = await blockIfFeatureMissing('whatsapp');
+      if (planGate) return planGate;
+    }
 
     if (!content || typeof content !== 'string' || !content.trim()) {
       return NextResponse.json({ error: 'Message content cannot be empty' }, { status: 400 });

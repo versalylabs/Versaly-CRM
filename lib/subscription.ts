@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
 import prisma from './prisma';
+import { FEATURES, PLANS, planHasFeature, type Feature } from './plans';
 
 export type SubscriptionAccess = {
   allowed: boolean;
@@ -67,4 +68,23 @@ export async function leadLimitError(organizationId: string): Promise<string | n
   });
   if (!org || org._count.leads < org.leadLimit) return null;
   return `You have reached your plan's limit of ${org.leadLimit.toLocaleString('en-US')} leads. Upgrade your plan to add more.`;
+}
+
+/**
+ * Plan gate for a feature (see FEATURES in lib/plans). Returns a 403 with an upgrade message
+ * when the signed-in workspace's plan does not include it, otherwise null.
+ */
+export async function blockIfFeatureMissing(feature: Feature): Promise<NextResponse | null> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.organizationId || session.user.isPlatformAdmin) return null;
+  if (planHasFeature(session.user.plan, feature)) return null;
+  return upgradeResponse(feature);
+}
+
+export function upgradeResponse(feature: Feature) {
+  const minPlan = FEATURES[feature].minPlan;
+  return NextResponse.json(
+    { error: `${FEATURES[feature].label} is included from the ${PLANS[minPlan].name} plan. Upgrade to use it.`, upgradeRequired: true, feature, minPlan },
+    { status: 403 }
+  );
 }

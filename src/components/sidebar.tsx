@@ -5,7 +5,11 @@ import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut } from 'lucide-react';
+import { LogOut, Lock } from 'lucide-react';
+import { planHasFeature, type Feature } from '@/lib/plans';
+
+// Nav items whose feature is not in every plan; they show a lock when the plan lacks it.
+const GATED: Record<string, Feature> = { '/customer-success': 'customer_success', '/copilot': 'deal_insights', '/integrations': 'developer_api', '/whatsapp': 'whatsapp', '/automation': 'automations' };
 import VersalyLabsLogo from '@/components/VersalyLabsLogo';
 
 // Clean, monochrome SVG outline icons (stroke="currentColor", fill="none")
@@ -218,6 +222,9 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
   const STATUS_LABELS: Record<string, string> = { trialing: 'Trial', active: 'Active', expired: 'Trial ended', past_due: 'Payment due', canceled: 'Canceled', suspended: 'Suspended' };
   const statusHealthy = !planStatus || planStatus.status === 'active' || planStatus.status === 'trialing';
 
+  const isLocked = (href: string) =>
+    Boolean(GATED[href]) && !session?.user?.isPlatformAdmin && !planHasFeature(session?.user?.plan, GATED[href]);
+
   const isActive = (href: string) => {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
@@ -298,6 +305,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
                         {item.icon}
                       </span>
                       <span>{item.label}</span>
+                      {isLocked(item.href) && <Lock className="ml-auto h-3.5 w-3.5 text-gray-500" aria-label="Upgrade required" />}
                     </Link>
                   );
                 })}
@@ -361,6 +369,7 @@ export default function Sidebar({ mobileOpen = false, onCloseMobile }: SidebarPr
                             {item.icon}
                           </span>
                           <span className="truncate">{item.label}</span>
+                          {isLocked(item.href) && <Lock className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-500" aria-label="Upgrade required" />}
                         </Link>
                       );
                     })}

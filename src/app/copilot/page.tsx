@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import PlanGate from '@/components/PlanGate';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrency } from '@/lib/currency';
@@ -71,7 +72,7 @@ interface OverviewMetrics {
   };
 }
 
-export default function CopilotPage() {
+function CopilotPageContent() {
   const [activeTab, setActiveTab] = useState<'matrix' | 'summarizer' | 'drafter'>('matrix');
   const [leads, setLeads] = useState<LeadItem[]>([]);
   const [metrics, setMetrics] = useState<OverviewMetrics>({
@@ -1213,5 +1214,13 @@ export default function CopilotPage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function CopilotPage() {
+  return (
+    <PlanGate feature="deal_insights">
+      <CopilotPageContent />
+    </PlanGate>
   );
 }

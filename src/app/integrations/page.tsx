@@ -1,8 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
+import PlanGate from '@/components/PlanGate';
 const field='mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-accent-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100';
 const events=['lead.created','lead.updated','lead.stage_changed','task.created','task.completed','activity.created','calendar.created','workflow.executed'];
-export default function IntegrationsPage(){
+function IntegrationsPageContent(){
  const [origin,setOrigin]=useState(''); const [keys,setKeys]=useState<any[]>([]); const [hooks,setHooks]=useState<any[]>([]); const [hookEvents,setHookEvents]=useState<string[]>(events); const [name,setName]=useState(''); const [url,setUrl]=useState(''); const [selected,setSelected]=useState<string[]>(['lead.created']); const [newSecret,setNewSecret]=useState(''); const [newKey,setNewKey]=useState(''); const [message,setMessage]=useState('');
  const load=async()=>{const [a,b]=await Promise.all([fetch('/api/developer/keys'),fetch('/api/developer/webhooks')]); if(a.ok)setKeys(await a.json()); if(b.ok){const j=await b.json();setHooks(j.webhooks||[]);setHookEvents(j.events||events)}};
  useEffect(()=>{setOrigin(window.location.origin);load()},[]);
@@ -36,4 +37,12 @@ export default function IntegrationsPage(){
   <section className="rounded-xl border border-blue-200 bg-blue-50 p-6 dark:border-blue-900/60 dark:bg-blue-950/30"><h2 className="text-xl font-semibold">Versioned API</h2><p className="mt-2 text-sm text-gray-600 dark:text-gray-300">Base endpoint: <code>{origin}/api/v1</code></p><div className="mt-4 grid gap-4 md:grid-cols-2"><div className="rounded-lg bg-white/80 p-4 dark:bg-gray-950/60"><div className="font-mono text-sm">POST /leads</div><p className="mt-1 text-sm text-gray-500">Capture a lead and run normal assignment, tasks and automations.</p></div><div className="rounded-lg bg-white/80 p-4 dark:bg-gray-950/60"><div className="font-mono text-sm">GET /leads?search=</div><p className="mt-1 text-sm text-gray-500">Read up to 100 workspace leads using an API key.</p></div></div><pre className="mt-4 overflow-x-auto rounded-lg bg-gray-950 p-4 text-xs leading-6 text-gray-100">{`curl -X POST ${origin}/api/v1/leads \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"contactName":"Jane Smith","email":"jane@example.com","leadSource":"WEBSITE_FORM"}'`}</pre></section>
   <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-950"><h2 className="font-semibold">Existing inbound integrations</h2><p className="mt-2 text-sm text-gray-500">The existing public website lead form, secure lead webhook, and Meta Lead Ads integration remain available. Phase 15 adds workspace-specific developer credentials and outbound event delivery on top.</p></section>
  </div>
+}
+
+export default function IntegrationsPage() {
+  return (
+    <PlanGate feature="developer_api">
+      <IntegrationsPageContent />
+    </PlanGate>
+  );
 }
