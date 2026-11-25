@@ -5,6 +5,7 @@ export type CommunicationChannel =
   | 'FACEBOOK'
   | 'X'
   | 'TIKTOK'
+  | 'SMS'
   | 'INTERNAL_NOTE';
 
 export type DeliveryStatus =

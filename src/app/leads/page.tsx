@@ -139,6 +139,22 @@ export default function LeadsPage() {
       setBulkBusy(false);
     }
   }
+  const [sms, setSms] = useState<{ open: boolean; text: string; result: string }>({ open: false, text: '', result: '' });
+  async function sendBulkSms() {
+    setBulkBusy(true);
+    setError('');
+    try {
+      const res = await fetch('/api/sms/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leadIds: selected, message: sms.text }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'SMS could not be sent.');
+      setSms({ open: false, text: '', result: `SMS sent to ${data.sent} lead${data.sent === 1 ? '' : 's'}${data.skippedNoPhone ? `; ${data.skippedNoPhone} had no phone number` : ''}${data.failed ? `; ${data.failed} failed` : ''}.` });
+      setSelected([]);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setBulkBusy(false);
+    }
+  }
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const [page, setPage] = useState(1);
@@ -605,9 +621,27 @@ export default function LeadsPage() {
                   <button onClick={() => runBulk({ action: 'delete' })} disabled={bulkBusy} className="rounded-lg border border-rose-400/40 px-3 py-1.5 font-semibold text-rose-300 hover:bg-rose-500/10 disabled:opacity-50">
                     Delete
                   </button>
+                  <button onClick={() => setSms({ ...sms, open: !sms.open, result: '' })} disabled={bulkBusy} className="rounded-lg border border-white/20 px-3 py-1.5 font-semibold text-white hover:bg-white/10 disabled:opacity-50">
+                    Send SMS
+                  </button>
                   <button onClick={() => setSelected([])} className="ml-auto font-semibold text-slate-400 hover:text-white">Clear</button>
+                  {sms.open && (
+                    <div className="flex w-full flex-wrap items-center gap-2">
+                      <input
+                        aria-label="SMS message"
+                        value={sms.text}
+                        maxLength={918}
+                        onChange={(e) => setSms({ ...sms, text: e.target.value })}
+                        placeholder="Hi {{name}}, ... ({{name}} becomes each lead's first name)"
+                        className="min-w-[260px] flex-1 rounded-lg border border-white/10 bg-ink-900 px-2 py-1.5 text-white"
+                      />
+                      <span className="text-slate-400">{sms.text.length} chars · uses SMS credits</span>
+                      <button onClick={sendBulkSms} disabled={bulkBusy || !sms.text.trim()} className="rounded-lg bg-brand-orange px-3 py-1.5 font-semibold text-white disabled:opacity-50">{bulkBusy ? 'Sending…' : `Send to ${selected.length}`}</button>
+                    </div>
+                  )}
                 </div>
               )}
+              {sms.result && <p className="mb-4 rounded-lg bg-emerald-500/10 p-3 text-xs text-emerald-200">{sms.result}</p>}
               <table className="w-full min-w-[980px] text-xs">
                 <thead>
                   <tr className="text-left uppercase tracking-wider text-slate-400 border-b border-white/10">

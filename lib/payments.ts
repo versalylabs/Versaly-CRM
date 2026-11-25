@@ -280,17 +280,18 @@ async function sendInstalmentReminder(inst: any, remaining: number, stage: strin
   const content = `Hi ${first}, ${opening}${link ? `\n\nPay by M-Pesa here: ${link}` : ''}\n\nThank you,\n${businessName}`;
 
   const conversation = await getOrCreateConversation({ organizationId: orgId, leadId: lead.id, channel: lead.email ? 'EMAIL' : 'WHATSAPP' });
-  for (const channel of [lead.email ? 'EMAIL' : null, lead.phone ? 'WHATSAPP' : null].filter(Boolean) as Array<'EMAIL' | 'WHATSAPP'>) {
+  // Email first, then WhatsApp, then SMS (works outside WhatsApp's 24-hour window; uses prepaid credits).
+  for (const channel of [lead.email ? 'EMAIL' : null, lead.phone ? 'WHATSAPP' : null, lead.phone ? 'SMS' : null].filter(Boolean) as Array<'EMAIL' | 'WHATSAPP' | 'SMS'>) {
     try {
       const result = await sendUnifiedMessage({ organizationId: orgId, conversationId: conversation.id, channel, content, subject: `Payment reminder: ${inst.plan.title}`, senderName: businessName });
       if (result.success) {
-        await logLeadActivity(prisma, lead.id, 'PAYMENT', `Payment reminder sent (${stage.toLowerCase()}) by ${channel === 'EMAIL' ? 'email' : 'WhatsApp'}`, { installmentId: inst.id, amount: remaining });
+        await logLeadActivity(prisma, lead.id, 'PAYMENT', `Payment reminder sent (${stage.toLowerCase()}) by ${channel === 'EMAIL' ? 'email' : channel === 'SMS' ? 'SMS' : 'WhatsApp'}`, { installmentId: inst.id, amount: remaining });
         return true;
       }
     } catch (e) {
       console.warn('Reminder send failed', (e as Error).message);
     }
   }
-  await logLeadActivity(prisma, lead.id, 'PAYMENT', `Payment reminder could not be sent (${stage.toLowerCase()}): connect email or WhatsApp`, { installmentId: inst.id });
+  await logLeadActivity(prisma, lead.id, 'PAYMENT', `Payment reminder could not be sent (${stage.toLowerCase()}): connect email or WhatsApp, or buy SMS credits`, { installmentId: inst.id });
   return false;
 }

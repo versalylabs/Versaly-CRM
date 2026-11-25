@@ -87,9 +87,10 @@ export async function POST(
         {
           error: result.errorMessage || `Failed to send message via ${channel}`,
           requiresConnection: result.requiresConnection,
+          windowClosed: 'windowClosed' in result ? result.windowClosed : undefined,
           deliveryStatus: result.deliveryStatus,
         },
-        { status: result.requiresConnection ? 400 : 502 }
+        { status: result.requiresConnection || ('windowClosed' in result && result.windowClosed) ? 400 : 502 }
       );
     }
 

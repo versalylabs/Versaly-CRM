@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma';
 import { recordInboundChannelMessage } from '@/lib/inbox';
 import { decryptSecret } from '@/lib/secretBox';
 import { providerRegistry } from '@/lib/communication-providers';
+import { applyStatus } from '@/lib/whatsapp';
 
 /**
  * Hardened inbound webhook handling shared by
@@ -147,8 +148,15 @@ function parseMeta(payload: any, raw: string, signature: string | null): Promise
         const account = await accountByExternalId('WHATSAPP', [value.metadata?.phone_number_id]);
         if (!account) continue;
         if (!validHmac(raw, signature, metaSecrets(account), 'hex')) throw new WebhookAuthError('Invalid signature');
+        // Delivery ticks for messages we sent.
+        for (const s of value.statuses || []) await applyStatus(account.organizationId, s);
         for (const msg of value.messages || []) {
-          const text = msg.text?.body || msg.button?.text || (msg.type ? `[${msg.type}]` : '');
+          // Photos, documents, voice notes, videos and stickers: keep the media ID; the file is fetched on demand.
+          const file = msg.image || msg.document || msg.audio || msg.video || msg.sticker;
+          const media = file?.id ? { id: String(file.id), type: msg.type, mime: file.mime_type || null, filename: file.filename || null } : null;
+          const label: Record<string, string> = { image: 'Photo', document: 'Document', audio: 'Voice note', video: 'Video', sticker: 'Sticker' };
+          const text = msg.text?.body || msg.button?.text || msg.interactive?.button_reply?.title || file?.caption
+            || (media ? `[${label[msg.type] || 'Attachment'}${media.filename ? `: ${media.filename}` : ''}]` : msg.type ? `[${msg.type}]` : '');
           if (!text || !msg.from) continue;
           out.push({
             organizationId: account.organizationId,
@@ -157,7 +165,7 @@ function parseMeta(payload: any, raw: string, signature: string | null): Promise
             externalMessageId: msg.id,
             senderPhone: msg.from,
             senderName: value.contacts?.[0]?.profile?.name,
-            metadata: { wamid: msg.id, type: msg.type },
+            metadata: { wamid: msg.id, type: msg.type, ...(media ? { media } : {}) },
           });
         }
       }

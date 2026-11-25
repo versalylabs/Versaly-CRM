@@ -25,6 +25,8 @@ interface Conversation {
   lastMessageSnippet: string | null;
   unreadCount: number;
   isClosed: boolean;
+  status?: string;
+  slaBreachedAt?: string | null;
   assignedToId: string | null;
   assignedTo?: { id: string; name: string | null; email: string } | null;
   lead?: { id: string; contactName: string; companyName: string | null; email: string; phone: string | null; pipelineStage: string; dealValue: number | null } | null;
@@ -39,7 +41,11 @@ interface Message {
   isInternal: boolean;
   deliveryStatus: string;
   sentAt: string;
+  metadata?: { media?: { id: string; type: string; mime?: string | null; filename?: string | null }; error?: string } | null;
 }
+
+type Template = { name: string; language: string; status: string; body: string; params: number };
+const WINDOW_MS = 24 * 3600_000;
 
 interface ChannelInfo {
   channel: string;
@@ -53,7 +59,17 @@ interface ChannelInfo {
 interface Account { id: string; channel: string; accountHandle: string; status: string; errorMessage?: string | null }
 interface Member { id: string; name: string | null; email: string }
 
-const CHANNEL_LABEL: Record<string, string> = { EMAIL: 'Email', WHATSAPP: 'WhatsApp' };
+const CHANNEL_LABEL: Record<string, string> = { EMAIL: 'Email', WHATSAPP: 'WhatsApp', SMS: 'SMS' };
+
+const fillTemplate = (body: string, params: string[]) => body.replace(/\{\{(\d+)\}\}/g, (_, n) => params[Number(n) - 1] || `{{${n}}}`);
+
+/** WhatsApp-style ticks: sent, delivered, read. */
+function Ticks({ status }: { status: string }) {
+  if (status === 'READ') return <span className="font-bold text-emerald-200" title="Read">✓✓</span>;
+  if (status === 'DELIVERED') return <span title="Delivered">✓✓</span>;
+  if (status === 'SENT') return <span title="Sent">✓</span>;
+  return null;
+}
 
 function timeAgo(iso: string) {
   const diff = Date.now() - new Date(iso).getTime();
@@ -115,6 +131,9 @@ export default function InboxPage() {
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [showQuick, setShowQuick] = useState(false);
+  const [via, setVia] = useState<string | null>(null); // reply channel; null = the conversation's channel
+  const [templates, setTemplates] = useState<Template[] | null>(null);
+  const [tpl, setTpl] = useState<{ t: Template; params: string[] } | null>(null);
 
   // channels
   const [channels, setChannels] = useState<ChannelInfo[]>([]);
@@ -211,16 +230,35 @@ export default function InboxPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emailChannel?.connected]);
 
-  // Light refresh for new WhatsApp/other messages that arrive by webhook.
+  // Near-live refresh for messages that arrive by webhook: every 8 s while visible, every 32 s in a background tab.
+  // shortcut: polling instead of server-sent events (cheap on serverless at this scale); switch to SSE/websockets if traffic grows.
   useEffect(() => {
-    const timer = setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        loadList(true);
-        if (selectedId) loadThread(selectedId);
+    let tick = 0;
+    let busy = false; // never stack refreshes when the network is slower than the interval
+    const timer = setInterval(async () => {
+      tick++;
+      if (busy || (document.visibilityState !== 'visible' && tick % 4 !== 0)) return;
+      busy = true;
+      try {
+        await Promise.all([loadList(true), selectedId && document.visibilityState === 'visible' ? loadThread(selectedId) : null]);
+      } finally {
+        busy = false;
       }
-    }, 20000);
+    }, 8000);
     return () => clearInterval(timer);
   }, [loadList, loadThread, selectedId]);
+
+  // Desktop alert when a new conversation needs a reply while the inbox tab is in the background.
+  const [alertsAsk, setAlertsAsk] = useState(false);
+  useEffect(() => { setAlertsAsk(typeof Notification !== 'undefined' && Notification.permission === 'default'); }, []);
+  const seenUnread = useRef<number | null>(null);
+  useEffect(() => {
+    const waiting = conversations.filter((c) => c.unreadCount > 0).length;
+    if (seenUnread.current !== null && waiting > seenUnread.current && document.visibilityState !== 'visible' && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      new Notification('New message in VersalyLabs', { body: `${waiting} conversation${waiting === 1 ? '' : 's'} waiting for a reply`, icon: '/icon.svg' });
+    }
+    seenUnread.current = waiting;
+  }, [conversations]);
 
   /* ------------------------------- actions ------------------------------- */
   const openConversation = (id: string) => {
@@ -229,6 +267,8 @@ export default function InboxPage() {
     setSendError(null);
     setMode('reply');
     setDraft('');
+    setVia(null);
+    setTpl(null);
   };
 
   const patchConversation = async (body: Record<string, unknown>) => {
@@ -250,14 +290,19 @@ export default function InboxPage() {
   };
 
   const send = async () => {
-    if (!thread || !draft.trim() || sending) return;
+    const usingTemplate = mode === 'reply' && windowClosed && tpl;
+    if (!thread || sending || (!usingTemplate && !draft.trim())) return;
+    if (usingTemplate && tpl.params.some((p) => !p.trim())) return setSendError('Fill in every blank in the template.');
     setSending(true);
     setSendError(null);
     try {
+      const body = usingTemplate
+        ? { channel: 'WHATSAPP', content: fillTemplate(tpl.t.body, tpl.params), metadata: { template: { name: tpl.t.name, language: tpl.t.language, params: tpl.params } } }
+        : { channel: mode === 'note' ? 'INTERNAL_NOTE' : replyVia, content: draft, isInternal: mode === 'note' };
       const res = await fetch(`/api/inbox/conversations/${thread.id}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channel: mode === 'note' ? 'INTERNAL_NOTE' : thread.channel, content: draft, isInternal: mode === 'note' }),
+        body: JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -265,6 +310,7 @@ export default function InboxPage() {
         return;
       }
       setDraft('');
+      setTpl(null);
       await Promise.all([loadThread(thread.id), loadList(true)]);
     } finally {
       setSending(false);
@@ -292,7 +338,22 @@ export default function InboxPage() {
   };
 
   const unreadTotal = useMemo(() => conversations.reduce((n, c) => n + (c.unreadCount > 0 ? 1 : 0), 0), [conversations]);
-  const replyChannelConnected = thread ? Boolean(channels.find((c) => c.channel === thread.channel)?.connected) : false;
+  const replyVia = via || thread?.channel || 'EMAIL';
+  const replyChannelConnected = thread ? Boolean(channels.find((c) => c.channel === replyVia)?.connected) : false;
+  // Channels this contact can be answered on (SMS needs a phone number and credits).
+  const replyOptions = thread
+    ? [thread.channel, ...(thread.contactPhone || thread.lead?.phone ? ['WHATSAPP', 'SMS'] : []), ...(thread.contactEmail || thread.lead?.email ? ['EMAIL'] : [])]
+        .filter((ch, i, all) => all.indexOf(ch) === i && (ch === thread.channel || channels.find((c) => c.channel === ch)?.connected))
+    : [];
+  // WhatsApp only allows free text within 24 hours of the customer's last WhatsApp message.
+  const lastWhatsAppIn = [...messages].reverse().find((m) => m.channel === 'WHATSAPP' && m.direction === 'INBOUND');
+  const windowClosed = replyVia === 'WHATSAPP' && (!lastWhatsAppIn || Date.now() - new Date(lastWhatsAppIn.sentAt).getTime() >= WINDOW_MS);
+
+  useEffect(() => {
+    if (windowClosed && mode === 'reply' && templates === null) {
+      fetch('/api/whatsapp/templates').then((r) => (r.ok ? r.json() : { templates: [] })).then((d) => setTemplates((d.templates || []).filter((t: Template) => t.status === 'APPROVED')));
+    }
+  }, [windowClosed, mode, templates]);
 
   /* -------------------------------- render -------------------------------- */
   const showWizard = channelsLoaded && !anyConnected && conversations.length === 0 && !loadingList;
@@ -365,6 +426,11 @@ export default function InboxPage() {
                   </span>
                   <span className="mt-1 flex items-center gap-2 text-[11px] text-slate-500">
                     {c.assignedTo ? <span>{c.assignedTo.name || c.assignedTo.email}</span> : <span className="text-amber-400/80">Unassigned</span>}
+                    {c.status === 'WAITING_ON_US' && !c.isClosed && (
+                      c.slaBreachedAt
+                        ? <span className="rounded bg-red-500/15 px-1.5 text-red-300">Reply overdue</span>
+                        : <span className="text-slate-500">· waiting {timeAgo(c.lastMessageAt)}</span>
+                    )}
                   </span>
                 </span>
                 {c.unreadCount > 0 && <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-sky-400" aria-label="Unread" />}
@@ -374,6 +440,9 @@ export default function InboxPage() {
         </div>
 
         <footer className="border-t border-white/10 px-4 py-2.5 text-[11px] text-slate-500">
+          {alertsAsk && (
+            <button onClick={() => Notification.requestPermission().then(() => setAlertsAsk(false))} className="mb-1 block text-sky-400 hover:text-sky-300">Turn on desktop alerts for new messages</button>
+          )}
           {emailChannel?.connected ? (
             <div className="flex items-center justify-between gap-2">
               <span className="truncate">
@@ -439,10 +508,17 @@ export default function InboxPage() {
                     return (
                       <div key={m.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm ${mine ? 'rounded-br-md bg-sky-600 text-white' : 'rounded-bl-md bg-white/8 bg-slate-800 text-slate-100'}`}>
+                          {m.metadata?.media && (
+                            /^image\/(jpeg|png|webp|gif)$/.test(m.metadata.media.mime || '') || m.metadata.media.type === 'image'
+                              ? <a href={`/api/inbox/media/${m.id}`} target="_blank" rel="noreferrer"><img src={`/api/inbox/media/${m.id}`} alt="Photo from customer" className="mb-1 max-h-64 rounded-lg" /></a>
+                              : <a href={`/api/inbox/media/${m.id}`} className="mb-1 inline-block rounded-lg bg-white/10 px-3 py-1.5 text-xs underline">Download {m.metadata.media.filename || m.metadata.media.type}</a>
+                          )}
                           <p className="whitespace-pre-wrap break-words">{m.content}</p>
-                          <p className={`mt-1 text-[11px] ${mine ? 'text-sky-100/80' : 'text-slate-500'}`}>
+                          <p className={`mt-1 flex items-center gap-1 text-[11px] ${mine ? 'text-sky-100/80' : 'text-slate-500'}`}>
                             {new Date(m.sentAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                            {mine && m.deliveryStatus === 'FAILED' ? ' · failed' : ''}
+                            {m.channel !== thread.channel && <span>· {CHANNEL_LABEL[m.channel] || m.channel}</span>}
+                            {mine && m.channel === 'WHATSAPP' && <Ticks status={m.deliveryStatus} />}
+                            {mine && m.deliveryStatus === 'FAILED' && <span className="font-semibold text-red-200">· failed{m.metadata?.error ? `: ${m.metadata.error}` : ''}</span>}
                           </p>
                         </div>
                       </div>
@@ -471,26 +547,62 @@ export default function InboxPage() {
                     </div>
                   </div>
 
+                  {mode === 'reply' && replyOptions.length > 1 && (
+                    <div className="mb-2 flex items-center gap-2 text-xs text-slate-400">
+                      Reply via
+                      {replyOptions.map((ch) => (
+                        <button key={ch} onClick={() => { setVia(ch); setTpl(null); }} className={`rounded-md px-2 py-0.5 ${replyVia === ch ? 'bg-white/10 text-white' : 'hover:text-white'}`}>{CHANNEL_LABEL[ch] || ch}</button>
+                      ))}
+                      {replyVia === 'SMS' && <span className="text-slate-500">· uses SMS credits; replies don&apos;t come back by SMS</span>}
+                    </div>
+                  )}
                   {mode === 'reply' && !replyChannelConnected && (
                     <div className="mb-2 rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-200">
-                      {CHANNEL_LABEL[thread.channel] || thread.channel} is not connected, so replies can't be sent. <button onClick={() => setShowConnect(true)} className="font-semibold underline">Connect it</button>
+                      {replyVia === 'SMS'
+                        ? <>You have no SMS credits. <Link href="/settings/messaging" className="font-semibold underline">Buy credits</Link></>
+                        : <>{CHANNEL_LABEL[replyVia] || replyVia} is not connected, so replies can&apos;t be sent. <button onClick={() => setShowConnect(true)} className="font-semibold underline">Connect it</button></>}
                     </div>
                   )}
                   {sendError && <div className="mb-2 rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-2 text-xs text-red-200">{sendError}</div>}
 
+                  {mode === 'reply' && windowClosed && replyChannelConnected ? (
+                    <div className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-slate-300">
+                      <p>This customer hasn&apos;t written on WhatsApp in the last 24 hours, so WhatsApp only allows an approved template.{replyOptions.includes('SMS') ? ' Or reply by SMS.' : ''}</p>
+                      {templates === null ? <p className="text-slate-500">Loading templates…</p> : templates.length === 0 ? (
+                        <p>No approved templates yet. <Link href="/settings/messaging" className="font-semibold text-sky-300 underline">Create one</Link></p>
+                      ) : (
+                        <>
+                          <select value={tpl ? `${tpl.t.name}|${tpl.t.language}` : ''} onChange={(e) => { const t = templates.find((x) => `${x.name}|${x.language}` === e.target.value); setTpl(t ? { t, params: Array(t.params).fill('') } : null); }} className="w-full rounded-lg border border-white/10 bg-ink-850 px-2 py-1.5 text-sm text-white">
+                            <option value="">Choose a template…</option>
+                            {templates.map((t) => <option key={`${t.name}|${t.language}`} value={`${t.name}|${t.language}`}>{t.name} ({t.language})</option>)}
+                          </select>
+                          {tpl && (
+                            <>
+                              <div className="grid gap-2 sm:grid-cols-2">
+                                {tpl.params.map((p, i) => <input key={i} value={p} placeholder={`Value for {{${i + 1}}}`} onChange={(e) => setTpl({ ...tpl, params: tpl.params.map((x, j) => (j === i ? e.target.value : x)) })} className="rounded-lg border border-white/10 bg-ink-850 px-2 py-1.5 text-sm text-white" />)}
+                              </div>
+                              <p className="whitespace-pre-wrap rounded-lg bg-black/20 p-2 text-slate-200">{fillTemplate(tpl.t.body, tpl.params)}</p>
+                              <button onClick={send} disabled={sending} className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40">{sending ? 'Sending…' : 'Send template'}</button>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ) : (
                   <div className="flex items-end gap-2">
                     <textarea
                       value={draft}
                       onChange={(e) => setDraft(e.target.value)}
                       onKeyDown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); send(); } }}
                       rows={3}
-                      placeholder={mode === 'note' ? 'Write a note only your team can see…' : `Reply via ${CHANNEL_LABEL[thread.channel] || thread.channel}…`}
+                      placeholder={mode === 'note' ? 'Write a note only your team can see…' : `Reply via ${CHANNEL_LABEL[replyVia] || replyVia}…`}
                       className={`min-h-[76px] flex-1 resize-none rounded-xl border px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none ${mode === 'note' ? 'border-amber-400/30 bg-amber-400/5 focus:border-amber-400/60' : 'border-white/10 bg-white/5 focus:border-sky-500/60'}`}
                     />
                     <button onClick={send} disabled={!draft.trim() || sending || (mode === 'reply' && !replyChannelConnected)} className="h-10 rounded-xl bg-sky-600 px-4 text-sm font-semibold text-white transition hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-40">
                       {sending ? 'Sending…' : mode === 'note' ? 'Add note' : 'Send'}
                     </button>
                   </div>
+                  )}
                   <p className="mt-1 text-[11px] text-slate-600">Ctrl + Enter to send</p>
                 </div>
               </div>
@@ -671,7 +783,7 @@ function ConnectEmailModal({ onClose, onConnected, isManager, whatsappConnected 
 
 /* ------------------------------- new message ------------------------------- */
 function NewMessageModal({ channels, onClose, onCreated }: { channels: ChannelInfo[]; onClose: () => void; onCreated: (id: string) => void }) {
-  const available = channels.filter((c) => c.connected && (c.channel === 'EMAIL' || c.channel === 'WHATSAPP'));
+  const available = channels.filter((c) => c.connected && ['EMAIL', 'WHATSAPP', 'SMS'].includes(c.channel));
   const [channel, setChannel] = useState(available[0]?.channel || 'EMAIL');
   const [to, setTo] = useState('');
   const [name, setName] = useState('');
@@ -687,10 +799,12 @@ function NewMessageModal({ channels, onClose, onCreated }: { channels: ChannelIn
     try {
       const create = await fetch('/api/inbox/conversations', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ channel, contactName: name || undefined, contactEmail: channel === 'EMAIL' ? to.trim().toLowerCase() : undefined, contactPhone: channel === 'WHATSAPP' ? to.trim() : undefined, subject: subject || undefined }),
+        body: JSON.stringify({ channel, contactName: name || undefined, contactEmail: channel === 'EMAIL' ? to.trim().toLowerCase() : undefined, contactPhone: channel !== 'EMAIL' ? to.trim() : undefined, subject: subject || undefined }),
       });
       const created = await create.json();
       if (!create.ok || !created.conversation?.id) { setError(created.error || 'Could not start the conversation.'); return; }
+      // WhatsApp conversations must start with an approved template, chosen in the conversation itself.
+      if (channel === 'WHATSAPP') return onCreated(created.conversation.id);
       const send = await fetch(`/api/inbox/conversations/${created.conversation.id}/messages`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ channel, content: text, subject: channel === 'EMAIL' ? subject || undefined : undefined }),
@@ -719,10 +833,12 @@ function NewMessageModal({ channels, onClose, onCreated }: { channels: ChannelIn
         <input required value={to} onChange={(e) => setTo(e.target.value)} type={channel === 'EMAIL' ? 'email' : 'tel'} placeholder={channel === 'EMAIL' ? 'Their email address' : 'Phone with country code, e.g. 2547…'} className={field} />
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Their name (optional)" className={field} />
         {channel === 'EMAIL' && <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Subject" className={field} />}
-        <textarea required rows={5} value={text} onChange={(e) => setText(e.target.value)} placeholder="Write your message…" className={`${field} resize-none`} />
+        {channel === 'WHATSAPP'
+          ? <p className="text-xs text-slate-400">WhatsApp requires an approved template to start a conversation. Continue to pick one.</p>
+          : <textarea required rows={5} value={text} onChange={(e) => setText(e.target.value)} placeholder="Write your message…" className={`${field} resize-none`} />}
         {error && <div className="rounded-lg border border-red-400/30 bg-red-400/10 px-3 py-2 text-xs text-red-200">{error}</div>}
         <div className="flex justify-end">
-          <button disabled={busy} className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-500 disabled:opacity-50">{busy ? 'Sending…' : 'Send'}</button>
+          <button disabled={busy} className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-500 disabled:opacity-50">{busy ? 'Sending…' : channel === 'WHATSAPP' ? 'Continue' : 'Send'}</button>
         </div>
       </form>
     </div>

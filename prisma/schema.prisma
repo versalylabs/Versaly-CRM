@@ -360,6 +360,10 @@ model Organization {
   currency    String   @default("KES")
   industry    String?
   onboardedAt DateTime? // set when the setup wizard is finished or skipped
+  autoAssignInbox Boolean @default(false) // round-robin new conversations to the team
+  inboxSlaMinutes Int?    // reply-time target; overdue conversations escalate
+  smsCredits      Int     @default(0)     // prepaid SMS balance (1 credit = 1 SMS segment)
+  smsSenderId     String? // approved Africa's Talking sender ID (Enterprise)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -391,6 +395,7 @@ model Organization {
   mpesaAccounts MpesaAccount[]
   payments      Payment[]
   paymentPlans  PaymentPlan[]
+  smsLedger     SmsCreditLedger[]
 }
 
 model PipelineStageConfig {
@@ -620,6 +625,7 @@ model Conversation {
   channel             String               @default("EMAIL") // EMAIL, WHATSAPP, INSTAGRAM, FACEBOOK, X, TIKTOK, MULTI
   primaryChannel      String?
   lastMessageAt       DateTime             @default(now())
+  slaBreachedAt       DateTime?            // set once when a waiting conversation passes the reply-time target
   lastMessageSnippet  String?
   lastMessagePreview  String?
   unreadCount         Int                  @default(0)
@@ -841,4 +847,22 @@ model Installment {
 
   @@index([planId, dueDate])
   @@index([dueDate])
+}
+
+// ---------------------------------------------------------------------------
+// Phase 7: prepaid SMS credits (Africa's Talking)
+// ---------------------------------------------------------------------------
+
+model SmsCreditLedger {
+  id             String       @id @default(uuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  change         Int          // + purchase / grant, - messages sent
+  reason         String       // PURCHASE, SEND, REFUND, ADJUSTMENT
+  reference      String?      @unique // Paystack reference for purchases (idempotency)
+  note           String?
+  createdById    String?
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId, createdAt])
 }

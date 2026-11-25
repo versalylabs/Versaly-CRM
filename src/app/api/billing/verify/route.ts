@@ -9,7 +9,8 @@ import { appUrl } from '@/lib/accountTokens';
  */
 export async function GET(req: NextRequest) {
   const reference = req.nextUrl.searchParams.get('reference') || req.nextUrl.searchParams.get('trxref') || '';
-  const back = (status: string) => NextResponse.redirect(`${appUrl(req.nextUrl.origin)}/settings/billing?payment=${status}`);
+  const page = req.nextUrl.searchParams.get('return') === 'messaging' ? '/settings/messaging' : '/settings/billing';
+  const back = (status: string) => NextResponse.redirect(`${appUrl(req.nextUrl.origin)}${page}?payment=${status}`);
   if (!reference) return back('missing');
   try {
     const invoice = await applyPaystackCharge(await verifyTransaction(reference));

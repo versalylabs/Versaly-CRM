@@ -44,6 +44,8 @@ export const FEATURES = {
   mpesa_payments: { label: 'M-Pesa payment requests & links', minPlan: 'SOLO' },
   mpesa_reconciliation: { label: 'M-Pesa auto-reconciliation for your Paybill or Till', minPlan: 'STARTER' },
   instalment_plans: { label: 'Instalment plans, payment reminders & debtor ageing', minPlan: 'GROWTH_PRO' },
+  sms: { label: 'Bulk SMS & SMS reminders (prepaid credits)', minPlan: 'STARTER' },
+  sms_sender_id: { label: 'Your own SMS sender name', minPlan: 'ENTERPRISE' },
   email_inbox: { label: 'Team inbox for your own email address', minPlan: 'STARTER' },
   automations: { label: 'Workflow automations', minPlan: 'STARTER' },
   whatsapp: { label: 'WhatsApp Business API inbox', minPlan: 'GROWTH_PRO' },
@@ -106,7 +108,7 @@ export const PLANS: Record<PlanKey, PlanDetails> = {
     priceKes: { monthly: 3900, annual: 3200 },
     description: 'For small teams that want every enquiry in one inbox and follow-ups that happen on their own.',
     features: ['Everything in Solo', ...limitLines('STARTER'), ...featuresFor('STARTER'), 'Email support'],
-    comingSoon: ['Bulk SMS'],
+    comingSoon: [],
   },
   GROWTH_PRO: {
     key: 'GROWTH_PRO',
@@ -122,7 +124,7 @@ export const PLANS: Record<PlanKey, PlanDetails> = {
     ...PLAN_LIMITS.ENTERPRISE,
     priceKes: { monthly: 34900, annual: 29900 },
     description: 'For multi-branch businesses that need high volume, more seats and hands-on onboarding.',
-    features: ['Everything in Growth Pro', ...limitLines('ENTERPRISE'), `${PLAN_QUOTAS.ENTERPRISE.apiKeys} developer API keys`, 'Guided onboarding & priority support'],
+    features: ['Everything in Growth Pro', ...limitLines('ENTERPRISE'), ...featuresFor('ENTERPRISE'), `${PLAN_QUOTAS.ENTERPRISE.apiKeys} developer API keys`, 'Guided onboarding & priority support'],
     comingSoon: ['Multiple branches & WhatsApp numbers', 'Audit log export', 'Custom roles'],
   },
 };

@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import { advanceStage, getStageGroups } from '@/lib/stages';
 import { decryptSecret, encryptSecret, generateWebhookSecret } from '@/lib/secretBox';
 import { providerRegistry, CommunicationChannel, SendMessageInput, InboundParsedMessage } from '@/lib/communication-providers';
+import { windowOpen } from '@/lib/whatsapp';
 
 export * from './inbox-shared';
 
@@ -244,7 +245,7 @@ export async function sendUnifiedMessage(params: SendUnifiedMessageParams) {
 
   if (channel === 'EMAIL') {
     recipientAddress = conversation.contactEmail || lead?.email || '';
-  } else if (channel === 'WHATSAPP') {
+  } else if (channel === 'WHATSAPP' || channel === 'SMS') {
     recipientAddress = conversation.contactPhone || lead?.phone || '';
   } else if (channel === 'INSTAGRAM') {
     recipientAddress = conversation.contactHandle || lead?.instagram || '';
@@ -260,6 +261,24 @@ export async function sendUnifiedMessage(params: SendUnifiedMessageParams) {
   const provider = providerRegistry.getProvider(channel);
   if (!provider) {
     throw new Error(`Channel provider for ${channel} is not registered in the system.`);
+  }
+
+  // WhatsApp only allows free-form messages within 24 hours of the customer's last message.
+  if (channel === 'WHATSAPP' && !metadata?.template) {
+    const lastInbound = await prisma.conversationMessage.findFirst({
+      where: { conversationId, channel: 'WHATSAPP', direction: 'INBOUND' },
+      orderBy: { sentAt: 'desc' },
+      select: { sentAt: true },
+    });
+    if (!windowOpen(lastInbound?.sentAt)) {
+      return {
+        success: false,
+        deliveryStatus: 'FAILED',
+        errorMessage: "WhatsApp's 24-hour reply window is closed for this customer. Send an approved template instead.",
+        requiresConnection: false,
+        windowClosed: true,
+      };
+    }
   }
 
   let threadMeta: Record<string, any> | undefined = metadata;
@@ -510,6 +529,15 @@ export async function recordInboundChannelMessage(params: {
 
   const sentAt = new Date();
 
+  // 4b. Round-robin: give unowned conversations to the teammate with the fewest open ones.
+  if (!conversation.assignedToId) {
+    const assignee = await pickRoundRobinAssignee(orgId);
+    if (assignee) {
+      await prisma.conversation.update({ where: { id: conversation.id }, data: { assignedToId: assignee } });
+      conversation.assignedToId = assignee;
+    }
+  }
+
   // 5. Store inbound message
   const message = await prisma.conversationMessage.create({
     data: {
@@ -540,6 +568,7 @@ export async function recordInboundChannelMessage(params: {
       lastMessageSnippet: `[${channel}] ${content.slice(0, 70)}`,
       status: 'WAITING_ON_US',
       isClosed: false,
+      slaBreachedAt: null, // a new customer message starts a new reply-time clock
       unreadCount: { increment: 1 },
       channel,
     },
@@ -783,3 +812,52 @@ export async function disconnectChannelAccount(organizationId: string, accountId
   });
 }
 
+
+/** The active teammate with the fewest open conversations, when the workspace has round-robin turned on. */
+export async function pickRoundRobinAssignee(organizationId: string): Promise<string | null> {
+  const org = await prisma.organization.findUnique({ where: { id: organizationId }, select: { autoAssignInbox: true } });
+  if (!org?.autoAssignInbox) return null;
+  const users = await prisma.user.findMany({
+    where: { organizationId, isActive: true },
+    select: { id: true, createdAt: true, _count: { select: { assignedConversations: { where: { isClosed: false, isArchived: false } } } } },
+  });
+  if (!users.length) return null;
+  users.sort((a, b) => a._count.assignedConversations - b._count.assignedConversations || a.createdAt.getTime() - b.createdAt.getTime());
+  return users[0].id;
+}
+
+/**
+ * Flags conversations that have waited longer than the workspace's reply-time target, notifies the
+ * assignee (or managers) once, and fires the CONVERSATION_ESCALATED automation. Called when the inbox
+ * refreshes and from the daily cron.
+ * shortcut: runs on inbox refresh rather than a minute-by-minute job; add a scheduler if escalations must fire with nobody online.
+ */
+export async function checkSlaBreaches(organizationId: string, now = new Date()) {
+  const org = await prisma.organization.findUnique({ where: { id: organizationId }, select: { inboxSlaMinutes: true } });
+  if (!org?.inboxSlaMinutes) return 0;
+  const overdue = await prisma.conversation.findMany({
+    where: {
+      organizationId,
+      status: 'WAITING_ON_US',
+      isClosed: false,
+      isArchived: false,
+      slaBreachedAt: null,
+      lastMessageAt: { lt: new Date(now.getTime() - org.inboxSlaMinutes * 60_000) },
+    },
+    select: { id: true, contactName: true, assignedToId: true, leadId: true },
+    take: 50,
+  });
+  if (!overdue.length) return 0;
+  const { getManagerIds, createNotification } = await import('./notifications');
+  const { executeAutomationWorkflows } = await import('./workflows');
+  const managers = await getManagerIds(organizationId);
+  for (const c of overdue) {
+    // Conditional update: only the first refresh to see the breach handles it.
+    const claimed = await prisma.conversation.updateMany({ where: { id: c.id, slaBreachedAt: null }, data: { slaBreachedAt: now, priority: 'HIGH' } });
+    if (!claimed.count) continue;
+    const to = c.assignedToId ? [c.assignedToId, ...managers] : managers;
+    await Promise.all([...new Set(to)].map((userId) => createNotification({ userId, type: 'INBOX_SLA', title: 'Reply overdue', message: `${c.contactName || 'A customer'} has waited more than ${org.inboxSlaMinutes} minutes for a reply.`, href: `/inbox?conversationId=${c.id}` })));
+    await executeAutomationWorkflows({ organizationId, triggerType: 'CONVERSATION_ESCALATED', leadId: c.leadId, eventId: `sla:${c.id}:${now.getTime()}` }).catch(() => undefined);
+  }
+  return overdue.length;
+}

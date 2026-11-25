@@ -90,8 +90,19 @@ export class WhatsAppProvider extends BaseCommunicationProvider {
           messaging_product: 'whatsapp',
           recipient_type: 'individual',
           to: cleanPhone,
-          type: 'text',
-          text: { preview_url: true, body: content },
+          ...(input.metadata?.template
+            ? {
+                // Approved template: the only message type allowed outside the 24-hour window.
+                type: 'template',
+                template: {
+                  name: input.metadata.template.name,
+                  language: { code: input.metadata.template.language },
+                  components: input.metadata.template.params?.length
+                    ? [{ type: 'body', parameters: input.metadata.template.params.map((text: string) => ({ type: 'text', text })) }]
+                    : [],
+                },
+              }
+            : { type: 'text', text: { preview_url: true, body: content } }),
         }),
       });
 

@@ -5,6 +5,7 @@ import { InstagramProvider } from './instagram.provider';
 import { FacebookProvider } from './facebook.provider';
 import { XProvider } from './x.provider';
 import { TikTokProvider } from './tiktok.provider';
+import { SmsProvider } from './sms.provider';
 
 class ProviderRegistry {
   private providers: Map<CommunicationChannel, CommunicationProvider> = new Map();
@@ -16,6 +17,7 @@ class ProviderRegistry {
     this.register(new FacebookProvider());
     this.register(new XProvider());
     this.register(new TikTokProvider());
+    this.register(new SmsProvider());
   }
 
   public register(provider: CommunicationProvider) {

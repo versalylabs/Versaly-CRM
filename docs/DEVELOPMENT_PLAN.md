@@ -345,7 +345,11 @@ Customer Success, Copilot and the Activity feed move into contact pages or Repor
 
 ---
 
-## Phase 7: WhatsApp Business API and SMS (L) — needs A6, A7
+## Phase 7: WhatsApp Business API and SMS (L) — needs A6, A7 ✅ BUILT (25 Nov 2026, awaiting your review)
+
+**What shipped:** WhatsApp delivery ticks (sent/delivered/read/failed, never moving backwards), inbound photos/documents/voice notes (fetched from Meta on demand, no file storage), the 24-hour window enforced on the server with an approved-template picker in the composer, template list + submission for Meta review (Settings → Messaging & SMS), Embedded Signup code ready behind `META_APP_ID`/`META_APP_SECRET`/`META_ES_CONFIG_ID` (manual connection stays until Meta approves you), round-robin assignment, reply-time target with escalation (notification + `CONVERSATION_ESCALATED` automation), monthly WhatsApp usage with a KES cost estimate, Africa's Talking SMS from prepaid credits bought via Paystack (packs in `lib/sms.ts`), bulk SMS from Leads, SMS replies in the inbox, SMS as the last fallback for payment reminders, Enterprise sender name, faster inbox refresh (8 s) and desktop alerts. Production schema change: `prisma/manual/2026-11-25-phase7-messaging.sql` (additive only).
+
+**Not done in this phase:** server-sent events (8-second polling instead), media storage in Blob/R2 (media is streamed from Meta while Meta keeps it, about 30 days), inbound SMS (sender IDs are one-way), SMS delivery reports.
 
 **Goal:** a real team WhatsApp inbox that customers connect in two clicks, with SMS as a fallback.
 

@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import prisma from './prisma';
 import { PLANS, PLAN_LIMITS, normalizePlan, type PlanKey } from './plans';
 import { decryptSecret, encryptSecret } from './secretBox';
+import { SMS_PACKS, addPurchasedCredits } from './sms';
 
 /**
  * Subscription billing through Paystack (Kenya: card + M-Pesa).
@@ -99,6 +100,8 @@ export function readSavedCard(encrypted: string | null): SavedCard | null {
  */
 export async function applyPaystackCharge(tx: any) {
   if (!tx || tx.status !== 'success' || tx.currency !== 'KES' || !tx.reference) return null;
+  const txMeta = typeof tx.metadata === 'string' ? safeJson(tx.metadata) : tx.metadata || {};
+  if (txMeta.type === 'sms_credits') return applySmsCreditCharge(tx, txMeta);
   const existing = await prisma.invoice.findUnique({ where: { reference: tx.reference } });
   if (existing) return existing;
 
@@ -255,4 +258,28 @@ export async function runBillingCycle(now = new Date(), baseUrl = process.env.NE
     stats.reminders++;
   }
   return stats;
+}
+
+/** Paystack checkout for a pack of prepaid SMS credits. */
+export async function startSmsCreditCheckout(input: { organizationId: string; email: string; credits: number; callbackUrl: string }) {
+  const pack = SMS_PACKS.find((p) => p.credits === input.credits);
+  if (!pack) throw new Error('Choose one of the SMS credit packs.');
+  const data = await paystack<{ authorization_url: string }>('/transaction/initialize', {
+    email: input.email,
+    amount: pack.priceKes * 100,
+    currency: 'KES',
+    reference: newReference(input.organizationId),
+    callback_url: input.callbackUrl,
+    channels: ['card', 'mobile_money'],
+    metadata: { organizationId: input.organizationId, type: 'sms_credits', credits: pack.credits },
+  });
+  return data.authorization_url;
+}
+
+/** Adds the credits for a successful SMS pack payment (idempotent per reference; price checked against the pack). */
+async function applySmsCreditCharge(tx: any, meta: any) {
+  const pack = SMS_PACKS.find((p) => p.credits === Number(meta.credits));
+  const org = meta.organizationId ? await prisma.organization.findUnique({ where: { id: String(meta.organizationId) }, select: { id: true } }) : null;
+  if (!pack || !org || Math.round(Number(tx.amount) / 100) < pack.priceKes) return null;
+  return addPurchasedCredits(org.id, pack.credits, tx.reference);
 }

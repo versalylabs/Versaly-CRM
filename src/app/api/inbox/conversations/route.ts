@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
-import { getOrCreateConversation } from '@/lib/inbox';
+import { checkSlaBreaches, getOrCreateConversation } from '@/lib/inbox';
 
 export async function GET(req: NextRequest) {
   try {
@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '40', 10)));
     const skip = (page - 1) * limit;
 
+    await checkSlaBreaches(organizationId).catch((e) => console.warn('SLA check failed', e));
     const where: any = { organizationId };
 
     // Apply Folder filter

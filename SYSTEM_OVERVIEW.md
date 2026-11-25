@@ -108,6 +108,12 @@ Quality tooling: `npm run qa:final` (structural checks), `npm run qa:smoke` (liv
 - Activity feed: unified chronological feed of lead, outreach, task and proposal events.
 - Reports: pipeline, conversion, source performance, revenue and team metrics with CSV export and print/PDF.
 
+### 4.12b WhatsApp, SMS and team inbox (Settings → Messaging & SMS)
+- WhatsApp: delivery ticks, photos/documents/voice notes from customers, the 24-hour reply rule (after it, only Meta-approved templates can be sent; the composer offers them), template creation for Meta review, and a monthly usage + cost estimate. One-click "Connect with Facebook" (Embedded Signup) switches on once VersalyLabs is a Meta Tech Provider; until then WhatsApp is connected with a phone number ID and token.
+- Team inbox: optional round-robin assignment of new conversations and a reply-time target; overdue conversations become urgent, notify the owner and managers, and run the "Customer waiting past reply-time target" automation.
+- SMS (Starter+): prepaid credits (1 credit per SMS segment) bought with M-Pesa or card through Paystack; bulk SMS to selected leads with `{{name}}`, SMS replies from the inbox, and SMS as the last fallback for payment reminders. Enterprise can use its own approved sender name.
+- The inbox refreshes about every 8 seconds and can show desktop alerts for new messages.
+
 ### 4.12a M-Pesa payments from customers (`/payments`)
 - Each workspace connects its own Paybill or Till with Safaricom Daraja keys (sandbox first, then production). Keys are verified with Safaricom and stored encrypted.
 - From a customer's **Payments** tab: send an M-Pesa prompt (STK Push) or create a pay link (`/pay/<token>`, works on any phone); status updates live and is logged on the timeline. Every customer gets a short account number for paying the Paybill directly.

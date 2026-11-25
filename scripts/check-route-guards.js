@@ -20,6 +20,7 @@ const EXEMPT = {
   'billing/checkout': 'billing must work to leave read-only mode',
   'billing/auto-renew': 'billing must work to leave read-only mode',
   'billing/paystack-webhook': 'payment provider webhook',
+  'sms/credits': 'buying SMS credits is a payment; must work when read-only',
   contact: 'public website form (platform workspace)',
   'inbox/conversations/[id]/read': 'marking as read is not a data change',
   'inbox/simulate': 'development-only tool',

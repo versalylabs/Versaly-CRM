@@ -4,6 +4,8 @@ import { runInactiveLeadWorkflows } from '../../../../../lib/workflows';
 import { syncAllMailboxes } from '../../../../../lib/emailSync';
 import { runBillingCycle } from '../../../../../lib/billing';
 import { runPaymentReminders } from '../../../../../lib/payments';
+import { checkSlaBreaches } from '../../../../../lib/inbox';
+import prisma from '../../../../../lib/prisma';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -28,6 +30,8 @@ async function handle(request: NextRequest) {
     const mail = await syncAllMailboxes().catch((e) => ({ accounts: 0, imported: 0, error: String(e?.message || e) }));
     const billing = await runBillingCycle(new Date(), process.env.NEXTAUTH_URL || request.nextUrl.origin).catch((e) => ({ error: String(e?.message || e) }));
     const reminders = await runPaymentReminders().catch((e) => ({ error: String(e?.message || e) }));
+    const slaOrgs = await prisma.organization.findMany({ where: { inboxSlaMinutes: { not: null } }, select: { id: true } });
+    for (const o of slaOrgs) await checkSlaBreaches(o.id).catch(() => undefined);
     return NextResponse.json({ ok: true, ...result, mail, billing, reminders, executedAt: new Date().toISOString() });
   } catch (error) {
     console.error('Scheduled automation run failed', error);
