@@ -14,7 +14,9 @@ if (!/^postgres(ql)?:\/\//.test(url)) {
   console.error('DB_URL is missing or does not start with postgres:// (paste it without quotes).');
   process.exit(1);
 }
-const prisma = new PrismaClient({ datasourceUrl: url });
+// Slow connections: wait up to a minute for the database instead of Prisma's 5-second default.
+const withTimeouts = /connect_timeout=/.test(url) ? url : `${url}${url.includes('?') ? '&' : '?'}connect_timeout=60&pool_timeout=60`;
+const prisma = new PrismaClient({ datasourceUrl: withTimeouts });
 
 (async () => {
   try {
